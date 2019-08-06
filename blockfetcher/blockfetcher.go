@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
-	pbrwset "github.com/hyperledger/fabric/protos/ledger/rwset"
+	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
+	"github.com/hyperledger/fabric/protos/ledger/rwset"
 	"github.com/hyperledger/fabric/protos/utils"
 )
 
@@ -30,13 +31,22 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) {
 
 		actionResults := action.GetResults()
 
-		rw := &pbrwset.NsReadWriteSet{}
-		err = proto.Unmarshal(actionResults, rw)
+		ReadWriteSet := &rwset.TxReadWriteSet{}
+
+		err = proto.Unmarshal(actionResults, ReadWriteSet)
 		if err != nil {
-			fmt.Printf("Failed to unmarshal rwset: %s", err)
+			fmt.Printf("Failed to unmarshal: %s", err)
 		}
 
-		fmt.Println("RWSet unmarshaled:", string(rw.Rwset))
+		txRWSet, err := rwsetutil.TxRwSetFromProtoMsg(ReadWriteSet)
+		if err != nil {
+			fmt.Printf("Failed to convert rwset.TxReadWriteSet to rwsetutil.TxRWSet: %s", err)
+		}
+
+		for _, nsRwSet := range txRWSet.NsRwSets {
+			fmt.Println(nsRwSet.KvRwSet.Reads)
+			fmt.Println(nsRwSet.KvRwSet.Writes)
+		}
 
 		// get tx id
 		//bytesEnvelope, err := utils.GetBytesEnvelope(envelope)
