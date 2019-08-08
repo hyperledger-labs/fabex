@@ -3,6 +3,12 @@
 Usage scenario example:                        
 (_you can skip any step)_
 
+configure `config.yaml` and `connection-profile.yaml`
+
+start [fist network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network): 
+
+start Postgres and create db with name `txs`
+
 build:                  
 `go build`
 

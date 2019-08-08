@@ -37,7 +37,7 @@ type Db struct {
 	Port     int    `yaml:"port"`
 	Dbuser   string `yaml:"dbuser"`
 	Dbsecret string `yaml:"dbsecret"`
-	Table    string `yaml:table`
+	Dbname   string `yaml:dbname`
 }
 
 type Config struct {
@@ -97,7 +97,7 @@ func main() {
 		fmt.Printf("Failed to create channel [%s]:", *channelName, err)
 	}
 
-	dbInstance := db.CreateDBConf(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Table)
+	dbInstance := db.CreateDBConf(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
 	err = dbInstance.Connect()
 	if err != nil {
 		log.Fatalln("DB connection failed:", err.Error())
