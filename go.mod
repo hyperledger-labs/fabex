@@ -21,6 +21,7 @@ require (
 	github.com/hyperledger/fabric-amcl v0.0.0-20181230093703-5ccba6eab8d6 // indirect
 	github.com/hyperledger/fabric-lib-go v0.0.0-20190212214935-3927a7b44496 // indirect
 	github.com/hyperledger/fabric-sdk-go v0.0.0-20190306235112-f198238ee7da
+	github.com/lib/pq v1.2.0
 	github.com/magiconair/properties v1.8.0 // indirect
 	github.com/miekg/pkcs11 v0.0.0-20190225171305-6120d95c0e95 // indirect
 	github.com/mitchellh/mapstructure v0.0.0-20180511142126-bb74f1db0675 // indirect
