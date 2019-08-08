@@ -80,7 +80,6 @@ func main() {
 	defer sdk.Close()
 
 	helpers.SetupLogLevel(lvl)
-
 	if *enrolluser {
 		helpers.EnrollUser(sdk, *user, *secret)
 	}
