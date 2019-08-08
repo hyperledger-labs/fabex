@@ -3,4 +3,4 @@ Db:
   port: 5432
   dbuser: postgres
   dbsecret: 1
-  table: txs
+  dbname: txs
