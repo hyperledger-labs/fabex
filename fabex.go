@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"fabex/blockfetcher"
 	"fabex/db"
 	"fabex/helpers"
@@ -117,11 +118,17 @@ func main() {
 	case "query":
 		helpers.QueryCC(fabex.channelClient, []byte("b"), *cc)
 	case "channelinfo":
-		helpers.QueryChannelInfo(fabex.ledgerClient)
+		resp, err := helpers.QueryChannelInfo(fabex.ledgerClient)
+		if err != nil {
+			log.Fatalf("Can't query blockchain info: %s", err)
+		}
+		fmt.Println("BlockChainInfo:", resp.BCI)
+		fmt.Println("Endorser:", resp.Endorser)
+		fmt.Println("Status:", resp.Status)
 	case "channelconfig":
 		helpers.QueryChannelConfig(fabex.ledgerClient)
-	case "getblock":
 
+	case "getblock":
 		customBlock, err := blockfetcher.GetBlock(fabex.ledgerClient, *blocknum)
 		if err != nil {
 			break
@@ -134,24 +141,57 @@ func main() {
 		}
 
 	case "explore":
-		var blockCounter uint64 = 0
 
-		for {
-			customBlock, err := blockfetcher.GetBlock(fabex.ledgerClient, blockCounter)
+		// check we have up-to-date db or not
+		// get last block hash
+		resp, err := helpers.QueryChannelInfo(fabex.ledgerClient)
+		if err != nil {
+			log.Fatalf("Can't query blockchain info: %s", err)
+		}
+		currentHash := hex.EncodeToString(resp.BCI.CurrentBlockHash)
+
+		//find txs from this block in db
+		tx, err := fabex.db.QueryBlockByHash(currentHash)
+		if err != nil {
+			log.Printf("Can't find data with hash %s: %s", currentHash, err)
+		}
+
+		// update db if block with current hash not finded
+		if tx == nil {
+			log.Println("Explore new blocks")
+			// find latest block in db
+			txs, err := fabex.db.QueryAll()
 			if err != nil {
-				break
+				log.Fatalf("Can't query data: ", err)
 			}
-
-			if customBlock != nil {
-				for _, block := range customBlock.Txs {
-					fabex.db.Insert(block.Txid, block.Hash, block.Blocknum, block.A, block.B)
+			var max uint64 = txs[0].Blocknum
+			for _, tx := range txs {
+				if tx.Blocknum > max {
+					max = tx.Blocknum
 				}
 			}
-			blockCounter++
+
+			// set blocks counter to latest saved in db block number value
+			var blockCounter uint64 = max
+
+			// insert missing blocks/txs into db
+			for {
+				customBlock, err := blockfetcher.GetBlock(fabex.ledgerClient, blockCounter)
+				if err != nil {
+					break
+				}
+
+				if customBlock != nil {
+					for _, block := range customBlock.Txs {
+						fabex.db.Insert(block.Txid, block.Hash, block.Blocknum, block.A, block.B)
+					}
+				}
+				blockCounter++
+			}
+			fmt.Println("All blocks saved")
 		}
-		fmt.Println("All blocks saved")
 	case "getall":
-		txs, err := fabex.db.QueryAll("txs")
+		txs, err := fabex.db.QueryAll()
 		if err != nil {
 			log.Fatalf("Can't query data: ", err)
 		}

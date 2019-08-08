@@ -19,7 +19,7 @@ type DB struct {
 type QueryResult struct {
 	Txid      string `json:"txid"`
 	Blockhash string `json:"blockhash"`
-	Blocknum  int    `json:"blocknum"`
+	Blocknum  uint64 `json:"blocknum"`
 	A         int    `json:"a"`
 	B         int    `json:"b"`
 }
@@ -77,10 +77,29 @@ func (db *DB) Insert(txid, blockhash string, blocknum uint64, a, b int64) error 
 	return nil
 }
 
-func (db *DB) QueryAll(table string) ([]QueryResult, error) {
+func (db *DB) QueryBlockByHash(hash string) (*QueryResult, error) {
+	query := fmt.Sprintf(`
+        SELECT (txid, blockhash, blocknum, a, b) FROM public.txs
+        WHERE blockhash='%s';`, hash)
+
+	var (
+		txid, blockhash string
+		blocknum        uint64
+		a, b            int
+	)
+
+	err := db.Instance.QueryRow(query).Scan(&txid, &blockhash, &blocknum, &a, &b)
+	if err != nil {
+		return nil, err
+	}
+
+	return &QueryResult{txid, blockhash, blocknum, a, b}, nil
+}
+
+func (db *DB) QueryAll() ([]QueryResult, error) {
 	arr := []QueryResult{}
 	query := fmt.Sprintf(`
-        SELECT * FROM public.%s;`, table)
+        SELECT * FROM public.txs;`)
 	rows, err := db.Instance.Query(query)
 	if err != nil {
 		return []QueryResult{}, err
@@ -91,7 +110,8 @@ func (db *DB) QueryAll(table string) ([]QueryResult, error) {
 
 		var (
 			txid, blockhash string
-			blocknum, a, b  int
+			blocknum        uint64
+			a, b            int
 		)
 
 		err := rows.Scan(&txid, &blockhash, &blocknum, &a, &b)

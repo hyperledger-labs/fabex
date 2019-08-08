@@ -1,6 +1,7 @@
 package blockfetcher
 
 import (
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"github.com/golang/protobuf/proto"
@@ -88,17 +89,22 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 			}
 
 			for _, nsRwSet := range txRWSet.NsRwSets {
-				//fmt.Println(nsRwSet.KvRwSet.Writes)
-				if len(nsRwSet.KvRwSet.Writes) != 0 && (nsRwSet.KvRwSet.Writes[0].Key == "a" || nsRwSet.KvRwSet.Writes[0].Key == "b") {
-					//fmt.Println(nsRwSet.KvRwSet.Writes)
-					tx := Tx{
-						hash,
-						blocknum,
-						string(bytesTxId),
-						1,
-						1,
+
+				// get only those txs that changes state
+				if len(nsRwSet.KvRwSet.Writes) != 0 {
+					if nsRwSet.KvRwSet.Writes[0].Key == "a" || nsRwSet.KvRwSet.Writes[0].Key == "b" {
+						//fmt.Println(nsRwSet.KvRwSet.Writes)
+						a, _ := binary.Varint(nsRwSet.KvRwSet.Writes[0].Value)
+						b, _ := binary.Varint(nsRwSet.KvRwSet.Writes[1].Value)
+						tx := Tx{
+							hash,
+							blocknum,
+							string(bytesTxId),
+							a,
+							b,
+						}
+						customBlock.Txs = append(customBlock.Txs, tx)
 					}
-					customBlock.Txs = append(customBlock.Txs, tx)
 				}
 				//fmt.Println(nsRwSet.KvRwSet.Reads)
 				//fmt.Println(nsRwSet.KvRwSet.Writes)
