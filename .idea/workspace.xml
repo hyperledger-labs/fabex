@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c46cb33d-9f8e-485d-9f02-ee572b3002ed" name="Default Changelist" comment="extract key/value from rwsets">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="c46cb33d-9f8e-485d-9f02-ee572b3002ed" name="Default Changelist" comment="fixup! db, global config, new strategy of block deserialization">
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockfetcher/blockfetcher.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockfetcher/blockfetcher.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/fabex.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -17,43 +13,192 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/fabex.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="162">
-              <caret line="9" column="60" lean-forward="true" selection-start-line="9" selection-start-column="60" selection-end-line="9" selection-end-column="60" />
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/readme.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="36">
+                <caret line="2" column="47" selection-start-line="2" selection-start-column="47" selection-end-line="2" selection-end-column="47" />
+              </first_editor>
+              <second_editor />
             </state>
           </provider>
         </entry>
       </file>
+      <file pinned="true" current-in-tab="false">
+        <entry file="remoteDeploymentFS://&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/blockfetcher/blockfetcher.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="42">
+              <caret line="37" selection-start-line="37" selection-end-line="37" />
+              <folding>
+                <element signature="e#22#364#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="true" current-in-tab="true">
+        <entry file="remoteDeploymentFS://&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/fabex.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="234">
+              <caret line="150" column="68" lean-forward="true" selection-start-line="146" selection-start-column="8" selection-end-line="150" selection-end-column="68" />
+              <folding>
+                <element signature="e#14#424#0" expanded="true" />
+                <marker date="0" expanded="true" signature="3889:4085" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="true" current-in-tab="false">
+        <entry file="remoteDeploymentFS://&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/config.yaml">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="true" current-in-tab="false">
+        <entry file="remoteDeploymentFS://&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/helpers/helpers.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="72">
+              <caret line="10" column="67" selection-start-line="10" selection-start-column="67" selection-end-line="10" selection-end-column="67" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="true" current-in-tab="false">
+        <entry file="remoteDeploymentFS://&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/db/db.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="126">
+              <caret line="82" column="25" selection-start-line="82" selection-start-column="25" selection-end-line="82" selection-end-column="25" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/config.yaml">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
     </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>unit</find>
+      <find>newun</find>
+      <find>createas</find>
+      <find>pan</find>
+      <find>fata</find>
+      <find>err</find>
+      <find>inite</find>
+      <find>createass</find>
+      <find>NewHandleConfig</find>
+      <find>gas</find>
+      <find>init</find>
+      <find>CreateAuth</find>
+      <find>response</find>
+      <find>dial</find>
+      <find>dia</find>
+      <find>mu</find>
+      <find>sette</find>
+      <find>settem</find>
+      <find>marsha</find>
+      <find>TrackerSession</find>
+      <find>sett</find>
+      <find>inser</find>
+      <find>Can't extract cc action in peer.ChaincodeAction</find>
+      <find>config</find>
+      <find>bci</find>
+      <find>hex</find>
+      <find>curre</find>
+      <find>blocknum</find>
+      <find>Can't query data</find>
+      <find>blockcha</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>chainhelpers</replace>
+      <replace>127.0.0.1</replace>
+      <replace>0.0.0.0</replace>
+      <replace>localhost</replace>
+    </replaceStrings>
+    <dirStrings>
+      <dir>C:\git\supply\server</dir>
+      <dir>C:\git\supply\quorum</dir>
+    </dirStrings>
   </component>
   <component name="GOROOT" path="C:\Go" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GoLibraries">
-    <option name="indexEntireGoPath" value="false" />
-  </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/fabex.go" />
+        <option value="$PROJECT_DIR$/exmo_api_lib/golang/lib/go.mod" />
+        <option value="$PROJECT_DIR$/exmo_api_lib/golang/lib/lib_test.go" />
+        <option value="$PROJECT_DIR$/server/handlers/handlers.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/go.mod" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/supply/contracts/chainhelpers/helpers.go" />
+        <option value="$PROJECT_DIR$/server/db/db.go" />
+        <option value="$PROJECT_DIR$/server/contracts.md" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/supply/contracts/Tracker.sol" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/models/models.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/supply/contracts/mainrunner/main.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/config.yaml" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/contracts.md" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/e2e_test.go" />
+        <option value="$PROJECT_DIR$/server/handlers/handlers_test.go" />
+        <option value="$PROJECT_DIR$/server/handlers_test.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/handlers_test.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/testsupply/handlers_test.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/testsupply/handlers_bench" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/testsupply/handlers_bench.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/benchmark/handlers_bench.go" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/downloader.go" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/config.yaml" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/fabric-samples/first-network/docker-compose-ca.yaml" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/connection-profile.yaml" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/benchmark/bench_test.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/router/router.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/testsupply/e2e_test.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/supply/contracts/manager.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/supply/contracts/go.mod" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/go.mod" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/loadtest/load.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/db/enhanceddriver.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/handlers/handlers.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/db/db.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/cmd/main.go" />
+        <option value="&lt;d531790b-52c7-4eb1-84e1-0ad247ffcb4b&gt;/home/ubuntu/server/supply.go" />
+        <option value="$PROJECT_DIR$/server/loadtest/load.go" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/config.yaml" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/readme.md" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/main.go" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/helpers/helpers.go" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/db/db.go" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/blockfetcher/blockfetcher.go" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/fabex.go" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="220" />
-    <option name="y" value="73" />
-    <option name="width" value="1440" />
-    <option name="height" value="765" />
+    <option name="x" value="-12" />
+    <option name="y" value="-12" />
+    <option name="width" value="1944" />
+    <option name="height" value="1044" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -75,19 +220,31 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="GO_FMT" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="WebServerToolWindowFactoryState" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="go.gopath.indexing.explicitly.defined" value="true" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
+    <property name="go.vendoring.notification.had.been.shown" value="true" />
     <property name="last_opened_file_path" value="$USER_HOME$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\git\supply\server" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -101,64 +258,126 @@
       </list>
     </option>
   </component>
+  <component name="TodoView" selected-index="1">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25788197" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26596606" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32978722" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32978722" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3280142" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Database Changes" order="8" />
-      <window_info anchor="bottom" id="Version Control" order="9" />
-      <window_info anchor="bottom" id="Terminal" order="10" />
-      <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32978722" />
+      <window_info anchor="bottom" id="Database Changes" order="7" />
+      <window_info anchor="bottom" id="Version Control" order="8" weight="0.32978722" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="9" visible="true" weight="0.35815603" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.32978722" />
+      <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
+      <window_info anchor="bottom" id="File Transfer" order="12" weight="0.3280142" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Database" order="3" />
+      <window_info anchor="right" id="Remote Host" order="4" visible="true" weight="0.21827" />
     </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.086886995" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32978722" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3280142" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32978722" />
+      <window_info anchor="bottom" id="Database Changes" order="7" />
+      <window_info anchor="bottom" id="Version Control" order="8" weight="0.32978722" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="9" visible="true" weight="0.3846154" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.32978722" />
+      <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
+      <window_info anchor="bottom" id="File Transfer" order="12" weight="0.3280142" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Database" order="3" />
+      <window_info anchor="right" id="Remote Host" order="4" visible="true" weight="0.17750533" />
+    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="extract key/value from rwsets" />
-    <option name="LAST_COMMIT_MESSAGE" value="extract key/value from rwsets" />
+    <MESSAGE value="Smart contract validation removed, maxTemp init on contract deploy, getter for maxTemp" />
+    <MESSAGE value="Integration tests" />
+    <MESSAGE value="Integration tests added" />
+    <MESSAGE value="profile" />
+    <option name="LAST_COMMIT_MESSAGE" value="profile" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/helpers/helpers.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" column="7" lean-forward="true" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
-          <folding>
-            <element signature="e#17#375#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/blockfetcher/blockfetcher.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" column="7" lean-forward="true" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
-          <folding>
-            <element signature="e#22#303#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/exmo_api_lib/golang/lib/lib.go" />
+    <entry file="file://$PROJECT_DIR$/exmo_api_lib/golang/example.go" />
+    <entry file="file://$PROJECT_DIR$/exmo_api_lib/golang/go.mod" />
+    <entry file="file://$PROJECT_DIR$/exmo_api_lib/golang/lib/go.mod" />
+    <entry file="file://$PROJECT_DIR$/exmo_api_lib/golang/lib/lib_test.go" />
+    <entry file="file://$PROJECT_DIR$/quorum/contracts/chainhelpers/helpers.go" />
+    <entry file="file://$PROJECT_DIR$/quorum/contracts/manager.go" />
+    <entry file="file://$PROJECT_DIR$/server/router/router.go" />
+    <entry file="file://$PROJECT_DIR$/quorum/contracts/mainrunner/main.go" />
+    <entry file="file://$PROJECT_DIR$/server/supply.go" />
+    <entry file="file://$PROJECT_DIR$/server/handlers/handlers.go" />
+    <entry file="file://$PROJECT_DIR$/server/contracts.md" />
+    <entry file="file://$PROJECT_DIR$/server/handlers_test.go" />
+    <entry file="file://$PROJECT_DIR$/server/loadtest/load.go" />
+    <entry file="file://$PROJECT_DIR$/server/db/db.go" />
+    <entry file="file://$PROJECT_DIR$/server/config.yaml" />
+    <entry file="file://$PROJECT_DIR$/server/cmd/main.go" />
     <entry file="file://$PROJECT_DIR$/fabex.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="9" column="60" lean-forward="true" selection-start-line="9" selection-start-column="60" selection-end-line="9" selection-end-column="60" />
+        <state relative-caret-position="1188">
+          <caret line="81" column="30" selection-start-line="81" selection-start-column="30" selection-end-line="81" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config.yaml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/readme.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="36">
+            <caret line="2" column="47" selection-start-line="2" selection-start-column="47" selection-end-line="2" selection-end-column="47" />
+          </first_editor>
+          <second_editor />
         </state>
       </provider>
     </entry>

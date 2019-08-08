@@ -7,6 +7,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
+	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 )
 
@@ -93,14 +94,13 @@ func QueryChannelConfig(ledgerClient *ledger.Client) {
 	fmt.Println("Channel Versions: ", resp1.Versions())
 }
 
-func QueryChannelInfo(ledgerClient *ledger.Client) {
+func QueryChannelInfo(ledgerClient *ledger.Client) (*fab.BlockchainInfoResponse, error) {
 	resp, err := ledgerClient.QueryInfo()
 	if err != nil {
 		fmt.Printf("Failed to queryInfo: %s", err)
+		return nil, err
 	}
-	fmt.Println("BlockChainInfo:", resp.BCI)
-	fmt.Println("Endorser:", resp.Endorser)
-	fmt.Println("Status:", resp.Status)
+	return resp, nil
 }
 
 func SetupLogLevel(lvl logging.Level) {
