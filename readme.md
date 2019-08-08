@@ -3,17 +3,17 @@
 Usage scenario example:
 (_you can skip any step)_
 
-build:
+build:                  
 `go build`
 
 enroll user:                         
 `./fabex --enrolluser true`
 
-create db table:                                                
+create db table:                                                         
 `./fabex --task initdb --config ./config.yaml`
 
-get transactions of specific block (chain operation):
+get transactions of specific block (chain operation):                                
 `./fabex --task getblock --blocknum 14 --config ./config.yaml`
 
-get all transactions (db operation):                                                      
+get all transactions (db operation):                                                                   
 `./fabex --task getblock --blocknum 15 --config ./config.yaml`
