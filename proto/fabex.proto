@@ -1,0 +1,20 @@
+syntax = "proto3";
+package fabex;
+
+service Fabex {
+    rpc Explore (Request) returns (stream Reply) {
+    }
+}
+
+message Request {
+    int64 startblock = 1;
+    int64 endblock = 2;
+}
+
+message Reply {
+    string txid = 1;
+    string hash = 2;
+    int64 blocknum = 3;
+    int64 a = 4;
+    int64 b = 5;
+}

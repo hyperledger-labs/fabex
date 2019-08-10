@@ -12,7 +12,7 @@ require (
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/mock v1.2.0 // indirect
-	github.com/golang/protobuf v1.2.0
+	github.com/golang/protobuf v1.3.2
 	github.com/google/certificate-transparency-go v1.0.21 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0 // indirect
 	github.com/hashicorp/go-version v1.1.0 // indirect
@@ -40,6 +40,6 @@ require (
 	github.com/sykesm/zap-logfmt v0.0.2 // indirect
 	golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6 // indirect
 	google.golang.org/genproto v0.0.0-20180706232955-8b2cc369ab52 // indirect
-	google.golang.org/grpc v0.0.0-20180706180940-f3361fda2fe0 // indirect
+	google.golang.org/grpc v0.0.0-20180706180940-f3361fda2fe0
 	gopkg.in/yaml.v2 v2.2.1
 )
