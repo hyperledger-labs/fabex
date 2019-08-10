@@ -5,6 +5,7 @@ import (
 	"fabex/blockfetcher"
 	"fabex/db"
 	"fabex/helpers"
+	pb "fabex/proto"
 	"flag"
 	"fmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
@@ -12,9 +13,11 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
+	"google.golang.org/grpc"
 	yaml "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 )
 
@@ -55,6 +58,8 @@ func main() {
 	task := flag.String("task", "query", "choose the task to execute")
 	blocknum := flag.Uint64("blocknum", 0, "block number")
 	confpath := flag.String("config", "./config.yaml", "path to YAML config")
+	grpcAddr := flag.String("grpcaddr", "0.0.0.0", "grpc server address")
+	grpcPort := flag.String("grpcport", "6000", "grpc server port")
 	flag.Parse()
 
 	// read config
@@ -198,5 +203,55 @@ func main() {
 		for _, tx := range txs {
 			fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\na=%d\nb=%d\n", tx.Blocknum, tx.Blockhash, tx.Txid, tx.A, tx.B)
 		}
+
+	case "grpc":
+		serv := NewFabexServer(*grpcAddr, *grpcPort, fabex)
+		StartGrpcServ(serv)
 	}
+}
+
+type fabexServer struct {
+	Address string
+	Port    string
+	Conf    *Fabex
+}
+
+func NewFabexServer(addr string, port string, conf *Fabex) *fabexServer {
+	return &fabexServer{addr, port, conf}
+}
+
+func (s *fabexServer) Explore(req *pb.Request, stream pb.Fabex_ExploreServer) error {
+	log.Println("Strat stream from %d block", req.Startblock)
+	// set blocks counter to latest saved in db block number value
+	var blockCounter uint64 = uint64(req.Startblock)
+
+	// insert missing blocks/txs into db
+	for blockCounter <= uint64(req.Endblock) {
+		customBlock, err := blockfetcher.GetBlock(s.Conf.ledgerClient, blockCounter)
+		if err != nil {
+			break
+		}
+
+		if customBlock != nil {
+			for _, block := range customBlock.Txs {
+				stream.Send(&pb.Reply{Txid: block.Txid, Hash: block.Hash, Blocknum: int64(block.Blocknum), A: block.A, B: block.B})
+			}
+		}
+		blockCounter++
+	}
+	log.Println("Stream closed")
+	return nil
+}
+
+func StartGrpcServ(serv *fabexServer) {
+	grpcServer := grpc.NewServer()
+	pb.RegisterFabexServer(grpcServer, serv)
+
+	l, err := net.Listen("tcp", fmt.Sprintf("%s:%s", serv.Address, serv.Port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	log.Printf("\nListening on tcp://%s:%s", serv.Address, serv.Port)
+	grpcServer.Serve(l)
 }

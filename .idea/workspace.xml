@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c46cb33d-9f8e-485d-9f02-ee572b3002ed" name="Default Changelist" comment="smart update prototype, new db query by hash, fix helpers.go">
+    <list default="true" id="c46cb33d-9f8e-485d-9f02-ee572b3002ed" name="Default Changelist" comment="readme update, fix db managment">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockfetcher/blockfetcher.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockfetcher/blockfetcher.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/db.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fabex.go" beforeDir="false" afterPath="$PROJECT_DIR$/fabex.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -15,14 +13,28 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/readme.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
             <state split_layout="SPLIT">
               <first_editor relative-caret-position="216">
-                <caret line="12" column="10" lean-forward="true" selection-start-line="12" selection-start-column="10" selection-end-line="12" selection-end-column="10" />
+                <caret line="12" column="10" selection-start-line="12" selection-start-column="10" selection-end-line="12" selection-end-column="10" />
               </first_editor>
               <second_editor />
             </state>
@@ -32,8 +44,8 @@
       <file pinned="true" current-in-tab="false">
         <entry file="remoteDeploymentFS://&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/blockfetcher/blockfetcher.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="42">
-              <caret line="37" selection-start-line="37" selection-end-line="37" />
+            <state relative-caret-position="54">
+              <caret line="91" selection-start-line="91" selection-end-line="91" />
               <folding>
                 <element signature="e#22#364#0" expanded="true" />
               </folding>
@@ -44,12 +56,42 @@
       <file pinned="true" current-in-tab="false">
         <entry file="remoteDeploymentFS://&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/fabex.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="108">
-              <caret line="111" column="46" selection-start-line="111" selection-start-column="41" selection-end-line="111" selection-end-column="46" />
+            <state relative-caret-position="180">
+              <caret line="203" column="132" selection-start-line="203" selection-start-column="23" selection-end-line="203" selection-end-column="132" />
               <folding>
-                <element signature="e#14#424#0" expanded="true" />
-                <marker date="0" expanded="true" signature="3892:4088" ph="..." />
+                <element signature="e#14#473#0" expanded="true" />
+                <marker date="0" expanded="true" signature="4078:4274" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="true" current-in-tab="true">
+        <entry file="remoteDeploymentFS://&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/client/client.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="162">
+              <caret line="33" column="38" selection-start-line="33" selection-start-column="38" selection-end-line="33" selection-end-column="38" />
+              <folding>
+                <element signature="e#14#135#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/proto/fabex.proto">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="126">
+              <caret line="13" column="20" lean-forward="true" selection-start-line="13" selection-start-column="20" selection-end-line="13" selection-end-column="20" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="true" current-in-tab="false">
+        <entry file="remoteDeploymentFS://&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/proto/fabex.pb.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="18">
+              <caret line="73" selection-start-line="73" selection-end-line="74" />
             </state>
           </provider>
         </entry>
@@ -76,7 +118,7 @@
         <entry file="remoteDeploymentFS://&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/db/db.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="180">
-              <caret line="61" column="11" lean-forward="true" selection-start-line="61" selection-start-column="11" selection-end-line="61" selection-end-column="11" />
+              <caret line="61" column="11" selection-start-line="61" selection-start-column="11" selection-end-line="61" selection-end-column="11" />
             </state>
           </provider>
         </entry>
@@ -97,17 +139,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>newun</find>
-      <find>createas</find>
-      <find>pan</find>
-      <find>fata</find>
-      <find>err</find>
-      <find>inite</find>
-      <find>createass</find>
-      <find>NewHandleConfig</find>
-      <find>gas</find>
-      <find>init</find>
-      <find>CreateAuth</find>
       <find>response</find>
       <find>dial</find>
       <find>dia</find>
@@ -127,6 +158,17 @@
       <find>Can't query data</find>
       <find>table</find>
       <find>blockcha</find>
+      <find>if (</find>
+      <find>register</find>
+      <find>explor</find>
+      <find>rpcser</find>
+      <find>Recv</find>
+      <find>close</find>
+      <find>fabexserv</find>
+      <find>RegisterFabexServer</find>
+      <find>Reply</find>
+      <find>Fabex_ExploreServer</find>
+      <find>port</find>
     </findStrings>
     <replaceStrings>
       <replace>chainhelpers</replace>
@@ -187,18 +229,22 @@
         <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/main.go" />
         <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/helpers/helpers.go" />
         <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/db/db.go" />
-        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/blockfetcher/blockfetcher.go" />
-        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/fabex.go" />
         <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/config.yaml" />
         <option value="$PROJECT_DIR$/readme.md" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/blockfetcher/blockfetcher.go" />
+        <option value="$PROJECT_DIR$/proto/tx.proto.go" />
+        <option value="$PROJECT_DIR$/proto/fabex.proto" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/proto/fabex.pb.go" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/fabex.go" />
+        <option value="&lt;30d90abf-0243-424f-9e71-4890d48f9179&gt;/home/ubuntu/explorer/ali/go-sdk-demo/client/client.go" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-12" />
-    <option name="y" value="-12" />
-    <option name="width" value="1944" />
-    <option name="height" value="1044" />
+    <option name="x" value="-11" />
+    <option name="y" value="-11" />
+    <option name="width" value="1943" />
+    <option name="height" value="1103" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -222,7 +268,7 @@
             <path>
               <item name="fabex" type="b2602c69:ProjectViewProjectNode" />
               <item name="fabex" type="462c0819:PsiDirectoryNode" />
-              <item name="helpers" type="462c0819:PsiDirectoryNode" />
+              <item name="proto" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -231,6 +277,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="DatabaseDriversLRU" value="postgresql" />
     <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="GO_FMT" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -277,9 +324,8 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26596606" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.1738076" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -291,18 +337,18 @@
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32978722" />
       <window_info anchor="bottom" id="Database Changes" order="7" />
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32978722" />
-      <window_info anchor="bottom" id="Terminal" order="9" visible="true" weight="0.35815603" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="9" visible="true" weight="0.4539007" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.32978722" />
       <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
       <window_info anchor="bottom" id="File Transfer" order="12" weight="0.3280142" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Database" order="3" />
-      <window_info anchor="right" id="Remote Host" order="4" visible="true" weight="0.21827" />
+      <window_info anchor="right" id="Database" order="3" weight="0.32983023" />
+      <window_info anchor="right" id="Remote Host" order="4" weight="0.22473727" />
     </layout>
     <layout-to-restore>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.086886995" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.1738076" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -314,15 +360,15 @@
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32978722" />
       <window_info anchor="bottom" id="Database Changes" order="7" />
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32978722" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="9" visible="true" weight="0.3846154" />
+      <window_info anchor="bottom" id="Terminal" order="9" weight="0.27304965" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.32978722" />
       <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
-      <window_info anchor="bottom" id="File Transfer" order="12" weight="0.3280142" />
+      <window_info anchor="bottom" id="File Transfer" order="12" visible="true" weight="0.3280142" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Database" order="3" />
-      <window_info anchor="right" id="Remote Host" order="4" visible="true" weight="0.17750533" />
+      <window_info anchor="right" id="Database" order="3" weight="0.32983023" />
+      <window_info active="true" anchor="right" id="Remote Host" order="4" visible="true" weight="0.22473727" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -350,7 +396,8 @@
     <MESSAGE value="Integration tests added" />
     <MESSAGE value="profile" />
     <MESSAGE value="smart update prototype, new db query by hash, fix helpers.go" />
-    <option name="LAST_COMMIT_MESSAGE" value="smart update prototype, new db query by hash, fix helpers.go" />
+    <MESSAGE value="readme update, fix db managment" />
+    <option name="LAST_COMMIT_MESSAGE" value="readme update, fix db managment" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="editorHistoryManager">
@@ -385,9 +432,23 @@
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
           <first_editor relative-caret-position="216">
-            <caret line="12" column="10" lean-forward="true" selection-start-line="12" selection-start-column="10" selection-end-line="12" selection-end-column="10" />
+            <caret line="12" column="10" selection-start-line="12" selection-start-column="10" selection-end-line="12" selection-end-column="10" />
           </first_editor>
           <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/proto/tx.proto.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="18">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/proto/fabex.proto">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="13" column="20" lean-forward="true" selection-start-line="13" selection-start-column="20" selection-end-line="13" selection-end-column="20" />
         </state>
       </provider>
     </entry>
