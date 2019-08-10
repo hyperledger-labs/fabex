@@ -23,3 +23,8 @@ get transactions of specific block (chain operation):
 
 get all transactions (db operation):                                                                   
 `./fabex --task getblock --blocknum 15 --config ./config.yaml`
+
+---
+Or you can use GRPC client with example RPC call in client/client/go:
+
+`go run client.go`
