@@ -58,8 +58,10 @@ func main() {
 	task := flag.String("task", "query", "choose the task to execute")
 	blocknum := flag.Uint64("blocknum", 0, "block number")
 	confpath := flag.String("config", "./config.yaml", "path to YAML config")
+	profile := flag.String("profile", "./connection-profile.yaml", "path to connection profile")
 	grpcAddr := flag.String("grpcaddr", "0.0.0.0", "grpc server address")
 	grpcPort := flag.String("grpcport", "6000", "grpc server port")
+
 	flag.Parse()
 
 	// read config
@@ -77,7 +79,7 @@ func main() {
 	}
 
 	fmt.Println("Reading connection profile..")
-	c := config.FromFile("./connection-profile.yaml")
+	c := config.FromFile(*profile)
 	sdk, err := fabsdk.New(c)
 	if err != nil {
 		fmt.Printf("Failed to create new SDK: %s\n", err)
