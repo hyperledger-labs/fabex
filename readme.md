@@ -5,7 +5,7 @@ Usage scenario example:
 
 configure `config.yaml` and `connection-profile.yaml`
 
-start [fist network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network): 
+start [fist network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network)
 
 start Postgres and create db with name `txs`
 
@@ -25,6 +25,6 @@ get all transactions (db operation):
 `./fabex --task getblock --blocknum 15 --config ./config.yaml`
 
 ---
-Or you can use GRPC client with example RPC call in client/client/go:
+Or you can use GRPC client with example RPC call in client/client.go:
 
 `go run client.go`
