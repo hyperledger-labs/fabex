@@ -38,6 +38,7 @@ require (
 	github.com/spf13/pflag v0.0.0-20180601132542-3ebe029320b2 // indirect
 	github.com/spf13/viper v0.0.0-20180507071007-15738813a09d // indirect
 	github.com/sykesm/zap-logfmt v0.0.2 // indirect
+	golang.org/x/net v0.0.0-20181114220301-adae6a3d119a
 	golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6 // indirect
 	google.golang.org/genproto v0.0.0-20180706232955-8b2cc369ab52 // indirect
 	google.golang.org/grpc v0.0.0-20180706180940-f3361fda2fe0

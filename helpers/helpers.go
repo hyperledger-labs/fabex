@@ -1,6 +1,9 @@
 package helpers
 
 import (
+	"encoding/hex"
+	"fabex/blockfetcher"
+	"fabex/models"
 	"fmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
@@ -9,7 +12,70 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
+	"log"
+	"sync"
 )
+
+func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
+	// check we have up-to-date db or not
+	// get last block hash
+	resp, err := QueryChannelInfo(fab.LedgerClient)
+	if err != nil {
+		return err
+	}
+	currentHash := hex.EncodeToString(resp.BCI.CurrentBlockHash)
+
+	//find txs from this block in db
+	tx, err := fab.Db.QueryBlockByHash(currentHash)
+	if err != nil {
+		if err.Error() != "sql: no rows in result set" {
+			return err
+		}
+	}
+
+	// update db if block with current hash not finded
+	var blockCounter uint64
+	if tx == nil {
+		log.Println("Explore new blocks")
+		// find latest block in db
+		txs, err := fab.Db.QueryAll()
+
+		if len(txs) != 0 {
+			if err != nil {
+				return err
+			}
+			var max uint64 = txs[0].Blocknum
+			for _, tx := range txs {
+				if tx.Blocknum > max {
+					max = tx.Blocknum
+				}
+			}
+
+			// set blocks counter to latest saved in db block number value
+			blockCounter = max
+		} else {
+			blockCounter = 0
+		}
+
+		// insert missing blocks/txs into db
+		for {
+			customBlock, err := blockfetcher.GetBlock(fab.LedgerClient, blockCounter)
+			if err != nil {
+				break
+			}
+
+			if customBlock != nil {
+				for _, block := range customBlock.Txs {
+					log.Printf("\nBlock finded\nBlock number: %d\nBlock hash: %s\nTx id: %s\na=%d\nb=%d\n", block.Blocknum, block.Hash, block.Txid, block.A, block.B)
+					fab.Db.Insert(block.Txid, block.Hash, block.Blocknum, block.A, block.B)
+				}
+			}
+			blockCounter++
+		}
+	}
+	wg.Done()
+	return nil
+}
 
 func QueryInstalledCC(sdk *fabsdk.FabricSDK, user string) {
 	userContext := sdk.Context(fabsdk.WithUser(user))

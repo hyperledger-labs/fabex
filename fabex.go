@@ -1,10 +1,10 @@
 package main
 
 import (
-	"encoding/hex"
 	"fabex/blockfetcher"
 	"fabex/db"
 	"fabex/helpers"
+	"fabex/models"
 	pb "fabex/proto"
 	"flag"
 	"fmt"
@@ -19,6 +19,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"sync"
+	"time"
 )
 
 var (
@@ -29,24 +31,6 @@ var (
 	lvl         = logging.INFO
 )
 
-type Fabex struct {
-	db            *db.DB
-	channelClient *channel.Client
-	ledgerClient  *ledger.Client
-}
-
-type Db struct {
-	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-	Dbuser   string `yaml:"dbuser"`
-	Dbsecret string `yaml:"dbsecret"`
-	Dbname   string `yaml:dbname`
-}
-
-type Config struct {
-	DB Db `yaml:"Db"`
-}
-
 func main() {
 
 	// parse flags
@@ -56,6 +40,8 @@ func main() {
 	channelName = flag.String("channel", "mychannel", "channel name")
 	enrolluser := flag.Bool("enrolluser", false, "enroll user (true) or not (false)")
 	task := flag.String("task", "query", "choose the task to execute")
+	forever := flag.Bool("forever", false, "explore ledger forever")
+	interval := flag.String("interval", "1s", "time interval for exploring blocks in forever mode (1s, 1h, etc)")
 	blocknum := flag.Uint64("blocknum", 0, "block number")
 	confpath := flag.String("config", "./config.yaml", "path to YAML config")
 	profile := flag.String("profile", "./connection-profile.yaml", "path to connection profile")
@@ -71,7 +57,7 @@ func main() {
 		return
 	}
 
-	var globalConfig Config
+	var globalConfig models.Config
 	err = yaml.Unmarshal([]byte(data), &globalConfig)
 	if err != nil {
 		log.Println("Unmarshalling error: ")
@@ -105,31 +91,31 @@ func main() {
 	}
 
 	dbInstance := db.CreateDBConf(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
-	var fabex *Fabex
+	var fabex *models.Fabex
 	if *task != "initdb" {
 		err = dbInstance.Connect()
 		if err != nil {
 			log.Fatalln("DB connection failed:", err.Error())
 		}
 		log.Println("Connected to Postgres successfully")
-		fabex = &Fabex{dbInstance, channelclient, ledgerClient}
+		fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}
 	} else {
-		fabex = &Fabex{dbInstance, channelclient, ledgerClient}
+		fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}
 	}
 	switch *task {
 	case "initdb":
-		err = fabex.db.Init()
+		err = fabex.Db.Init()
 		if err != nil {
 			fmt.Printf("Failed to create table: %s", err)
 			return
 		}
 		log.Println("Database and table created successfully")
 	case "invoke":
-		helpers.InvokeCC(fabex.channelClient, "a", "b", "30")
+		helpers.InvokeCC(fabex.ChannelClient, "a", "b", "30")
 	case "query":
-		helpers.QueryCC(fabex.channelClient, []byte("b"), *cc)
+		helpers.QueryCC(fabex.ChannelClient, []byte("b"), *cc)
 	case "channelinfo":
-		resp, err := helpers.QueryChannelInfo(fabex.ledgerClient)
+		resp, err := helpers.QueryChannelInfo(fabex.LedgerClient)
 		if err != nil {
 			log.Fatalf("Can't query blockchain info: %s", err)
 		}
@@ -137,10 +123,10 @@ func main() {
 		fmt.Println("Endorser:", resp.Endorser)
 		fmt.Println("Status:", resp.Status)
 	case "channelconfig":
-		helpers.QueryChannelConfig(fabex.ledgerClient)
+		helpers.QueryChannelConfig(fabex.LedgerClient)
 
 	case "getblock":
-		customBlock, err := blockfetcher.GetBlock(fabex.ledgerClient, *blocknum)
+		customBlock, err := blockfetcher.GetBlock(fabex.LedgerClient, *blocknum)
 		if err != nil {
 			break
 		}
@@ -152,57 +138,39 @@ func main() {
 		}
 
 	case "explore":
-
-		// check we have up-to-date db or not
-		// get last block hash
-		resp, err := helpers.QueryChannelInfo(fabex.ledgerClient)
-		if err != nil {
-			log.Fatalf("Can't query blockchain info: %s", err)
-		}
-		currentHash := hex.EncodeToString(resp.BCI.CurrentBlockHash)
-
-		//find txs from this block in db
-		tx, err := fabex.db.QueryBlockByHash(currentHash)
-		if err != nil {
-			log.Printf("Can't find data with hash %s: %s", currentHash, err)
-		}
-
-		// update db if block with current hash not finded
-		if tx == nil {
-			log.Println("Explore new blocks")
-			// find latest block in db
-			txs, err := fabex.db.QueryAll()
+		wg := &sync.WaitGroup{}
+		if *forever {
+			duration, err := time.ParseDuration(*interval)
 			if err != nil {
-				log.Fatalf("Can't query data: ", err)
+				log.Fatal("Can't to parse time interval")
 			}
-			var max uint64 = txs[0].Blocknum
-			for _, tx := range txs {
-				if tx.Blocknum > max {
-					max = tx.Blocknum
-				}
-			}
-
-			// set blocks counter to latest saved in db block number value
-			var blockCounter uint64 = max
-
-			// insert missing blocks/txs into db
+			ticker := time.NewTicker(duration)
 			for {
-				customBlock, err := blockfetcher.GetBlock(fabex.ledgerClient, blockCounter)
-				if err != nil {
-					break
+				select {
+				case <-ticker.C:
+					wg.Add(1)
+					go func() {
+						err = helpers.Explore(wg, fabex)
+						if err != nil {
+							log.Println(err)
+						}
+					}()
+					wg.Wait()
 				}
-
-				if customBlock != nil {
-					for _, block := range customBlock.Txs {
-						fabex.db.Insert(block.Txid, block.Hash, block.Blocknum, block.A, block.B)
-					}
-				}
-				blockCounter++
 			}
-			fmt.Println("All blocks saved")
+		} else {
+			wg.Add(1)
+			go func() {
+				err = helpers.Explore(wg, fabex)
+				if err != nil {
+					log.Println(err)
+				}
+			}()
+			wg.Wait()
+			log.Println("All blocks saved")
 		}
 	case "getall":
-		txs, err := fabex.db.QueryAll()
+		txs, err := fabex.Db.QueryAll()
 		if err != nil {
 			log.Fatalf("Can't query data: ", err)
 		}
@@ -219,10 +187,10 @@ func main() {
 type fabexServer struct {
 	Address string
 	Port    string
-	Conf    *Fabex
+	Conf    *models.Fabex
 }
 
-func NewFabexServer(addr string, port string, conf *Fabex) *fabexServer {
+func NewFabexServer(addr string, port string, conf *models.Fabex) *fabexServer {
 	return &fabexServer{addr, port, conf}
 }
 
@@ -233,7 +201,7 @@ func (s *fabexServer) Explore(req *pb.Request, stream pb.Fabex_ExploreServer) er
 
 	// insert missing blocks/txs into db
 	for blockCounter <= uint64(req.Endblock) {
-		customBlock, err := blockfetcher.GetBlock(s.Conf.ledgerClient, blockCounter)
+		customBlock, err := blockfetcher.GetBlock(s.Conf.LedgerClient, blockCounter)
 		if err != nil {
 			break
 		}
