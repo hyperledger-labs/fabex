@@ -29,3 +29,8 @@ get all transactions (db operation):
 Or you can use GRPC client with example RPC call in client/client.go:
 
 `go run client.go`
+
+---
+
+Start service in daemon mode:  
+`go run fabex.go --task explore --config ./config.yaml --forever true --duration 1s`
