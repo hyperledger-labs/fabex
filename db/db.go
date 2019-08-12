@@ -52,7 +52,39 @@ func (db *DB) Init() error {
 
 	// create simple table with transaction id, block hash, block number
 	// keys a and b (for simple chaincode)
-	_, err := db.Instance.Exec(`
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s sslmode=disable",
+		db.Host, db.Port, db.User, db.Password)
+
+	dbinstance, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		return err
+	}
+
+	err = dbinstance.Ping()
+	if err != nil {
+		return err
+	}
+
+	_, err = dbinstance.Exec(`
+        CREATE DATABASE txs
+    	`)
+	if err != nil {
+		return err
+	}
+
+	// close old connection and reconnect to new database
+	dbinstance.Close()
+	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		db.Host, db.Port, db.User, db.Password, "txs")
+
+	dbinstance, err = sql.Open("postgres", psqlInfo)
+	if err != nil {
+		return err
+	}
+
+	_, err = dbinstance.Exec(`
         CREATE TABLE txs (
     		txid TEXT PRIMARY KEY,
     		blockhash TEXT,
