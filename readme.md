@@ -1,30 +1,31 @@
 **Block explorer for Hyperledger Fabric**
 
-Usage scenario example:                        
+Usage scenario example:  
 (_you can skip any step)_
 
 configure `config.yaml` and `connection-profile.yaml`
 
 start [fist network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network)
 
-start Postgres and create db with name `txs`
+install and start Postgres
 
-build:                  
+build:  
 `go build`
 
-enroll user:                         
+enroll user:  
 `./fabex --enrolluser true`
 
-create db table:                                                         
+create database and table for data saving:  
 `./fabex --task initdb --config ./config.yaml`
 
-get transactions of specific block (chain operation):                                
+get transactions of specific block (chain operation):  
 `./fabex --task getblock --blocknum 14 --config ./config.yaml`
 
-get all transactions (db operation):                                                                   
+get all transactions (db operation):  
 `./fabex --task getblock --blocknum 15 --config ./config.yaml`
 
 ---
+
 Or you can use GRPC client with example RPC call in client/client.go:
 
 `go run client.go`

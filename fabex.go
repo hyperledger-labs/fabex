@@ -105,13 +105,17 @@ func main() {
 	}
 
 	dbInstance := db.CreateDBConf(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
-	err = dbInstance.Connect()
-	if err != nil {
-		log.Fatalln("DB connection failed:", err.Error())
+	var fabex *Fabex
+	if *task != "initdb" {
+		err = dbInstance.Connect()
+		if err != nil {
+			log.Fatalln("DB connection failed:", err.Error())
+		}
+		log.Println("Connected to Postgres successfully")
+		fabex = &Fabex{dbInstance, channelclient, ledgerClient}
+	} else {
+		fabex = &Fabex{dbInstance, channelclient, ledgerClient}
 	}
-	log.Println("Connected to Postgres successfully")
-	fabex := &Fabex{dbInstance, channelclient, ledgerClient}
-
 	switch *task {
 	case "initdb":
 		err = fabex.db.Init()
@@ -119,7 +123,7 @@ func main() {
 			fmt.Printf("Failed to create table: %s", err)
 			return
 		}
-		log.Println("Table created successfully")
+		log.Println("Database and table created successfully")
 	case "invoke":
 		helpers.InvokeCC(fabex.channelClient, "a", "b", "30")
 	case "query":
