@@ -133,7 +133,7 @@ func main() {
 
 		if customBlock != nil {
 			for _, block := range customBlock.Txs {
-				fmt.Printf("\nBlock number: %d\nBlock hash: %s\na=%d\nb=%d\n", block.Blocknum, block.Hash, block.A, block.B)
+				fmt.Printf("\nBlock number: %d\nBlock hash: %s\nPayload=%s\n", block.Blocknum, block.Hash, block.Payload)
 			}
 		}
 
@@ -175,7 +175,7 @@ func main() {
 			log.Fatalf("Can't query data: ", err)
 		}
 		for _, tx := range txs {
-			fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\na=%d\nb=%d\n", tx.Blocknum, tx.Blockhash, tx.Txid, tx.A, tx.B)
+			fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload=%s\n", tx.Blocknum, tx.Blockhash, tx.Txid, tx.Payload)
 		}
 
 	case "grpc":
@@ -195,7 +195,7 @@ func NewFabexServer(addr string, port string, conf *models.Fabex) *fabexServer {
 }
 
 func (s *fabexServer) Explore(req *pb.Request, stream pb.Fabex_ExploreServer) error {
-	log.Printf("Strat stream from %d block", req.Startblock)
+	log.Printf("Start stream from %d block", req.Startblock)
 	// set blocks counter to latest saved in db block number value
 	var blockCounter uint64 = uint64(req.Startblock)
 
@@ -203,12 +203,13 @@ func (s *fabexServer) Explore(req *pb.Request, stream pb.Fabex_ExploreServer) er
 	for blockCounter <= uint64(req.Endblock) {
 		customBlock, err := blockfetcher.GetBlock(s.Conf.LedgerClient, blockCounter)
 		if err != nil {
+			log.Printf("GetBlock error: %s", err)
 			break
 		}
 
 		if customBlock != nil {
 			for _, block := range customBlock.Txs {
-				stream.Send(&pb.Reply{Txid: block.Txid, Hash: block.Hash, Blocknum: int64(block.Blocknum), A: block.A, B: block.B})
+				stream.Send(&pb.Reply{Txid: block.Txid, Hash: block.Hash, Blocknum: int64(block.Blocknum), Payload: block.Payload})
 			}
 		}
 		blockCounter++
