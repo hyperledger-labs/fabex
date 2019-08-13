@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/binary"
+	"encoding/json"
+	"fabex/models"
 	pb "fabex/proto"
 	"fmt"
 	"golang.org/x/net/context"
@@ -31,7 +34,16 @@ func ReadStream(addr string, port string, startblock, endblock int64) error {
 			log.Println(err)
 			return err
 		}
-		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload=%s\n", in.Blocknum, in.Hash, in.Txid, in.Payload)
+		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload:\n", in.Blocknum, in.Hash, in.Txid)
+		var firstNetwork []models.FirstNetworkChaincode
+		err = json.Unmarshal(in.Payload, &firstNetwork)
+		if err != nil {
+			log.Printf("Unmarshalling error: %s", err)
+		}
+		for _, val := range firstNetwork {
+			decoded, _ := binary.Varint(in.Payload)
+			fmt.Printf("Key: %s,\nValue: %d\n", val.Key, decoded)
+		}
 	}
 
 	return nil
