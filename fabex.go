@@ -193,7 +193,7 @@ func main() {
 		for _, tx := range txs {
 
 			var firstNetwork []models.FirstNetworkChaincode
-			log.Println(tx.Payload)
+
 			err = json.Unmarshal(tx.Payload, &firstNetwork)
 			if err != nil {
 				log.Printf("Unmarshalling error: %s", err)
