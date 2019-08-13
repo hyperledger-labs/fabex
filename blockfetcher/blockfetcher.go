@@ -1,8 +1,8 @@
 package blockfetcher
 
 import (
-	"encoding/binary"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
@@ -20,8 +20,7 @@ type Tx struct {
 	Hash     string
 	Blocknum uint64
 	Txid     string
-	A        int64
-	B        int64
+	Payload  []byte
 }
 
 func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error) {
@@ -51,15 +50,10 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 			envelope, err := utils.GetEnvelopeFromBlock(value)
 			if err != nil {
 				//fmt.Printf("Can't extract envelope: ", err)
-				return nil, nil
+				return nil, err
 			}
 
-			action, err := utils.GetActionFromEnvelopeMsg(envelope)
-			if err != nil {
-				//fmt.Printf("Can't extract cc action in peer.ChaincodeAction format: ", err)
-				return nil, nil
-			}
-
+			action, _ := utils.GetActionFromEnvelopeMsg(envelope)
 			actionResults := action.GetResults()
 
 			ReadWriteSet := &rwset.TxReadWriteSet{}
@@ -67,44 +61,47 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 			err = proto.Unmarshal(actionResults, ReadWriteSet)
 			if err != nil {
 				//fmt.Printf("Failed to unmarshal: %s", err)
-				return nil, nil
+				return nil, err
 			}
 
 			txRWSet, err := rwsetutil.TxRwSetFromProtoMsg(ReadWriteSet)
 			if err != nil {
 				//fmt.Printf("Failed to convert rwset.TxReadWriteSet to rwsetutil.TxRWSet: %s", err)
-				return nil, nil
+				return nil, err
 			}
 
 			//get tx id
 			bytesEnvelope, err := utils.GetBytesEnvelope(envelope)
 			if err != nil {
 				//fmt.Printf("Can't convert common.Envelope to bytes: ", err)
-				return nil, nil
+				return nil, err
 			}
 			bytesTxId, err := utils.GetOrComputeTxIDFromEnvelope(bytesEnvelope)
 			if err != nil {
 				//fmt.Printf("Can't extract tx id in bytes format: ", err)
-				return nil, nil
+				return nil, err
 			}
 
 			for _, nsRwSet := range txRWSet.NsRwSets {
 
 				// get only those txs that changes state
 				if len(nsRwSet.KvRwSet.Writes) != 0 {
-					if nsRwSet.KvRwSet.Writes[0].Key == "a" || nsRwSet.KvRwSet.Writes[0].Key == "b" {
-						//fmt.Println(nsRwSet.KvRwSet.Writes)
-						a, _ := binary.Varint(nsRwSet.KvRwSet.Writes[0].Value)
-						b, _ := binary.Varint(nsRwSet.KvRwSet.Writes[1].Value)
-						tx := Tx{
-							hash,
-							blocknum,
-							string(bytesTxId),
-							a,
-							b,
-						}
-						customBlock.Txs = append(customBlock.Txs, tx)
+
+					//fmt.Println(nsRwSet.KvRwSet.Writes)
+					jsonPayload, err := json.Marshal(nsRwSet.KvRwSet.Writes)
+					if err != nil {
+						return nil, err
 					}
+					//a, _ := binary.Varint(nsRwSet.KvRwSet.Writes[0].Value)
+					//b, _ := binary.Varint(nsRwSet.KvRwSet.Writes[1].Value)
+					tx := Tx{
+						hash,
+						blocknum,
+						string(bytesTxId),
+						jsonPayload,
+					}
+					customBlock.Txs = append(customBlock.Txs, tx)
+
 				}
 				//fmt.Println(nsRwSet.KvRwSet.Reads)
 				//fmt.Println(nsRwSet.KvRwSet.Writes)
