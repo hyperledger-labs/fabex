@@ -31,12 +31,12 @@ func ReadStream(addr string, port string, startblock, endblock int64) error {
 			log.Println(err)
 			return err
 		}
-		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\na=%d\nb=%d\n", in.Blocknum, in.Hash, in.Txid, in.A, in.B)
+		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload=%s\n", in.Blocknum, in.Hash, in.Txid, in.Payload)
 	}
 
 	return nil
 }
 
 func main() {
-	ReadStream("0.0.0.0", "6000", 1, 5)
+	ReadStream("0.0.0.0", "6000", 1, 15)
 }

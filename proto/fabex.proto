@@ -15,6 +15,5 @@ message Reply {
     string txid = 1;
     string hash = 2;
     int64 blocknum = 3;
-    int64 a = 4;
-    int64 b = 5;
+    bytes payload = 4;
 }
