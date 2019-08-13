@@ -92,8 +92,7 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 					if err != nil {
 						return nil, err
 					}
-					//a, _ := binary.Varint(nsRwSet.KvRwSet.Writes[0].Value)
-					//b, _ := binary.Varint(nsRwSet.KvRwSet.Writes[1].Value)
+
 					tx := Tx{
 						hash,
 						blocknum,

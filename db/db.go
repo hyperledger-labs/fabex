@@ -128,6 +128,7 @@ func (db *DB) QueryBlockByHash(hash string) (*QueryResult, error) {
 
 func (db *DB) QueryAll() ([]QueryResult, error) {
 	arr := []QueryResult{}
+
 	query := fmt.Sprintf(`
         SELECT * FROM public.txs;`)
 	rows, err := db.Instance.Query(query)
