@@ -18,6 +18,9 @@ enroll user:
 create database and table for data saving:  
 `./fabex --task initdb --config ./config.yaml`
 
+save blocks data to db:
+`./fabex --task explore --config ./config.yaml`
+
 get transactions of specific block (chain operation):  
 `./fabex --task getblock --blocknum 14 --config ./config.yaml`
 
