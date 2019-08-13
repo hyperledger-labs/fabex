@@ -66,7 +66,7 @@ func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
 
 			if customBlock != nil {
 				for _, block := range customBlock.Txs {
-					log.Printf("\nBlock finded\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload:=%s\n", block.Blocknum, block.Hash, block.Txid, block.Payload)
+					//log.Printf("\nBlock finded\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload:=%s\n", block.Blocknum, block.Hash, block.Txid, block.Payload)
 					fab.Db.Insert(block.Txid, block.Hash, block.Blocknum, block.Payload)
 				}
 			}

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/binary"
+	"encoding/json"
 	"fabex/blockfetcher"
 	"fabex/db"
 	"fabex/helpers"
@@ -132,8 +134,21 @@ func main() {
 		}
 
 		if customBlock != nil {
+
+			var firstNetwork []models.FirstNetworkChaincode
+
 			for _, block := range customBlock.Txs {
-				fmt.Printf("\nBlock number: %d\nBlock hash: %s\nPayload=%s\n", block.Blocknum, block.Hash, block.Payload)
+
+				err = json.Unmarshal(block.Payload, &firstNetwork)
+				if err != nil {
+					log.Printf("Unmarshalling error: %s", err)
+				}
+
+				fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", block.Blocknum, block.Hash, block.Txid)
+				for _, val := range firstNetwork {
+					decoded, _ := binary.Varint(val.Value)
+					fmt.Printf("Key: %s,\nValue: %d\n", val.Key, decoded)
+				}
 			}
 		}
 
@@ -174,8 +189,22 @@ func main() {
 		if err != nil {
 			log.Fatalf("Can't query data: ", err)
 		}
+		log.Println(txs)
 		for _, tx := range txs {
-			fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload=%s\n", tx.Blocknum, tx.Blockhash, tx.Txid, tx.Payload)
+
+			var firstNetwork []models.FirstNetworkChaincode
+			log.Println(tx.Payload)
+			err = json.Unmarshal(tx.Payload, &firstNetwork)
+			if err != nil {
+				log.Printf("Unmarshalling error: %s", err)
+			}
+
+			fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", tx.Blocknum, tx.Blockhash, tx.Txid)
+			for _, val := range firstNetwork {
+				decoded, _ := binary.Varint(val.Value)
+				fmt.Printf("Key: %s,\nValue: %d\n", val.Key, decoded)
+			}
+
 		}
 
 	case "grpc":
