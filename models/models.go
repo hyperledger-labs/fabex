@@ -7,7 +7,7 @@ import (
 )
 
 type Fabex struct {
-	Db            *db.DB
+	Db            db.DbManager
 	ChannelClient *channel.Client
 	LedgerClient  *ledger.Client
 }
