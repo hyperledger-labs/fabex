@@ -29,7 +29,7 @@ get all transactions (db operation):
 
 ---
 
-You can choose PostgresSQL or MongoDB for data saving and retrieving with `--db flag`:       
+You can choose PostgresSQL or MongoDB for data saving and retrieving with `--db flag`:
 
 `./fabex --task getall --config ./config.yaml --db postgres`
 
@@ -37,7 +37,13 @@ You can choose PostgresSQL or MongoDB for data saving and retrieving with `--db 
 
 ---
 
-Or you can use GRPC client with example RPC call in client/client.go:
+Or you can use GRPC client with example RPC call in client/client.go.
+
+Start GRPC server:
+
+`./fabex --task grpc --config ./config.yaml`
+
+Execute request from client:
 
 `go run client.go`
 
