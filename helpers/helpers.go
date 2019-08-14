@@ -27,8 +27,9 @@ func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
 
 	//find txs from this block in db
 	tx, err := fab.Db.QueryBlockByHash(currentHash)
+
 	if err != nil {
-		if err.Error() != "sql: no rows in result set" {
+		if err.Error() != "sql: no rows in result set" && err.Error() != "mongo: no documents in result" {
 			return err
 		}
 	}

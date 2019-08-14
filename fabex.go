@@ -49,6 +49,7 @@ func main() {
 	profile := flag.String("profile", "./connection-profile.yaml", "path to connection profile")
 	grpcAddr := flag.String("grpcaddr", "0.0.0.0", "grpc server address")
 	grpcPort := flag.String("grpcport", "6000", "grpc server port")
+	databaseSelected := flag.String("db", "mongo", "select database (mongo or postgres)")
 
 	flag.Parse()
 
@@ -92,14 +93,22 @@ func main() {
 		fmt.Printf("Failed to create channel [%s]:", *channelName, err)
 	}
 
-	dbInstance := db.CreateDBConf(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
+	// choose database
+	var dbInstance db.DbManager
+	switch *databaseSelected {
+	case "mongo":
+		dbInstance = db.CreateDBConfMongo(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
+	case "postgres":
+		dbInstance = db.CreateDBConfPostgres(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
+	}
+
 	var fabex *models.Fabex
 	if *task != "initdb" {
 		err = dbInstance.Connect()
 		if err != nil {
 			log.Fatalln("DB connection failed:", err.Error())
 		}
-		log.Println("Connected to Postgres successfully")
+
 		fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}
 	} else {
 		fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}

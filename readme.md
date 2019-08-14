@@ -7,7 +7,7 @@ configure `config.yaml` and `connection-profile.yaml`
 
 start [fist network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network)
 
-install and start Postgres
+install and start PostgresSQL or MongoDB
 
 build:  
 `go build`
@@ -26,6 +26,14 @@ get transactions of specific block (chain operation):
 
 get all transactions (db operation):  
 `./fabex --task getblock --blocknum 15 --config ./config.yaml`
+
+---
+
+You can choose PostgresSQL or MongoDB for data saving and retrieving with `--db flag`:       
+
+`./fabex --task getall --config ./config.yaml --db postgres`
+
+`./fabex --task explore --config ./config.yaml --db mongo`
 
 ---
 
