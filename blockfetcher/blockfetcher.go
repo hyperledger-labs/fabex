@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/vadiminshakov/fabex/models"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
@@ -13,14 +14,7 @@ import (
 )
 
 type CustomBlock struct {
-	Txs []Tx
-}
-
-type Tx struct {
-	Hash     string
-	Blocknum uint64
-	Txid     string
-	Payload  []byte
+	Txs []models.Tx
 }
 
 func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error) {
@@ -78,7 +72,6 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 			}
 			bytesTxId, err := utils.GetOrComputeTxIDFromEnvelope(bytesEnvelope)
 			if err != nil {
-				//fmt.Printf("Can't extract tx id in bytes format: ", err)
 				return nil, err
 			}
 
@@ -87,13 +80,12 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 				// get only those txs that changes state
 				if len(nsRwSet.KvRwSet.Writes) != 0 {
 
-					//fmt.Println(nsRwSet.KvRwSet.Writes)
 					jsonPayload, err := json.Marshal(nsRwSet.KvRwSet.Writes)
 					if err != nil {
 						return nil, err
 					}
 
-					tx := Tx{
+					tx := models.Tx{
 						hash,
 						blocknum,
 						string(bytesTxId),
@@ -102,8 +94,6 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 					customBlock.Txs = append(customBlock.Txs, tx)
 
 				}
-				//fmt.Println(nsRwSet.KvRwSet.Reads)
-				//fmt.Println(nsRwSet.KvRwSet.Writes)
 			}
 		}
 	}

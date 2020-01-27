@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	pb "github.com/vadiminshakov/fabex/proto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -9,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"log"
 	"time"
+	"fmt"
 )
 
 type DBmongo struct {
@@ -68,6 +70,34 @@ func (db *DBmongo) QueryBlockByHash(hash string) (*QueryResult, error) {
 	}
 	// Do something with result...
 	return &QueryResult{result.Txid, result.Blockhash, result.Blocknum, result.Payload}, nil
+}
+
+func (db *DBmongo) GetByTxId(filter *pb.RequestFilter) ([]*QueryResult, error) {
+	collection := db.Instance.Database("blocks").Collection("txs")
+	filterOpts := bson.M{"Txid": filter.Txid}
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+
+	cur, err := collection.Find(ctx, filterOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cur.Close(ctx)
+
+	var results []*QueryResult
+	for cur.Next(ctx) {
+		var result *QueryResult
+		err := cur.Decode(&result)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+fmt.Println(results)
+	return results, nil
 }
 
 func (db *DBmongo) QueryAll() ([]QueryResult, error) {
