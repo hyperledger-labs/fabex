@@ -35,14 +35,14 @@ func ReadStream(addr string, port string, startblock, endblock int64) error {
 			return err
 		}
 		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload:\n", in.Blocknum, in.Hash, in.Txid)
-		var firstNetwork []models.FirstNetworkChaincode
-		err = json.Unmarshal(in.Payload, &firstNetwork)
+		var cc []models.Chaincode
+		err = json.Unmarshal(in.Payload, &cc)
 		if err != nil {
 			log.Printf("Unmarshalling error: %s", err)
 		}
-		for _, val := range firstNetwork {
-			decoded, _ := binary.Varint(in.Payload)
-			fmt.Printf("Key: %s,\nValue: %d\n", val.Key, decoded)
+		for _, val := range cc {
+
+			fmt.Printf("Key: %s\nValue: %v\n", val.Key, in.Payload)
 		}
 	}
 

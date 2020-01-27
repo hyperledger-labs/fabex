@@ -24,7 +24,7 @@ type Config struct {
 	DB Db `yaml:"Db"`
 }
 
-type FirstNetworkChaincode struct {
+type Chaincode struct {
 	Key   string `json:"key"`
 	Value []byte `json:"value"`
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/binary"
 	"encoding/json"
 	"fabex/blockfetcher"
 	"fabex/db"
@@ -26,20 +25,17 @@ import (
 )
 
 var (
-	cc          *string
-	user        *string
-	secret      *string
-	channelName *string
 	lvl         = logging.INFO
 )
 
 func main() {
 
 	// parse flags
-	cc = flag.String("cc", "mycc", "chaincode name")
-	user = flag.String("user", "admin", "user name")
-	secret = flag.String("secret", "adminpw", "user secret")
-	channelName = flag.String("channel", "mychannel", "channel name")
+	cc := flag.String("cc", "mycc", "chaincode name")
+	user := flag.String("user", "admin", "user name")
+	secret := flag.String("secret", "adminpw", "user secret")
+	org := flag.String("org", "rzd", "org to which identity belongs")
+	channelName := flag.String("channel", "mychannel", "channel name")
 	enrolluser := flag.Bool("enrolluser", false, "enroll user (true) or not (false)")
 	task := flag.String("task", "query", "choose the task to execute")
 	forever := flag.Bool("forever", false, "explore ledger forever")
@@ -81,7 +77,7 @@ func main() {
 		helpers.EnrollUser(sdk, *user, *secret)
 	}
 
-	clientChannelContext := sdk.ChannelContext(*channelName, fabsdk.WithUser(*user), fabsdk.WithOrg("Org1"))
+	clientChannelContext := sdk.ChannelContext(*channelName, fabsdk.WithUser(*user), fabsdk.WithOrg(*org))
 	ledgerClient, err := ledger.New(clientChannelContext)
 	if err != nil {
 		fmt.Printf("Failed to create channel [%s] client: %#v", *channelName, err)
@@ -144,19 +140,18 @@ func main() {
 
 		if customBlock != nil {
 
-			var firstNetwork []models.FirstNetworkChaincode
+			var cc []models.Chaincode
 
 			for _, block := range customBlock.Txs {
 
-				err = json.Unmarshal(block.Payload, &firstNetwork)
+				err = json.Unmarshal(block.Payload, &cc)
 				if err != nil {
 					log.Printf("Unmarshalling error: %s", err)
 				}
 
 				fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", block.Blocknum, block.Hash, block.Txid)
-				for _, val := range firstNetwork {
-					decoded, _ := binary.Varint(val.Value)
-					fmt.Printf("Key: %s,\nValue: %d\n", val.Key, decoded)
+				for _, val := range cc {
+					fmt.Printf("Key: %s\nValue: %v\n", val.Key, val.Value)
 				}
 			}
 		}
@@ -198,20 +193,19 @@ func main() {
 		if err != nil {
 			log.Fatalf("Can't query data: ", err)
 		}
-		log.Println(txs)
+
 		for _, tx := range txs {
 
-			var firstNetwork []models.FirstNetworkChaincode
+			var cc []models.Chaincode
 
-			err = json.Unmarshal(tx.Payload, &firstNetwork)
+			err = json.Unmarshal(tx.Payload, &cc)
 			if err != nil {
 				log.Printf("Unmarshalling error: %s", err)
 			}
 
 			fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", tx.Blocknum, tx.Blockhash, tx.Txid)
-			for _, val := range firstNetwork {
-				decoded, _ := binary.Varint(val.Value)
-				fmt.Printf("Key: %s,\nValue: %d\n", val.Key, decoded)
+			for _, val := range cc {
+				fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
 			}
 
 		}
