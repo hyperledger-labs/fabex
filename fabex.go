@@ -2,11 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fabex/blockfetcher"
-	"fabex/db"
-	"fabex/helpers"
-	"fabex/models"
-	pb "fabex/proto"
 	"flag"
 	"fmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
@@ -14,9 +9,13 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
+	"github.com/spf13/viper"
+	"github.com/vadiminshakov/fabex/blockfetcher"
+	"github.com/vadiminshakov/fabex/db"
+	"github.com/vadiminshakov/fabex/helpers"
+	"github.com/vadiminshakov/fabex/models"
+	pb "github.com/vadiminshakov/fabex/proto"
 	"google.golang.org/grpc"
-	yaml "gopkg.in/yaml.v2"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -25,46 +24,45 @@ import (
 )
 
 var (
-	lvl         = logging.INFO
+	lvl          = logging.INFO
+	globalConfig models.Config
 )
 
 func main() {
 
 	// parse flags
-	cc := flag.String("cc", "mycc", "chaincode name")
-	user := flag.String("user", "admin", "user name")
-	secret := flag.String("secret", "adminpw", "user secret")
-	org := flag.String("org", "rzd", "org to which identity belongs")
-	channelName := flag.String("channel", "mychannel", "channel name")
 	enrolluser := flag.Bool("enrolluser", false, "enroll user (true) or not (false)")
 	task := flag.String("task", "query", "choose the task to execute")
 	forever := flag.Bool("forever", false, "explore ledger forever")
 	interval := flag.String("interval", "1s", "time interval for exploring blocks in forever mode (1s, 1h, etc)")
 	blocknum := flag.Uint64("blocknum", 0, "block number")
-	confpath := flag.String("config", "./config.yaml", "path to YAML config")
-	profile := flag.String("profile", "./connection-profile.yaml", "path to connection profile")
-	grpcAddr := flag.String("grpcaddr", "0.0.0.0", "grpc server address")
-	grpcPort := flag.String("grpcport", "6000", "grpc server port")
+	confpath := flag.String("configpath", "./", "path to YAML config")
+	confname := flag.String("configname", "config", "name of YAML config")
 	databaseSelected := flag.String("db", "mongo", "select database (mongo or postgres)")
 
 	flag.Parse()
 
 	// read config
-	data, err := ioutil.ReadFile(*confpath)
+	viper.SetConfigName(*confname)
+	viper.AddConfigPath(*confpath)
+	viper.SetConfigType("yaml")
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("Error reading config file, %s", err)
+	}
+
+	err := viper.Unmarshal(&globalConfig)
+	if err != nil {
+		log.Fatalf("unable to decode into struct, %v", err)
+	}
+
 	if err != nil {
 		log.Println("Reading file error: ")
 		return
 	}
 
-	var globalConfig models.Config
-	err = yaml.Unmarshal([]byte(data), &globalConfig)
-	if err != nil {
-		log.Println("Unmarshalling error: ")
-		return
-	}
-
 	fmt.Println("Reading connection profile..")
-	c := config.FromFile(*profile)
+	c := config.FromFile(globalConfig.Fabric.ConnectionProfile)
 	sdk, err := fabsdk.New(c)
 	if err != nil {
 		fmt.Printf("Failed to create new SDK: %s\n", err)
@@ -74,19 +72,19 @@ func main() {
 
 	helpers.SetupLogLevel(lvl)
 	if *enrolluser {
-		helpers.EnrollUser(sdk, *user, *secret)
+		helpers.EnrollUser(sdk, globalConfig.Fabric.User, globalConfig.Fabric.Secret)
 	}
 
-	clientChannelContext := sdk.ChannelContext(*channelName, fabsdk.WithUser(*user), fabsdk.WithOrg(*org))
+	clientChannelContext := sdk.ChannelContext(globalConfig.Fabric.Channel, fabsdk.WithUser(globalConfig.Fabric.User), fabsdk.WithOrg(globalConfig.Fabric.Org))
 	ledgerClient, err := ledger.New(clientChannelContext)
 	if err != nil {
-		fmt.Printf("Failed to create channel [%s] client: %#v", *channelName, err)
+		fmt.Printf("Failed to create channel [%s] client: %#v", globalConfig.Fabric.Channel, err)
 		os.Exit(1)
 	}
 
 	channelclient, err := channel.New(clientChannelContext)
 	if err != nil {
-		fmt.Printf("Failed to create channel [%s]:", *channelName, err)
+		fmt.Printf("Failed to create channel [%s]:", globalConfig.Fabric.Channel, err)
 	}
 
 	// choose database
@@ -104,11 +102,9 @@ func main() {
 		if err != nil {
 			log.Fatalln("DB connection failed:", err.Error())
 		}
-
-		fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}
-	} else {
-		fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}
 	}
+	fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}
+
 	switch *task {
 	case "initdb":
 		err = fabex.Db.Init()
@@ -117,10 +113,7 @@ func main() {
 			return
 		}
 		log.Println("Database and table created successfully")
-	case "invoke":
-		helpers.InvokeCC(fabex.ChannelClient, "a", "b", "30")
-	case "query":
-		helpers.QueryCC(fabex.ChannelClient, []byte("b"), *cc)
+
 	case "channelinfo":
 		resp, err := helpers.QueryChannelInfo(fabex.LedgerClient)
 		if err != nil {
@@ -129,6 +122,7 @@ func main() {
 		fmt.Println("BlockChainInfo:", resp.BCI)
 		fmt.Println("Endorser:", resp.Endorser)
 		fmt.Println("Status:", resp.Status)
+
 	case "channelconfig":
 		helpers.QueryChannelConfig(fabex.LedgerClient)
 
@@ -139,9 +133,7 @@ func main() {
 		}
 
 		if customBlock != nil {
-
 			var cc []models.Chaincode
-
 			for _, block := range customBlock.Txs {
 
 				err = json.Unmarshal(block.Payload, &cc)
@@ -151,8 +143,9 @@ func main() {
 
 				fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", block.Blocknum, block.Hash, block.Txid)
 				for _, val := range cc {
-					fmt.Printf("Key: %s\nValue: %v\n", val.Key, val.Value)
+					fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
 				}
+
 			}
 		}
 
@@ -188,6 +181,7 @@ func main() {
 			wg.Wait()
 			log.Println("All blocks saved")
 		}
+
 	case "getall":
 		txs, err := fabex.Db.QueryAll()
 		if err != nil {
@@ -211,7 +205,7 @@ func main() {
 		}
 
 	case "grpc":
-		serv := NewFabexServer(*grpcAddr, *grpcPort, fabex)
+		serv := NewFabexServer(globalConfig.GRPCServer.Host, globalConfig.GRPCServer.Port, fabex)
 		StartGrpcServ(serv)
 	}
 }
@@ -226,7 +220,7 @@ func NewFabexServer(addr string, port string, conf *models.Fabex) *fabexServer {
 	return &fabexServer{addr, port, conf}
 }
 
-func (s *fabexServer) Explore(req *pb.Request, stream pb.Fabex_ExploreServer) error {
+func (s *fabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServer) error {
 	log.Printf("Start stream from %d block", req.Startblock)
 	// set blocks counter to latest saved in db block number value
 	var blockCounter uint64 = uint64(req.Startblock)
@@ -246,6 +240,20 @@ func (s *fabexServer) Explore(req *pb.Request, stream pb.Fabex_ExploreServer) er
 		}
 		blockCounter++
 	}
+	log.Println("Stream closed")
+	return nil
+}
+
+func (s *fabexServer) GetByTxId(req *pb.RequestFilter, stream pb.Fabex_GetByTxIdServer) error {
+	QueryResults, err := s.Conf.Db.GetByTxId(req)
+	if err != nil {
+		return err
+	}
+
+	for _, queryResult := range QueryResults {
+		stream.Send(&pb.Reply{Txid: queryResult.Txid})
+	}
+
 	log.Println("Stream closed")
 	return nil
 }

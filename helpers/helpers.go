@@ -2,16 +2,14 @@ package helpers
 
 import (
 	"encoding/hex"
-	"fabex/blockfetcher"
-	"fabex/models"
 	"fmt"
-	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
-	"github.com/hyperledger/fabric-sdk-go/pkg/client/resmgmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
+	"github.com/vadiminshakov/fabex/blockfetcher"
+	"github.com/vadiminshakov/fabex/models"
 	"log"
 	"sync"
 )
@@ -76,54 +74,6 @@ func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
 	}
 	wg.Done()
 	return nil
-}
-
-func QueryInstalledCC(sdk *fabsdk.FabricSDK, user string) {
-	userContext := sdk.Context(fabsdk.WithUser(user))
-
-	resClient, err := resmgmt.New(userContext)
-	if err != nil {
-		fmt.Println("Failed to create resmgmt: ", err)
-	}
-
-	resp2, err := resClient.QueryInstalledChaincodes()
-	if err != nil {
-		fmt.Println("Failed to query installed cc: ", err)
-	}
-	fmt.Println("Installed cc: ", resp2.GetChaincodes())
-}
-
-func QueryCC(client *channel.Client, name []byte, chaincodeId string) string {
-	var queryArgs = [][]byte{name}
-	response, err := client.Query(channel.Request{
-		ChaincodeID: chaincodeId,
-		Fcn:         "query",
-		Args:        queryArgs,
-	}, channel.WithTargetEndpoints("grpcs://localhost:7051"))
-
-	if err != nil {
-		fmt.Println("Failed to query: ", err)
-	}
-
-	ret := string(response.Payload)
-	fmt.Println("Chaincode status: ", response.ChaincodeStatus)
-	fmt.Println("Payload: ", ret)
-	return ret
-}
-
-func InvokeCC(client *channel.Client, chaincodeId string, args ...string) {
-	fmt.Println("Invoke cc with new value:", args)
-	invokeArgs := [][]byte{[]byte(args[0]), []byte(args[1]), []byte(args[2])}
-
-	_, err := client.Execute(channel.Request{
-		ChaincodeID: chaincodeId,
-		Fcn:         "invoke",
-		Args:        invokeArgs,
-	})
-
-	if err != nil {
-		fmt.Printf("Failed to invoke: %+v\n", err)
-	}
 }
 
 func EnrollUser(sdk *fabsdk.FabricSDK, user, secret string) {

@@ -1,6 +1,17 @@
+Fabric:
+  user: admin
+  secret: adminpw
+  org: orgname
+  channel: wheelsets
+  connectionProfile: /home/user/config-dev-2orgs.yaml
+
 Db:
   host: localhost
   port: 5432
   dbuser: postgres
   dbsecret: 1
   dbname: txs
+
+GRPCServer:
+  host: localhost
+  port: 6000
