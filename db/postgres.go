@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
+	pb "github.com/vadiminshakov/fabex/proto"
 	"log"
 )
 
@@ -152,4 +153,9 @@ func (db *DB) QueryAll() ([]QueryResult, error) {
 	}
 
 	return arr, nil
+}
+
+// dummy stub
+func (db *DB) GetByTxId(filter *pb.RequestFilter) ([]*QueryResult, error) {
+	return nil, nil
 }

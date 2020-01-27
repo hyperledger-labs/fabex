@@ -1,10 +1,13 @@
 package db
 
+import pb "github.com/vadiminshakov/fabex/proto"
+
 type DbManager interface {
 	Connect() error
 	Init() error
 	Insert(txid, blockhash string, blocknum uint64, payload []byte) error
 	QueryBlockByHash(hash string) (*QueryResult, error)
+	GetByTxId(filter *pb.RequestFilter) ([]*QueryResult, error)
 	QueryAll() ([]QueryResult, error)
 }
 

@@ -1,26 +1,37 @@
 package main
 
 import (
-	"encoding/binary"
 	"encoding/json"
-	"fabex/models"
-	pb "fabex/proto"
 	"fmt"
+	"github.com/vadiminshakov/fabex/models"
+	pb "github.com/vadiminshakov/fabex/proto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io"
 	"log"
 )
 
-func ReadStream(addr string, port string, startblock, endblock int64) error {
+var (
+	client pb.FabexClient
+	addr = "0.0.0.0"
+	port = "6000"
+)
+
+func init() {
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", addr, port), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("failed to connect: %s", err)
 	}
-	defer conn.Close()
 
-	client := pb.NewFabexClient(conn)
-	stream, err := client.Explore(context.Background(), &pb.Request{Startblock: startblock, Endblock: endblock})
+	client = pb.NewFabexClient(conn)
+}
+
+func ReadStream(startblock, endblock int) error {
+
+	stream, err := client.Explore(context.Background(), &pb.RequestRange{Startblock: int64(startblock), Endblock: int64(endblock)})
+	if err != nil {
+		return err
+	}
 
 	log.Println("Started stream")
 
@@ -42,7 +53,41 @@ func ReadStream(addr string, port string, startblock, endblock int64) error {
 		}
 		for _, val := range cc {
 
-			fmt.Printf("Key: %s\nValue: %v\n", val.Key, in.Payload)
+			fmt.Printf("Key: %s\nValue: %s\n", val.Key, in.Payload)
+		}
+	}
+
+	return nil
+}
+
+func GetByTxId(filter *pb.RequestFilter) error {
+
+	stream, err := client.GetByTxId(context.Background(), filter)
+	if err != nil {
+		return err
+	}
+
+	log.Println("Started stream")
+
+	for {
+		in, err := stream.Recv()
+		log.Println("Received value")
+		if err == io.EOF {
+			log.Println("Steam is empty")
+		}
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload:\n", in.Blocknum, in.Hash, in.Txid)
+		var cc []models.Chaincode
+		err = json.Unmarshal(in.Payload, &cc)
+		if err != nil {
+			log.Printf("Unmarshalling error: %s", err)
+		}
+		for _, val := range cc {
+
+			fmt.Printf("Key: %s\nValue: %s\n", val.Key, in.Payload)
 		}
 	}
 
@@ -50,5 +95,8 @@ func ReadStream(addr string, port string, startblock, endblock int64) error {
 }
 
 func main() {
-	ReadStream("0.0.0.0", "6000", 1, 15)
+	//ReadStream(1, 15)
+	err := GetByTxId(&pb.RequestFilter{Blocknum:2})
+	if err != nil { log.Fatal(err) }
+
 }

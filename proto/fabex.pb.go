@@ -24,7 +24,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type Request struct {
+type RequestRange struct {
 	Startblock           int64    `protobuf:"varint,1,opt,name=startblock,proto3" json:"startblock,omitempty"`
 	Endblock             int64    `protobuf:"varint,2,opt,name=endblock,proto3" json:"endblock,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -32,39 +32,39 @@ type Request struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *Request) Reset()         { *m = Request{} }
-func (m *Request) String() string { return proto.CompactTextString(m) }
-func (*Request) ProtoMessage()    {}
-func (*Request) Descriptor() ([]byte, []int) {
+func (m *RequestRange) Reset()         { *m = RequestRange{} }
+func (m *RequestRange) String() string { return proto.CompactTextString(m) }
+func (*RequestRange) ProtoMessage()    {}
+func (*RequestRange) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d7d7206373264ff4, []int{0}
 }
 
-func (m *Request) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Request.Unmarshal(m, b)
+func (m *RequestRange) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RequestRange.Unmarshal(m, b)
 }
-func (m *Request) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Request.Marshal(b, m, deterministic)
+func (m *RequestRange) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RequestRange.Marshal(b, m, deterministic)
 }
-func (m *Request) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Request.Merge(m, src)
+func (m *RequestRange) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RequestRange.Merge(m, src)
 }
-func (m *Request) XXX_Size() int {
-	return xxx_messageInfo_Request.Size(m)
+func (m *RequestRange) XXX_Size() int {
+	return xxx_messageInfo_RequestRange.Size(m)
 }
-func (m *Request) XXX_DiscardUnknown() {
-	xxx_messageInfo_Request.DiscardUnknown(m)
+func (m *RequestRange) XXX_DiscardUnknown() {
+	xxx_messageInfo_RequestRange.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_Request proto.InternalMessageInfo
+var xxx_messageInfo_RequestRange proto.InternalMessageInfo
 
-func (m *Request) GetStartblock() int64 {
+func (m *RequestRange) GetStartblock() int64 {
 	if m != nil {
 		return m.Startblock
 	}
 	return 0
 }
 
-func (m *Request) GetEndblock() int64 {
+func (m *RequestRange) GetEndblock() int64 {
 	if m != nil {
 		return m.Endblock
 	}
@@ -134,28 +134,94 @@ func (m *Reply) GetPayload() []byte {
 	return nil
 }
 
+type RequestFilter struct {
+	Txid                 string   `protobuf:"bytes,1,opt,name=txid,proto3" json:"txid,omitempty"`
+	Hash                 string   `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash,omitempty"`
+	Blocknum             int64    `protobuf:"varint,3,opt,name=blocknum,proto3" json:"blocknum,omitempty"`
+	Payload              []byte   `protobuf:"bytes,4,opt,name=payload,proto3" json:"payload,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *RequestFilter) Reset()         { *m = RequestFilter{} }
+func (m *RequestFilter) String() string { return proto.CompactTextString(m) }
+func (*RequestFilter) ProtoMessage()    {}
+func (*RequestFilter) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d7d7206373264ff4, []int{2}
+}
+
+func (m *RequestFilter) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RequestFilter.Unmarshal(m, b)
+}
+func (m *RequestFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RequestFilter.Marshal(b, m, deterministic)
+}
+func (m *RequestFilter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RequestFilter.Merge(m, src)
+}
+func (m *RequestFilter) XXX_Size() int {
+	return xxx_messageInfo_RequestFilter.Size(m)
+}
+func (m *RequestFilter) XXX_DiscardUnknown() {
+	xxx_messageInfo_RequestFilter.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RequestFilter proto.InternalMessageInfo
+
+func (m *RequestFilter) GetTxid() string {
+	if m != nil {
+		return m.Txid
+	}
+	return ""
+}
+
+func (m *RequestFilter) GetHash() string {
+	if m != nil {
+		return m.Hash
+	}
+	return ""
+}
+
+func (m *RequestFilter) GetBlocknum() int64 {
+	if m != nil {
+		return m.Blocknum
+	}
+	return 0
+}
+
+func (m *RequestFilter) GetPayload() []byte {
+	if m != nil {
+		return m.Payload
+	}
+	return nil
+}
+
 func init() {
-	proto.RegisterType((*Request)(nil), "fabex.Request")
+	proto.RegisterType((*RequestRange)(nil), "fabex.RequestRange")
 	proto.RegisterType((*Reply)(nil), "fabex.Reply")
+	proto.RegisterType((*RequestFilter)(nil), "fabex.RequestFilter")
 }
 
 func init() { proto.RegisterFile("fabex.proto", fileDescriptor_d7d7206373264ff4) }
 
 var fileDescriptor_d7d7206373264ff4 = []byte{
-	// 196 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x4c, 0x8f, 0xc1, 0x8a, 0x83, 0x40,
-	0x10, 0x44, 0x77, 0x56, 0x5d, 0xd7, 0x5e, 0xd9, 0x43, 0x9f, 0x06, 0x0f, 0x8b, 0x78, 0x12, 0x16,
-	0x24, 0x24, 0xf9, 0x05, 0xf3, 0x01, 0xf3, 0x07, 0x63, 0x9c, 0x60, 0xc8, 0xc4, 0x99, 0xe8, 0x08,
-	0xfa, 0xf7, 0xc1, 0x36, 0x4a, 0x6e, 0xfd, 0xaa, 0xa8, 0xa2, 0x0b, 0x7e, 0x2e, 0xb2, 0x52, 0x63,
-	0x61, 0x3b, 0xe3, 0x0c, 0x06, 0x04, 0x59, 0x09, 0xa1, 0x50, 0x8f, 0x41, 0xf5, 0x0e, 0xff, 0x00,
-	0x7a, 0x27, 0x3b, 0x57, 0x69, 0x73, 0xbe, 0x71, 0x96, 0xb2, 0xdc, 0x13, 0x6f, 0x0a, 0x26, 0xf0,
-	0xad, 0xda, 0x7a, 0x71, 0x3f, 0xc9, 0xdd, 0x38, 0x53, 0x10, 0x08, 0x65, 0xf5, 0x84, 0x08, 0xbe,
-	0x1b, 0xaf, 0x35, 0xc5, 0x23, 0x41, 0xf7, 0xac, 0x35, 0xb2, 0x6f, 0x28, 0x14, 0x09, 0xba, 0xe7,
-	0x32, 0x4a, 0xb6, 0xc3, 0x9d, 0x7b, 0x4b, 0xd9, 0xca, 0xc8, 0x21, 0xb4, 0x72, 0xd2, 0x46, 0xd6,
-	0xdc, 0x4f, 0x59, 0x1e, 0x8b, 0x15, 0xf7, 0x47, 0x08, 0x4e, 0xf3, 0xdb, 0xf8, 0x0f, 0x61, 0x39,
-	0x5a, 0x6d, 0x3a, 0x85, 0xbf, 0xc5, 0x32, 0xeb, 0x35, 0x23, 0x89, 0x37, 0xb6, 0x7a, 0xca, 0x3e,
-	0x76, 0xac, 0xfa, 0xa2, 0xc5, 0x87, 0x67, 0x00, 0x00, 0x00, 0xff, 0xff, 0x60, 0x8f, 0x30, 0x5d,
-	0x00, 0x01, 0x00, 0x00,
+	// 234 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x91, 0xcd, 0x4e, 0xc3, 0x30,
+	0x10, 0x84, 0x15, 0xda, 0x50, 0xb2, 0x84, 0xcb, 0xc2, 0x21, 0xea, 0x01, 0x55, 0x39, 0xf5, 0x14,
+	0xf1, 0xf3, 0x06, 0x48, 0x14, 0xc1, 0xd1, 0xe2, 0x05, 0x1c, 0xbc, 0xd0, 0x82, 0x1b, 0x1b, 0xc7,
+	0x95, 0xec, 0xb7, 0x47, 0x59, 0xd3, 0x2a, 0x70, 0xef, 0x6d, 0x67, 0x56, 0xdf, 0x7a, 0x34, 0x86,
+	0xf3, 0x77, 0xd9, 0x52, 0x68, 0xac, 0x33, 0xde, 0x60, 0xce, 0xa2, 0x7e, 0x81, 0x52, 0xd0, 0xf7,
+	0x8e, 0x7a, 0x2f, 0x64, 0xf7, 0x41, 0x78, 0x0d, 0xd0, 0x7b, 0xe9, 0x7c, 0xab, 0xcd, 0xdb, 0x57,
+	0x95, 0x2d, 0xb2, 0xe5, 0x44, 0x8c, 0x1c, 0x9c, 0xc3, 0x19, 0x75, 0x2a, 0x6d, 0x4f, 0x78, 0x7b,
+	0xd0, 0x35, 0x41, 0x2e, 0xc8, 0xea, 0x88, 0x08, 0x53, 0x1f, 0x36, 0x8a, 0xf1, 0x42, 0xf0, 0x3c,
+	0x78, 0x6b, 0xd9, 0xaf, 0x19, 0x2a, 0x04, 0xcf, 0xc3, 0x31, 0x26, 0xbb, 0xdd, 0xb6, 0x9a, 0xa4,
+	0x63, 0x7b, 0x8d, 0x15, 0xcc, 0xac, 0x8c, 0xda, 0x48, 0x55, 0x4d, 0x17, 0xd9, 0xb2, 0x14, 0x7b,
+	0x59, 0x6f, 0xe1, 0xe2, 0x37, 0xf2, 0x6a, 0xa3, 0x3d, 0xb9, 0xe3, 0x3e, 0x77, 0xf7, 0x09, 0xf9,
+	0x6a, 0xa8, 0x0a, 0x1b, 0x98, 0x3d, 0x06, 0xab, 0x8d, 0x23, 0xbc, 0x6c, 0x52, 0x95, 0xe3, 0xea,
+	0xe6, 0xe5, 0xc1, 0xb4, 0x3a, 0xde, 0x64, 0x78, 0x0b, 0xc5, 0x13, 0xf9, 0x87, 0xf8, 0x1a, 0x9e,
+	0x15, 0x5e, 0xfd, 0x25, 0x52, 0xf2, 0xff, 0x48, 0x7b, 0xca, 0x7f, 0x73, 0xff, 0x13, 0x00, 0x00,
+	0xff, 0xff, 0xc2, 0x1f, 0x07, 0xdb, 0xaa, 0x01, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -170,7 +236,8 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type FabexClient interface {
-	Explore(ctx context.Context, in *Request, opts ...grpc.CallOption) (Fabex_ExploreClient, error)
+	Explore(ctx context.Context, in *RequestRange, opts ...grpc.CallOption) (Fabex_ExploreClient, error)
+	GetByTxId(ctx context.Context, in *RequestFilter, opts ...grpc.CallOption) (Fabex_GetByTxIdClient, error)
 }
 
 type fabexClient struct {
@@ -181,7 +248,7 @@ func NewFabexClient(cc *grpc.ClientConn) FabexClient {
 	return &fabexClient{cc}
 }
 
-func (c *fabexClient) Explore(ctx context.Context, in *Request, opts ...grpc.CallOption) (Fabex_ExploreClient, error) {
+func (c *fabexClient) Explore(ctx context.Context, in *RequestRange, opts ...grpc.CallOption) (Fabex_ExploreClient, error) {
 	stream, err := c.cc.NewStream(ctx, &_Fabex_serviceDesc.Streams[0], "/fabex.Fabex/Explore", opts...)
 	if err != nil {
 		return nil, err
@@ -213,17 +280,53 @@ func (x *fabexExploreClient) Recv() (*Reply, error) {
 	return m, nil
 }
 
+func (c *fabexClient) GetByTxId(ctx context.Context, in *RequestFilter, opts ...grpc.CallOption) (Fabex_GetByTxIdClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Fabex_serviceDesc.Streams[1], "/fabex.Fabex/GetByTxId", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &fabexGetByTxIdClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Fabex_GetByTxIdClient interface {
+	Recv() (*Reply, error)
+	grpc.ClientStream
+}
+
+type fabexGetByTxIdClient struct {
+	grpc.ClientStream
+}
+
+func (x *fabexGetByTxIdClient) Recv() (*Reply, error) {
+	m := new(Reply)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // FabexServer is the server API for Fabex service.
 type FabexServer interface {
-	Explore(*Request, Fabex_ExploreServer) error
+	Explore(*RequestRange, Fabex_ExploreServer) error
+	GetByTxId(*RequestFilter, Fabex_GetByTxIdServer) error
 }
 
 // UnimplementedFabexServer can be embedded to have forward compatible implementations.
 type UnimplementedFabexServer struct {
 }
 
-func (*UnimplementedFabexServer) Explore(req *Request, srv Fabex_ExploreServer) error {
+func (*UnimplementedFabexServer) Explore(req *RequestRange, srv Fabex_ExploreServer) error {
 	return status.Errorf(codes.Unimplemented, "method Explore not implemented")
+}
+func (*UnimplementedFabexServer) GetByTxId(req *RequestFilter, srv Fabex_GetByTxIdServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetByTxId not implemented")
 }
 
 func RegisterFabexServer(s *grpc.Server, srv FabexServer) {
@@ -231,7 +334,7 @@ func RegisterFabexServer(s *grpc.Server, srv FabexServer) {
 }
 
 func _Fabex_Explore_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Request)
+	m := new(RequestRange)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
@@ -251,6 +354,27 @@ func (x *fabexExploreServer) Send(m *Reply) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Fabex_GetByTxId_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RequestFilter)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(FabexServer).GetByTxId(m, &fabexGetByTxIdServer{stream})
+}
+
+type Fabex_GetByTxIdServer interface {
+	Send(*Reply) error
+	grpc.ServerStream
+}
+
+type fabexGetByTxIdServer struct {
+	grpc.ServerStream
+}
+
+func (x *fabexGetByTxIdServer) Send(m *Reply) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 var _Fabex_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "fabex.Fabex",
 	HandlerType: (*FabexServer)(nil),
@@ -259,6 +383,11 @@ var _Fabex_serviceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "Explore",
 			Handler:       _Fabex_Explore_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetByTxId",
+			Handler:       _Fabex_GetByTxId_Handler,
 			ServerStreams: true,
 		},
 	},
