@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/vadiminshakov/fabex/blockfetcher"
 	pb "github.com/vadiminshakov/fabex/proto"
 	"golang.org/x/net/context"
@@ -14,8 +13,8 @@ import (
 
 var (
 	client pb.FabexClient
-	addr = "0.0.0.0"
-	port = "6000"
+	addr   = "0.0.0.0"
+	port   = "6000"
 )
 
 func init() {
@@ -27,7 +26,7 @@ func init() {
 	client = pb.NewFabexClient(conn)
 }
 
-func ReadStream(startblock, endblock int) error {
+func Explore(startblock, endblock int) error {
 
 	stream, err := client.Explore(context.Background(), &pb.RequestRange{Startblock: int64(startblock), Endblock: int64(endblock)})
 	if err != nil {
@@ -38,24 +37,15 @@ func ReadStream(startblock, endblock int) error {
 
 	for {
 		in, err := stream.Recv()
-		log.Println("Received value")
 		if err == io.EOF {
 			log.Println("Steam is empty")
+			return nil
 		}
 		if err != nil {
 			log.Println(err)
 			return err
 		}
-		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload:\n", in.Blocknum, in.Hash, in.Txid)
-		var cc []blockfetcher.Chaincode
-		err = json.Unmarshal(in.Payload, &cc)
-		if err != nil {
-			log.Printf("Unmarshalling error: %s", err)
-		}
-		for _, val := range cc {
-
-			fmt.Printf("Key: %s\nValue: %s\n", val.Key, in.Payload)
-		}
+		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload: %s\n", in.Blocknum, in.Hash, in.Txid, in.Payload)
 	}
 
 	return nil
@@ -72,24 +62,14 @@ func GetByTxId(filter *pb.RequestFilter) error {
 
 	for {
 		in, err := stream.Recv()
-		log.Println("Received value")
 		if err == io.EOF {
 			log.Println("Steam is empty")
+			return nil
 		}
 		if err != nil {
-			log.Println(err)
 			return err
 		}
-		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload:\n", in.Blocknum, in.Hash, in.Txid)
-		var cc []blockfetcher.Chaincode
-		err = json.Unmarshal(in.Payload, &cc)
-		if err != nil {
-			log.Printf("Unmarshalling error: %s", err)
-		}
-		for _, val := range cc {
-
-			fmt.Printf("Key: %s\nValue: %s\n", val.Key, in.Payload)
-		}
+		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload: %s\n", in.Blocknum, in.Hash, in.Txid, in.Payload)
 	}
 
 	return nil
@@ -113,8 +93,16 @@ func GetByBlocknum(filter *pb.RequestFilter) error {
 		if err != nil {
 			return err
 		}
-		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload: %s\n", in.Blocknum, in.Hash, in.Txid, in.Payload)
+		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\n", in.Blocknum, in.Hash, in.Txid)
 
+		var ccData []blockfetcher.Chaincode
+		err = json.Unmarshal(in.Payload, &ccData)
+		if err != nil {
+			return err
+		}
+		for _, item := range ccData {
+			log.Printf("Key:%s\nValue:%s\n", item.Key, item.Value)
+		}
 
 	}
 
@@ -122,9 +110,10 @@ func GetByBlocknum(filter *pb.RequestFilter) error {
 }
 
 func main() {
-	//ReadStream(1, 15)
-	//err := GetByTxId(&pb.RequestFilter{TxId:2})
-	err := GetByBlocknum(&pb.RequestFilter{Blocknum:2})
-	if err != nil { log.Fatal(err) }
-
+	//Explore(1, 15)
+	//err := GetByTxId(&pb.RequestFilter{Txid:"bc328c08161602fe2267f208b6df18efdc703d12bfc28caa9b12a9085c6ac878"})
+	err := GetByBlocknum(&pb.RequestFilter{Blocknum: 2})
+	if err != nil {
+		log.Fatal(err)
+	}
 }

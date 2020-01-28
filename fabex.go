@@ -55,11 +55,6 @@ func main() {
 		log.Fatalf("unable to decode into struct, %v", err)
 	}
 
-	if err != nil {
-		log.Println("Reading file error: ")
-		return
-	}
-
 	fmt.Println("Reading connection profile..")
 	c := config.FromFile(globalConfig.Fabric.ConnectionProfile)
 	sdk, err := fabsdk.New(c)
@@ -83,14 +78,14 @@ func main() {
 
 	channelclient, err := channel.New(clientChannelContext)
 	if err != nil {
-		fmt.Printf("Failed to create channel [%s]:", globalConfig.Fabric.Channel, err)
+		fmt.Printf("Failed to create channel [%s], error: %s", globalConfig.Fabric.Channel, err)
 	}
 
 	// choose database
 	var dbInstance db.DbManager
 	switch *databaseSelected {
 	case "mongo":
-		dbInstance = db.CreateDBConfMongo(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
+		dbInstance = db.CreateDBConfMongo(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname, globalConfig.DB.Collection)
 	case "postgres":
 		dbInstance = db.CreateDBConfPostgres(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
 	}
@@ -184,7 +179,7 @@ func main() {
 	case "getall":
 		txs, err := fabex.Db.QueryAll()
 		if err != nil {
-			log.Fatalf("Can't query data: ", err)
+			log.Fatal("Can't query data: ", err)
 		}
 
 		for _, tx := range txs {
