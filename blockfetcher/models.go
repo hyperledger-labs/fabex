@@ -1,4 +1,4 @@
-package models
+package blockfetcher
 
 import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
@@ -42,25 +42,4 @@ type Config struct {
 type Chaincode struct {
 	Key   string `json:"key"`
 	Value []byte `json:"value"`
-}
-
-type Tx struct {
-	Hash     string
-	Blocknum uint64
-	Txid     string
-	Payload  []byte
-}
-
-type QueryResult struct {
-	Txid      string `json:"txid"`
-	Blockhash string `json:"blockhash"`
-	Blocknum  uint64 `json:"blocknum"`
-	Payload   []byte `json:"payload"`
-}
-
-type QueryResultMongo struct {
-	Txid      string                       `json:"txid"`
-	Blockhash string                       `json:"blockhash"`
-	Blocknum  map[string]uint64            `json:"blocknum"`
-	Payload   map[string]map[string]string `json:"payload"`
 }

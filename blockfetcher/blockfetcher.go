@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/vadiminshakov/fabex/models"
+	"github.com/vadiminshakov/fabex/db"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
@@ -14,7 +14,7 @@ import (
 )
 
 type CustomBlock struct {
-	Txs []models.Tx
+	Txs []db.Tx
 }
 
 func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error) {
@@ -85,10 +85,10 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 						return nil, err
 					}
 
-					tx := models.Tx{
+					tx := db.Tx{
+						string(bytesTxId),
 						hash,
 						blocknum,
-						string(bytesTxId),
 						jsonPayload,
 					}
 					customBlock.Txs = append(customBlock.Txs, tx)
