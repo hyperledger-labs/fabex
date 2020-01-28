@@ -13,20 +13,21 @@ import (
 )
 
 type DBmongo struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	DBname   string
-	Instance *mongo.Client
+	Host       string
+	Port       int
+	User       string
+	Password   string
+	DBname     string
+	Collection string
+	Instance   *mongo.Client
 }
 
-func CreateDBConfMongo(host string, port int, user, password, dbname string) *DBmongo {
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+func CreateDBConfMongo(host string, port int, user, password, dbname, collection string) *DBmongo {
+	client, err := mongo.NewClient(options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%d", host, port)))
 	if err != nil {
 		log.Fatalf("Mongodb client creation failed: %s", err)
 	}
-	return &DBmongo{host, port, user, password, dbname, client}
+	return &DBmongo{host, port, user, password, dbname, collection, client}
 }
 func (db *DBmongo) Init() error {
 	return nil
@@ -47,7 +48,7 @@ func (db *DBmongo) Connect() error {
 }
 
 func (db *DBmongo) Insert(txid, blockhash string, blocknum uint64, payload []byte) error {
-	collection := db.Instance.Database("blocks").Collection("txs")
+	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	res, err := collection.InsertOne(ctx, bson.M{"Txid": txid, "Blockhash": blockhash, "Blocknum": blocknum, "Payload": payload})
 	log.Println(res.InsertedID)
@@ -59,7 +60,7 @@ func (db *DBmongo) Insert(txid, blockhash string, blocknum uint64, payload []byt
 }
 
 func (db *DBmongo) QueryBlockByHash(hash string) (Tx, error) {
-	collection := db.Instance.Database("blocks").Collection("txs")
+	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 	var result Tx
 	filter := bson.M{"Blockhash": hash}
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
@@ -72,7 +73,7 @@ func (db *DBmongo) QueryBlockByHash(hash string) (Tx, error) {
 }
 
 func (db *DBmongo) GetByTxId(filter *pb.RequestFilter) ([]Tx, error) {
-	collection := db.Instance.Database("blocks").Collection("txs")
+	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 	filterOpts := bson.M{"Txid": filter.Txid}
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
@@ -95,12 +96,11 @@ func (db *DBmongo) GetByTxId(filter *pb.RequestFilter) ([]Tx, error) {
 	if err := cur.Err(); err != nil {
 		return nil, err
 	}
-	fmt.Println(results)
 	return results, nil
 }
 
 func (db *DBmongo) GetByBlocknum(filter *pb.RequestFilter) ([]Tx, error) {
-	collection := db.Instance.Database("blocks").Collection("txs")
+	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 
 	filterOpts := bson.M{"Blocknum": filter.Blocknum}
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
@@ -133,7 +133,7 @@ func (db *DBmongo) GetByBlocknum(filter *pb.RequestFilter) ([]Tx, error) {
 func (db *DBmongo) QueryAll() ([]Tx, error) {
 	arr := []Tx{}
 
-	collection := db.Instance.Database("blocks").Collection("txs")
+	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	cur, err := collection.Find(ctx, bson.D{})
 	if err != nil {

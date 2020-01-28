@@ -13,11 +13,12 @@ type Fabex struct {
 }
 
 type DB struct {
-	Host     string
-	Port     int
-	Dbuser   string
-	Dbsecret string
-	Dbname   string
+	Host       string
+	Port       int
+	Dbuser     string
+	Dbsecret   string
+	Dbname     string
+	Collection string
 }
 
 type GRPCServer struct {
