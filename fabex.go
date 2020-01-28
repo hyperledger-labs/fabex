@@ -13,7 +13,6 @@ import (
 	"github.com/vadiminshakov/fabex/blockfetcher"
 	"github.com/vadiminshakov/fabex/db"
 	"github.com/vadiminshakov/fabex/helpers"
-	"github.com/vadiminshakov/fabex/models"
 	pb "github.com/vadiminshakov/fabex/proto"
 	"google.golang.org/grpc"
 	"log"
@@ -25,7 +24,7 @@ import (
 
 var (
 	lvl          = logging.INFO
-	globalConfig models.Config
+	globalConfig blockfetcher.Config
 )
 
 func main() {
@@ -96,14 +95,14 @@ func main() {
 		dbInstance = db.CreateDBConfPostgres(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
 	}
 
-	var fabex *models.Fabex
+	var fabex *blockfetcher.Fabex
 	if *task != "initdb" {
 		err = dbInstance.Connect()
 		if err != nil {
 			log.Fatalln("DB connection failed:", err.Error())
 		}
 	}
-	fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}
+	fabex = &blockfetcher.Fabex{dbInstance, channelclient, ledgerClient}
 
 	switch *task {
 	case "initdb":
@@ -133,7 +132,7 @@ func main() {
 		}
 
 		if customBlock != nil {
-			var cc []models.Chaincode
+			var cc []blockfetcher.Chaincode
 			for _, block := range customBlock.Txs {
 
 				err = json.Unmarshal(block.Payload, &cc)
@@ -190,14 +189,14 @@ func main() {
 
 		for _, tx := range txs {
 
-			var cc []models.Chaincode
+			var cc []blockfetcher.Chaincode
 
 			err = json.Unmarshal(tx.Payload, &cc)
 			if err != nil {
 				log.Printf("Unmarshalling error: %s", err)
 			}
 
-			fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", tx.Blocknum, tx.Blockhash, tx.Txid)
+			fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", tx.Blocknum, tx.Hash, tx.Txid)
 			for _, val := range cc {
 				fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
 			}
@@ -213,10 +212,10 @@ func main() {
 type fabexServer struct {
 	Address string
 	Port    string
-	Conf    *models.Fabex
+	Conf    *blockfetcher.Fabex
 }
 
-func NewFabexServer(addr string, port string, conf *models.Fabex) *fabexServer {
+func NewFabexServer(addr string, port string, conf *blockfetcher.Fabex) *fabexServer {
 	return &fabexServer{addr, port, conf}
 }
 
@@ -235,12 +234,12 @@ func (s *fabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServe
 
 		if customBlock != nil {
 			for _, block := range customBlock.Txs {
-				stream.Send(&pb.Reply{Txid: block.Txid, Hash: block.Hash, Blocknum: int64(block.Blocknum), Payload: block.Payload})
+				stream.Send(&pb.Reply{Txid: block.Txid, Hash: block.Hash, Blocknum: block.Blocknum, Payload: block.Payload})
 			}
 		}
 		blockCounter++
 	}
-	log.Println("Stream closed")
+
 	return nil
 }
 
@@ -251,10 +250,22 @@ func (s *fabexServer) GetByTxId(req *pb.RequestFilter, stream pb.Fabex_GetByTxId
 	}
 
 	for _, queryResult := range QueryResults {
-		stream.Send(&pb.Reply{Txid: queryResult.Txid})
+		stream.Send(&pb.Reply{Txid: queryResult.Txid, Hash: queryResult.Hash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload})
 	}
 
-	log.Println("Stream closed")
+	return nil
+}
+
+func (s *fabexServer) GetByBlocknum(req *pb.RequestFilter, stream pb.Fabex_GetByBlocknumServer) error {
+	QueryResults, err := s.Conf.Db.GetByBlocknum(req)
+	if err != nil {
+		return err
+	}
+
+	for _, queryResult := range QueryResults {
+		stream.Send(&pb.Reply{Txid: queryResult.Txid, Hash: queryResult.Hash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload})
+	}
+
 	return nil
 }
 

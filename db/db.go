@@ -1,26 +1,22 @@
 package db
 
-import pb "github.com/vadiminshakov/fabex/proto"
+import (
+	pb "github.com/vadiminshakov/fabex/proto"
+)
 
 type DbManager interface {
 	Connect() error
 	Init() error
 	Insert(txid, blockhash string, blocknum uint64, payload []byte) error
-	QueryBlockByHash(hash string) (*QueryResult, error)
-	GetByTxId(filter *pb.RequestFilter) ([]*QueryResult, error)
-	QueryAll() ([]QueryResult, error)
+	QueryBlockByHash(hash string) (Tx, error)
+	GetByTxId(filter *pb.RequestFilter) ([]Tx, error)
+	GetByBlocknum(req *pb.RequestFilter) ([]Tx, error)
+	QueryAll() ([]Tx, error)
 }
 
-type QueryResult struct {
-	Txid      string `json:"txid"`
-	Blockhash string `json:"blockhash"`
-	Blocknum  uint64 `json:"blocknum"`
-	Payload   []byte `json:"payload"`
-}
-
-type QueryResultMongo struct {
-	Txid      string                       `json:"txid"`
-	Blockhash string                       `json:"blockhash"`
-	Blocknum  map[string]uint64            `json:"blocknum"`
-	Payload   map[string]map[string]string `json:"payload"`
+type Tx struct {
+	Txid     string `json:"txid" bson:"Txid"`
+	Hash     string `json:"blockhash" bson:"Blockhash"`
+	Blocknum uint64 `json:"blocknum" bson:"Blocknum"`
+	Payload  []byte `json:"payload" bson:"Payload"`
 }

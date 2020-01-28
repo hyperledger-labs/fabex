@@ -4,6 +4,7 @@ package fabex;
 service Fabex {
     rpc Explore(RequestRange) returns (stream Reply);
     rpc GetByTxId(RequestFilter) returns (stream Reply);
+    rpc GetByBlocknum(RequestFilter) returns (stream Reply);
 }
 
 message RequestRange {
@@ -14,13 +15,13 @@ message RequestRange {
 message Reply {
     string txid = 1;
     string hash = 2;
-    int64 blocknum = 3;
+    uint64 blocknum = 3;
     bytes payload = 4;
 }
 
 message RequestFilter {
     string txid = 1;
     string hash = 2;
-    int64 blocknum = 3;
+    uint64 blocknum = 3;
     bytes payload = 4;
 }

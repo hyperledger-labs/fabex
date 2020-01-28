@@ -3,7 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/vadiminshakov/fabex/models"
+
+	"github.com/vadiminshakov/fabex/blockfetcher"
 	pb "github.com/vadiminshakov/fabex/proto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -46,7 +47,7 @@ func ReadStream(startblock, endblock int) error {
 			return err
 		}
 		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload:\n", in.Blocknum, in.Hash, in.Txid)
-		var cc []models.Chaincode
+		var cc []blockfetcher.Chaincode
 		err = json.Unmarshal(in.Payload, &cc)
 		if err != nil {
 			log.Printf("Unmarshalling error: %s", err)
@@ -80,7 +81,7 @@ func GetByTxId(filter *pb.RequestFilter) error {
 			return err
 		}
 		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload:\n", in.Blocknum, in.Hash, in.Txid)
-		var cc []models.Chaincode
+		var cc []blockfetcher.Chaincode
 		err = json.Unmarshal(in.Payload, &cc)
 		if err != nil {
 			log.Printf("Unmarshalling error: %s", err)
@@ -94,9 +95,36 @@ func GetByTxId(filter *pb.RequestFilter) error {
 	return nil
 }
 
+func GetByBlocknum(filter *pb.RequestFilter) error {
+
+	stream, err := client.GetByBlocknum(context.Background(), filter)
+	if err != nil {
+		return err
+	}
+
+	log.Println("Started stream")
+
+	for {
+		in, err := stream.Recv()
+		if err == io.EOF {
+			log.Println("Steam is empty")
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload: %s\n", in.Blocknum, in.Hash, in.Txid, in.Payload)
+
+
+	}
+
+	return nil
+}
+
 func main() {
 	//ReadStream(1, 15)
-	err := GetByTxId(&pb.RequestFilter{Blocknum:2})
+	//err := GetByTxId(&pb.RequestFilter{TxId:2})
+	err := GetByBlocknum(&pb.RequestFilter{Blocknum:2})
 	if err != nil { log.Fatal(err) }
 
 }
