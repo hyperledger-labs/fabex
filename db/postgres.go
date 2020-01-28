@@ -103,7 +103,7 @@ func (db *DB) Insert(txid, blockhash string, blocknum uint64, payload []byte) er
 	return nil
 }
 
-func (db *DB) QueryBlockByHash(hash string) (*QueryResult, error) {
+func (db *DB) QueryBlockByHash(hash string) (Tx, error) {
 	query := fmt.Sprintf(`
         SELECT (txid, blockhash, blocknum, payload) FROM public.txs
         WHERE blockhash='%s';`, hash)
@@ -116,20 +116,20 @@ func (db *DB) QueryBlockByHash(hash string) (*QueryResult, error) {
 
 	err := db.Instance.QueryRow(query).Scan(&txid, &blockhash, &blocknum, &payload)
 	if err != nil {
-		return nil, err
+		return Tx{}, err
 	}
 
-	return &QueryResult{txid, blockhash, blocknum, payload}, nil
+	return Tx{txid, blockhash, blocknum, payload}, nil
 }
 
-func (db *DB) QueryAll() ([]QueryResult, error) {
-	arr := []QueryResult{}
+func (db *DB) QueryAll() ([]Tx, error) {
+	arr := []Tx{}
 
 	query := fmt.Sprintf(`
         SELECT * FROM public.txs;`)
 	rows, err := db.Instance.Query(query)
 	if err != nil {
-		return []QueryResult{}, err
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -143,9 +143,9 @@ func (db *DB) QueryAll() ([]QueryResult, error) {
 
 		err := rows.Scan(&txid, &blockhash, &blocknum, &payload)
 		if err != nil {
-			return []QueryResult{}, err
+			return nil, err
 		}
-		arr = append(arr, QueryResult{txid, blockhash, blocknum, payload})
+		arr = append(arr, Tx{txid, blockhash, blocknum, payload})
 	}
 	err = rows.Err()
 	if err != nil {
@@ -156,6 +156,11 @@ func (db *DB) QueryAll() ([]QueryResult, error) {
 }
 
 // dummy stub
-func (db *DB) GetByTxId(filter *pb.RequestFilter) ([]*QueryResult, error) {
+func (db *DB) GetByTxId(filter *pb.RequestFilter) ([]Tx, error) {
+	return nil, nil
+}
+
+// dummy stub
+func (db *DB) GetByBlocknum(filter *pb.RequestFilter) ([]Tx, error) {
 	return nil, nil
 }
