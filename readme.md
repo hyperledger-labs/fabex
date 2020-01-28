@@ -34,7 +34,7 @@
     `./fabex --task explore --configpath ./ --configname config`
     
 
-Also you can start service for fetching blocks in daemon mode: 
+   Also you can start service for fetching blocks in daemon mode: 
  
     `./fabex --task explore --configpath ./ --configname config --forever true --duration 1s` 
     
