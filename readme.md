@@ -2,7 +2,7 @@
 
 [CLI usage](#cli)
 
-[Microservice mode](microservice)
+[Microservice mode](#microservice)
 
 
 ### <a name="cli">**CLI**</a>
