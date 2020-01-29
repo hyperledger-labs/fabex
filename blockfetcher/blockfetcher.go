@@ -4,13 +4,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/vadiminshakov/fabex/db"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
 	"github.com/hyperledger/fabric/protos/ledger/rwset"
 	"github.com/hyperledger/fabric/protos/peer"
 	"github.com/hyperledger/fabric/protos/utils"
+	"github.com/vadiminshakov/fabex/db"
 )
 
 type CustomBlock struct {
@@ -80,16 +80,20 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 				// get only those txs that changes state
 				if len(nsRwSet.KvRwSet.Writes) != 0 {
 
-					jsonPayload, err := json.Marshal(nsRwSet.KvRwSet.Writes)
+					var stringedPayload []Chaincode
+					for _, write := range nsRwSet.KvRwSet.Writes {
+						stringedPayload = append(stringedPayload, Chaincode{Key: write.Key, Value: string(write.Value)})
+					}
+
+					jsonPayload, err := json.Marshal(stringedPayload)
 					if err != nil {
 						return nil, err
 					}
-
 					tx := db.Tx{
-						string(bytesTxId),
+						bytesTxId,
 						hash,
 						blocknum,
-						jsonPayload,
+						string(jsonPayload),
 					}
 					customBlock.Txs = append(customBlock.Txs, tx)
 

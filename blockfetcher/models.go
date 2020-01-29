@@ -13,11 +13,12 @@ type Fabex struct {
 }
 
 type DB struct {
-	Host     string
-	Port     int
-	Dbuser   string
-	Dbsecret string
-	Dbname   string
+	Host       string
+	Port       int
+	Dbuser     string
+	Dbsecret   string
+	Dbname     string
+	Collection string
 }
 
 type GRPCServer struct {
@@ -41,5 +42,21 @@ type Config struct {
 
 type Chaincode struct {
 	Key   string `json:"key"`
-	Value []byte `json:"value"`
+	Value string `json:"value"`
+}
+
+type Block struct {
+	BlockHash string `json:"blockhash"`
+	Blocknum  uint64 `json:"blocknum"`
+	Tx        []Tx   `json:"txs"`
+}
+
+type Tx struct {
+	Txid string `json:"txid"`
+	KW   []KW
+}
+
+type KW struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }

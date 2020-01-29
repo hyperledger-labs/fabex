@@ -55,11 +55,6 @@ func main() {
 		log.Fatalf("unable to decode into struct, %v", err)
 	}
 
-	if err != nil {
-		log.Println("Reading file error: ")
-		return
-	}
-
 	fmt.Println("Reading connection profile..")
 	c := config.FromFile(globalConfig.Fabric.ConnectionProfile)
 	sdk, err := fabsdk.New(c)
@@ -83,14 +78,14 @@ func main() {
 
 	channelclient, err := channel.New(clientChannelContext)
 	if err != nil {
-		fmt.Printf("Failed to create channel [%s]:", globalConfig.Fabric.Channel, err)
+		fmt.Printf("Failed to create channel [%s], error: %s", globalConfig.Fabric.Channel, err)
 	}
 
 	// choose database
 	var dbInstance db.DbManager
 	switch *databaseSelected {
 	case "mongo":
-		dbInstance = db.CreateDBConfMongo(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
+		dbInstance = db.CreateDBConfMongo(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname, globalConfig.DB.Collection)
 	case "postgres":
 		dbInstance = db.CreateDBConfPostgres(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
 	}
@@ -135,7 +130,7 @@ func main() {
 			var cc []blockfetcher.Chaincode
 			for _, block := range customBlock.Txs {
 
-				err = json.Unmarshal(block.Payload, &cc)
+				err = json.Unmarshal([]byte(block.Payload), &cc)
 				if err != nil {
 					log.Printf("Unmarshalling error: %s", err)
 				}
@@ -184,14 +179,14 @@ func main() {
 	case "getall":
 		txs, err := fabex.Db.QueryAll()
 		if err != nil {
-			log.Fatalf("Can't query data: ", err)
+			log.Fatal("Can't query data: ", err)
 		}
 
 		for _, tx := range txs {
 
 			var cc []blockfetcher.Chaincode
 
-			err = json.Unmarshal(tx.Payload, &cc)
+			err = json.Unmarshal([]byte(tx.Payload), &cc)
 			if err != nil {
 				log.Printf("Unmarshalling error: %s", err)
 			}
@@ -258,6 +253,19 @@ func (s *fabexServer) GetByTxId(req *pb.RequestFilter, stream pb.Fabex_GetByTxId
 
 func (s *fabexServer) GetByBlocknum(req *pb.RequestFilter, stream pb.Fabex_GetByBlocknumServer) error {
 	QueryResults, err := s.Conf.Db.GetByBlocknum(req)
+	if err != nil {
+		return err
+	}
+
+	for _, queryResult := range QueryResults {
+		stream.Send(&pb.Reply{Txid: queryResult.Txid, Hash: queryResult.Hash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload})
+	}
+
+	return nil
+}
+
+func (s *fabexServer) GetBlockInfoByPayload(req *pb.RequestFilter, stream pb.Fabex_GetBlockInfoByPayloadServer) error {
+	QueryResults, err := s.Conf.Db.GetBlockInfoByPayload(req)
 	if err != nil {
 		return err
 	}
