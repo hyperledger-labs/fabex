@@ -135,7 +135,7 @@ func (db *DBmongo) GetBlockInfoByPayload(filter *pb.RequestFilter) ([]Tx, error)
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 
 	filterOpts := bson.D{
-		{"Payload", primitive.Regex{Pattern:filter.Payload, Options:""}},
+		{"Payload", primitive.Regex{Pattern: filter.Payload, Options: ""}},
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
