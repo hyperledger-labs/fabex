@@ -5,8 +5,10 @@ go 1.11
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
+	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/Shopify/sarama v1.21.0 // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
+	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cloudflare/cfssl v0.0.0-20180705210102-ff56ab5eb62a // indirect
 	github.com/fsouza/go-dockerclient v1.3.6 // indirect
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
@@ -28,6 +30,7 @@ require (
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7 // indirect
+	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/pelletier/go-toml v0.0.0-20180703183337-603baefff989 // indirect
 	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90 // indirect
 	github.com/prometheus/common v0.2.0 // indirect
@@ -45,5 +48,6 @@ require (
 	golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6 // indirect
 	google.golang.org/genproto v0.0.0-20180706232955-8b2cc369ab52 // indirect
 	google.golang.org/grpc v0.0.0-20180706180940-f3361fda2fe0
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v2 v2.2.1
 )
