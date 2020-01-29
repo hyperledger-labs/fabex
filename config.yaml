@@ -7,10 +7,11 @@ Fabric:
 
 Db:
   host: localhost
-  port: 5432
+  port: 27017
   dbuser: postgres
   dbsecret: 1
-  dbname: txs
+  dbname: blocks
+  collection: txs
 
 GRPCServer:
   host: localhost
