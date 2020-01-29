@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	pb "github.com/vadiminshakov/fabex/proto"
 	"github.com/vadiminshakov/fabex/client/fabexclient"
+	pb "github.com/vadiminshakov/fabex/proto"
 	"log"
 )
 
@@ -20,7 +20,6 @@ func init() {
 		panic(err)
 	}
 }
-
 
 func main() {
 	//Explore(1, 15)

@@ -1,9 +1,9 @@
 Fabric:
   user: admin
   secret: adminpw
-  org: orgname
+  org: rzd
   channel: wheelsets
-  connectionProfile: /home/user/config-dev-2orgs.yaml
+  connectionProfile: /home/vadim/wheelsets-fabric/wheelsets-core/app/blockchain/fabric/config-dev-2orgs.yaml
 
 Db:
   host: localhost
