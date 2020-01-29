@@ -93,7 +93,7 @@ func (db *DB) Init() error {
 	return nil
 }
 
-func (db *DB) Insert(txid, blockhash string, blocknum uint64, payload []byte) error {
+func (db *DB) Insert(txid, blockhash string, blocknum uint64, payload string) error {
 	query := `INSERT INTO public.txs (txid, blockhash, blocknum, payload) VALUES ($1, $2, $3, $4);`
 	_, err := db.Instance.Exec(query, txid, blockhash, blocknum, payload)
 	if err != nil {
@@ -111,7 +111,7 @@ func (db *DB) QueryBlockByHash(hash string) (Tx, error) {
 	var (
 		txid, blockhash string
 		blocknum        uint64
-		payload         []byte
+		payload         string
 	)
 
 	err := db.Instance.QueryRow(query).Scan(&txid, &blockhash, &blocknum, &payload)
@@ -138,7 +138,7 @@ func (db *DB) QueryAll() ([]Tx, error) {
 		var (
 			txid, blockhash string
 			blocknum        uint64
-			payload         []byte
+			payload         string
 		)
 
 		err := rows.Scan(&txid, &blockhash, &blocknum, &payload)
@@ -162,5 +162,10 @@ func (db *DB) GetByTxId(filter *pb.RequestFilter) ([]Tx, error) {
 
 // dummy stub
 func (db *DB) GetByBlocknum(filter *pb.RequestFilter) ([]Tx, error) {
+	return nil, nil
+}
+
+// dummy stub
+func (db *DB) GetBlockInfoByPayload(filter *pb.RequestFilter) ([]Tx, error) {
 	return nil, nil
 }
