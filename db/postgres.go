@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
-	pb "github.com/vadiminshakov/fabex/proto"
 	"log"
 )
 
@@ -156,16 +155,16 @@ func (db *DB) QueryAll() ([]Tx, error) {
 }
 
 // dummy stub
-func (db *DB) GetByTxId(filter *pb.RequestFilter) ([]Tx, error) {
+func (db *DB) GetByTxId(filter string) ([]Tx, error) {
 	return nil, nil
 }
 
 // dummy stub
-func (db *DB) GetByBlocknum(filter *pb.RequestFilter) ([]Tx, error) {
+func (db *DB) GetByBlocknum(filter uint64) ([]Tx, error) {
 	return nil, nil
 }
 
 // dummy stub
-func (db *DB) GetBlockInfoByPayload(filter *pb.RequestFilter) ([]Tx, error) {
+func (db *DB) GetBlockInfoByPayload(filter string) ([]Tx, error) {
 	return nil, nil
 }

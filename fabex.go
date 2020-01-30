@@ -239,7 +239,8 @@ func (s *fabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServe
 }
 
 func (s *fabexServer) GetByTxId(req *pb.RequestFilter, stream pb.Fabex_GetByTxIdServer) error {
-	QueryResults, err := s.Conf.Db.GetByTxId(req)
+
+	QueryResults, err := s.Conf.Db.GetByTxId(req.Txid)
 	if err != nil {
 		return err
 	}
@@ -252,7 +253,7 @@ func (s *fabexServer) GetByTxId(req *pb.RequestFilter, stream pb.Fabex_GetByTxId
 }
 
 func (s *fabexServer) GetByBlocknum(req *pb.RequestFilter, stream pb.Fabex_GetByBlocknumServer) error {
-	QueryResults, err := s.Conf.Db.GetByBlocknum(req)
+	QueryResults, err := s.Conf.Db.GetByBlocknum(req.Blocknum)
 	if err != nil {
 		return err
 	}
@@ -265,7 +266,7 @@ func (s *fabexServer) GetByBlocknum(req *pb.RequestFilter, stream pb.Fabex_GetBy
 }
 
 func (s *fabexServer) GetBlockInfoByPayload(req *pb.RequestFilter, stream pb.Fabex_GetBlockInfoByPayloadServer) error {
-	QueryResults, err := s.Conf.Db.GetBlockInfoByPayload(req)
+	QueryResults, err := s.Conf.Db.GetBlockInfoByPayload(req.Payload)
 	if err != nil {
 		return err
 	}
