@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/ory/dockertest"
-	"github.com/vadiminshakov/fabex/blockfetcher"
+	"github.com/vadiminshakov/fabex/models"
 	"log"
 	"os"
 	"os/exec"
@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	fabex *blockfetcher.Fabex
+	fabex *models.Fabex
 	wg    *sync.WaitGroup
 )
 
