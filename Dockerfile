@@ -7,7 +7,8 @@ RUN GOSUMDB=off GOPROXY=direct go build
 # production stage
 FROM alpine:3.9 as production-stage
 WORKDIR /app
+COPY ./entrypoint.sh .
 COPY --from=build-stage /app/fabex .
 COPY --from=build-stage /app/configs .
 RUN apk add --no-cache libc6-compat
-CMD ["/app/fabex --task grpc --configpath /app --configname config --enrolluser true --interval 5"]
+ENTRYPOINT ["./entrypoint.sh"]
