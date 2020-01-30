@@ -11,6 +11,7 @@ import (
 	"github.com/hyperledger/fabric/protos/peer"
 	"github.com/hyperledger/fabric/protos/utils"
 	"github.com/vadiminshakov/fabex/db"
+	"github.com/vadiminshakov/fabex/models"
 )
 
 type CustomBlock struct {
@@ -80,9 +81,9 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 				// get only those txs that changes state
 				if len(nsRwSet.KvRwSet.Writes) != 0 {
 
-					var stringedPayload []Chaincode
+					var stringedPayload []models.Chaincode
 					for _, write := range nsRwSet.KvRwSet.Writes {
-						stringedPayload = append(stringedPayload, Chaincode{Key: write.Key, Value: string(write.Value)})
+						stringedPayload = append(stringedPayload, models.Chaincode{Key: write.Key, Value: string(write.Value)})
 					}
 
 					jsonPayload, err := json.Marshal(stringedPayload)

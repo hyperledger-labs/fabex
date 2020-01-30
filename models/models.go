@@ -1,4 +1,4 @@
-package blockfetcher
+package models
 
 import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
