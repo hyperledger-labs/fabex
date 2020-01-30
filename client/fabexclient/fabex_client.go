@@ -3,8 +3,8 @@ package fabexclient
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/vadiminshakov/fabex/blockfetcher"
 	"github.com/vadiminshakov/fabex/db"
+	"github.com/vadiminshakov/fabex/models"
 	pb "github.com/vadiminshakov/fabex/proto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -119,28 +119,28 @@ func (fabexCli *FabexClient) GetBlockInfoByPayload(filter *pb.RequestFilter) ([]
 	}
 }
 
-func (fabexCli *FabexClient) PackTxsToBlocks(blocks []db.Tx) ([]blockfetcher.Block, error) {
+func (fabexCli *FabexClient) PackTxsToBlocks(blocks []db.Tx) ([]models.Block, error) {
 	var blockAlreadyRead = make(map[uint64]bool)
 
-	var Blocks []blockfetcher.Block
+	var Blocks []models.Block
 	for _, in := range blocks {
 		var (
-			block blockfetcher.Block
-			tx blockfetcher.Tx
-			)
+			block models.Block
+			tx    models.Tx
+		)
 		if _, ok := blockAlreadyRead[in.Blocknum]; !ok {
-			block = blockfetcher.Block{Blocknum: in.Blocknum, BlockHash: in.Hash}
+			block = models.Block{Blocknum: in.Blocknum, BlockHash: in.Hash}
 		}
 		tx.Txid = in.Txid
 
-		var ccData []blockfetcher.Chaincode
+		var ccData []models.Chaincode
 		err := json.Unmarshal([]byte(in.Payload), &ccData)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, item := range ccData {
-			tx.KW = append(tx.KW, blockfetcher.KW{item.Key, item.Value})
+			tx.KW = append(tx.KW, models.KW{item.Key, item.Value})
 		}
 
 		block.Tx = append(block.Tx, tx)
