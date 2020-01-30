@@ -9,6 +9,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/vadiminshakov/fabex/blockfetcher"
+	"github.com/vadiminshakov/fabex/db"
 	"github.com/vadiminshakov/fabex/models"
 	"sync"
 )
@@ -33,7 +34,7 @@ func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
 
 	// update db if block with current hash not finded
 	var blockCounter uint64
-	if tx.Txid == "" {
+	if tx == (db.Tx{}) {
 		// find latest block in db
 		txs, err := fab.Db.QueryAll()
 
