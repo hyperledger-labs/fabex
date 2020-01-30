@@ -20,7 +20,7 @@ require (
 	github.com/gotestyourself/gotestyourself v1.4.0 // indirect
 	github.com/hashicorp/go-version v1.1.0 // indirect
 	github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce // indirect
-	github.com/hyperledger/fabric v1.4.2
+	github.com/hyperledger/fabric v1.4.4
 	github.com/hyperledger/fabric-amcl v0.0.0-20181230093703-5ccba6eab8d6 // indirect
 	github.com/hyperledger/fabric-lib-go v0.0.0-20190212214935-3927a7b44496 // indirect
 	github.com/hyperledger/fabric-sdk-go v0.0.0-20190306235112-f198238ee7da
@@ -51,6 +51,5 @@ require (
 	go.mongodb.org/mongo-driver v1.1.0
 	golang.org/x/net v0.0.0-20181114220301-adae6a3d119a
 	golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6 // indirect
-	google.golang.org/genproto v0.0.0-20180706232955-8b2cc369ab52 // indirect
 	google.golang.org/grpc v0.0.0-20180706180940-f3361fda2fe0
 )
