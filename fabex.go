@@ -11,7 +11,6 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	log "github.com/sirupsen/logrus"
 	"github.com/vadiminshakov/fabex/blockfetcher"
 	"github.com/vadiminshakov/fabex/db"
 	"github.com/vadiminshakov/fabex/helpers"
