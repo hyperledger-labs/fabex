@@ -13,16 +13,14 @@ var (
 	port   = "6000"
 )
 
-func init() {
+func main() {
 	var err error
 	client, err = fabexclient.New(addr, port)
 	if err != nil {
 		panic(err)
 	}
-}
 
-func main() {
-	//Explore(1, 15)
+	//client.Explore(1, 15)
 	//txs, err := client.GetByTxId(&pb.RequestFilter{Txid:"3a3e933a3d9953b0b10e6573254b6d3cf2347d72058c0347a55054babdd8e1a1"})
 	//txs, err := client.GetByBlocknum(&pb.RequestFilter{Blocknum: 2})
 	txs, err := client.GetBlockInfoByPayload(&pb.RequestFilter{Payload: "1440-"})
