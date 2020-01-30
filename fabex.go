@@ -9,6 +9,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/vadiminshakov/fabex/blockfetcher"
 	"github.com/vadiminshakov/fabex/db"
@@ -16,7 +17,6 @@ import (
 	"github.com/vadiminshakov/fabex/models"
 	pb "github.com/vadiminshakov/fabex/proto"
 	"google.golang.org/grpc"
-	"log"
 	"net"
 	"os"
 	"sync"
@@ -201,7 +201,7 @@ func main() {
 
 	case "grpc":
 		serv := NewFabexServer(globalConfig.GRPCServer.Host, globalConfig.GRPCServer.Port, fabex)
-		StartGrpcServ(serv)
+		StartGrpcServ(serv, fabex, *interval)
 	}
 }
 
@@ -279,7 +279,30 @@ func (s *fabexServer) GetBlockInfoByPayload(req *pb.RequestFilter, stream pb.Fab
 	return nil
 }
 
-func StartGrpcServ(serv *fabexServer) {
+func StartGrpcServ(serv *fabexServer, fabex *models.Fabex, interval string) {
+
+	go func() {
+		wg := &sync.WaitGroup{}
+		duration, err := time.ParseDuration(interval)
+		if err != nil {
+			log.Fatal("Can't to parse time interval")
+		}
+		ticker := time.NewTicker(duration)
+		for {
+			select {
+			case <-ticker.C:
+				wg.Add(1)
+				go func() {
+					err = helpers.Explore(wg, fabex)
+					if err != nil {
+						log.Error(err)
+					}
+				}()
+				wg.Wait()
+			}
+		}
+	}()
+
 	grpcServer := grpc.NewServer()
 	pb.RegisterFabexServer(grpcServer, serv)
 

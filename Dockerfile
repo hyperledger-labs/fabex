@@ -1,15 +1,13 @@
-FROM golang:latest
-
+FROM golang:1.12 as build-stage
 LABEL maintainer="Vadim Inshakov <vadiminshakov@gmail.com>"
-
 WORKDIR /app
-
-COPY go.mod go.sum ./
-
-RUN go mod download
-
 COPY . .
+RUN GOSUMDB=off GOPROXY=direct go build
 
-RUN go build -o main .
-
-CMD ["./main"]
+# production stage
+FROM alpine:3.9 as production-stage
+WORKDIR /app
+COPY --from=build-stage /app/fabex .
+COPY --from=build-stage /app/configs .
+RUN apk add --no-cache libc6-compat
+CMD ["/app/fabex --task grpc --configpath /app/ --configname config --enrolluser true --interval 5"]
