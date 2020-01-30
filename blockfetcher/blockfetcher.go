@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
-	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
-	"github.com/hyperledger/fabric/protos/ledger/rwset"
+	fabrwsetutil "github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
+	fabrwset "github.com/hyperledger/fabric/protos/ledger/rwset"
 	"github.com/hyperledger/fabric/protos/peer"
 	"github.com/hyperledger/fabric/protos/utils"
 	"github.com/vadiminshakov/fabex/db"
@@ -50,7 +50,7 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 			action, _ := utils.GetActionFromEnvelopeMsg(envelope)
 			actionResults := action.GetResults()
 
-			ReadWriteSet := &rwset.TxReadWriteSet{}
+			ReadWriteSet := &fabrwset.TxReadWriteSet{}
 
 			err = proto.Unmarshal(actionResults, ReadWriteSet)
 			if err != nil {
@@ -58,9 +58,9 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 				return nil, err
 			}
 
-			txRWSet, err := rwsetutil.TxRwSetFromProtoMsg(ReadWriteSet)
+			txRWSet, err := fabrwsetutil.TxRwSetFromProtoMsg(ReadWriteSet)
 			if err != nil {
-				//fmt.Printf("Failed to convert rwset.TxReadWriteSet to rwsetutil.TxRWSet: %s", err)
+				//fmt.Printf("Failed to convert rwset.TxReadWriteSet to fabrwsetutil.TxRWSet: %s", err)
 				return nil, err
 			}
 
