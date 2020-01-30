@@ -50,8 +50,7 @@ func (db *DBmongo) Connect() error {
 func (db *DBmongo) Insert(txid, blockhash string, blocknum uint64, payload string) error {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	res, err := collection.InsertOne(ctx, bson.M{"Txid": txid, "Blockhash": blockhash, "Blocknum": blocknum, "Payload": payload})
-	log.Println(res.InsertedID)
+	_, err := collection.InsertOne(ctx, bson.M{"Txid": txid, "Blockhash": blockhash, "Blocknum": blocknum, "Payload": payload})
 	if err != nil {
 		return err
 	}
