@@ -311,6 +311,6 @@ func StartGrpcServ(serv *fabexServer, fabex *models.Fabex, interval string) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	log.Printf("\nListening on tcp://%s:%s", serv.Address, serv.Port)
+	log.Printf("Listening on tcp://%s:%s", serv.Address, serv.Port)
 	grpcServer.Serve(l)
 }
