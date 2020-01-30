@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"fmt"
-	pb "github.com/vadiminshakov/fabex/proto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -73,9 +72,9 @@ func (db *DBmongo) QueryBlockByHash(hash string) (Tx, error) {
 	return Tx{result.Txid, result.Hash, result.Blocknum, result.Payload}, nil
 }
 
-func (db *DBmongo) GetByTxId(filter *pb.RequestFilter) ([]Tx, error) {
+func (db *DBmongo) GetByTxId(filter string) ([]Tx, error) {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
-	filterOpts := bson.M{"Txid": filter.Txid}
+	filterOpts := bson.M{"Txid": filter}
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
 	cur, err := collection.Find(ctx, filterOpts)
@@ -100,10 +99,10 @@ func (db *DBmongo) GetByTxId(filter *pb.RequestFilter) ([]Tx, error) {
 	return results, nil
 }
 
-func (db *DBmongo) GetByBlocknum(filter *pb.RequestFilter) ([]Tx, error) {
+func (db *DBmongo) GetByBlocknum(filter uint64) ([]Tx, error) {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 
-	filterOpts := bson.M{"Blocknum": filter.Blocknum}
+	filterOpts := bson.M{"Blocknum": filter}
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
 	cur, err := collection.Find(ctx, filterOpts)
@@ -131,11 +130,11 @@ func (db *DBmongo) GetByBlocknum(filter *pb.RequestFilter) ([]Tx, error) {
 	return results, nil
 }
 
-func (db *DBmongo) GetBlockInfoByPayload(filter *pb.RequestFilter) ([]Tx, error) {
+func (db *DBmongo) GetBlockInfoByPayload(filter string) ([]Tx, error) {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 
 	filterOpts := bson.D{
-		{"Payload", primitive.Regex{Pattern: filter.Payload, Options: ""}},
+		{"Payload", primitive.Regex{Pattern: filter, Options: ""}},
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
