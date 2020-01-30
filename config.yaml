@@ -1,15 +1,15 @@
 Fabric:
   user: admin
   secret: adminpw
-  org: rzd
+  org: sampleorg
   channel: wheelsets
-  connectionProfile: /home/vadim/wheelsets-fabric/wheelsets-core/app/blockchain/fabric/config-dev-2orgs.yaml
+  connectionProfile: /home/user/config-dev-2orgs.yaml
 
 Db:
   host: localhost
   port: 27017
-  dbuser: postgres
-  dbsecret: 1
+  dbuser: dbuser
+  dbsecret: dbpass
   dbname: blocks
   collection: txs
 
