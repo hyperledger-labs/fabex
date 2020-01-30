@@ -13,6 +13,7 @@ import (
 	"github.com/vadiminshakov/fabex/blockfetcher"
 	"github.com/vadiminshakov/fabex/db"
 	"github.com/vadiminshakov/fabex/helpers"
+	"github.com/vadiminshakov/fabex/models"
 	pb "github.com/vadiminshakov/fabex/proto"
 	"google.golang.org/grpc"
 	"log"
@@ -24,7 +25,7 @@ import (
 
 var (
 	lvl          = logging.INFO
-	globalConfig blockfetcher.Config
+	globalConfig models.Config
 )
 
 func main() {
@@ -90,14 +91,14 @@ func main() {
 		dbInstance = db.CreateDBConfPostgres(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
 	}
 
-	var fabex *blockfetcher.Fabex
+	var fabex *models.Fabex
 	if *task != "initdb" {
 		err = dbInstance.Connect()
 		if err != nil {
 			log.Fatalln("DB connection failed:", err.Error())
 		}
 	}
-	fabex = &blockfetcher.Fabex{dbInstance, channelclient, ledgerClient}
+	fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}
 
 	switch *task {
 	case "initdb":
@@ -127,7 +128,7 @@ func main() {
 		}
 
 		if customBlock != nil {
-			var cc []blockfetcher.Chaincode
+			var cc []models.Chaincode
 			for _, block := range customBlock.Txs {
 
 				err = json.Unmarshal([]byte(block.Payload), &cc)
@@ -184,7 +185,7 @@ func main() {
 
 		for _, tx := range txs {
 
-			var cc []blockfetcher.Chaincode
+			var cc []models.Chaincode
 
 			err = json.Unmarshal([]byte(tx.Payload), &cc)
 			if err != nil {
@@ -207,10 +208,10 @@ func main() {
 type fabexServer struct {
 	Address string
 	Port    string
-	Conf    *blockfetcher.Fabex
+	Conf    *models.Fabex
 }
 
-func NewFabexServer(addr string, port string, conf *blockfetcher.Fabex) *fabexServer {
+func NewFabexServer(addr string, port string, conf *models.Fabex) *fabexServer {
 	return &fabexServer{addr, port, conf}
 }
 

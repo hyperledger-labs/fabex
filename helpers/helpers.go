@@ -9,11 +9,12 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/vadiminshakov/fabex/blockfetcher"
+	"github.com/vadiminshakov/fabex/models"
 	"log"
 	"sync"
 )
 
-func Explore(wg *sync.WaitGroup, fab *blockfetcher.Fabex) error {
+func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
 	// check we have up-to-date db or not
 	// get last block hash
 	resp, err := QueryChannelInfo(fab.LedgerClient)
