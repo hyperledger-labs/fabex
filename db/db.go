@@ -4,7 +4,7 @@ type DbManager interface {
 	Connect() error
 	Init() error
 	Insert(string, string, uint64, string) error
-	QueryBlockByHash(hash string) (Tx, error)
+	QueryBlockByHash(hash string) ([]Tx, error)
 	GetByTxId(string) ([]Tx, error)
 	GetByBlocknum(uint64) ([]Tx, error)
 	GetBlockInfoByPayload(string) ([]Tx, error)
