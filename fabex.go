@@ -281,6 +281,16 @@ func (s *fabexServer) GetBlockInfoByPayload(req *pb.RequestFilter, stream pb.Fab
 
 func StartGrpcServ(serv *fabexServer, fabex *models.Fabex, interval string) {
 
+	grpcServer := grpc.NewServer()
+	pb.RegisterFabexServer(grpcServer, serv)
+
+	l, err := net.Listen("tcp", fmt.Sprintf("%s:%s", serv.Address, serv.Port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	log.Printf("Listening on tcp://%s:%s", serv.Address, serv.Port)
+
+	// start explorer
 	go func() {
 		wg := &sync.WaitGroup{}
 		duration, err := time.ParseDuration(interval)
@@ -303,14 +313,6 @@ func StartGrpcServ(serv *fabexServer, fabex *models.Fabex, interval string) {
 		}
 	}()
 
-	grpcServer := grpc.NewServer()
-	pb.RegisterFabexServer(grpcServer, serv)
-
-	l, err := net.Listen("tcp", fmt.Sprintf("%s:%s", serv.Address, serv.Port))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	log.Printf("Listening on tcp://%s:%s", serv.Address, serv.Port)
+	// start server
 	grpcServer.Serve(l)
 }
