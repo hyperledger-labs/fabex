@@ -102,23 +102,24 @@ func (db *DB) Insert(txid, blockhash string, blocknum uint64, payload string) er
 	return nil
 }
 
-func (db *DB) QueryBlockByHash(hash string) (Tx, error) {
-	query := fmt.Sprintf(`
-        SELECT (txid, blockhash, blocknum, payload) FROM public.txs
-        WHERE blockhash='%s';`, hash)
-
-	var (
-		txid, blockhash string
-		blocknum        uint64
-		payload         string
-	)
-
-	err := db.Instance.QueryRow(query).Scan(&txid, &blockhash, &blocknum, &payload)
-	if err != nil {
-		return Tx{}, err
-	}
-
-	return Tx{txid, blockhash, blocknum, payload}, nil
+func (db *DB) QueryBlockByHash(hash string) ([]Tx, error) {
+	//query := fmt.Sprintf(`
+    //    SELECT (txid, blockhash, blocknum, payload) FROM public.txs
+    //    WHERE blockhash='%s';`, hash)
+	//
+	//var (
+	//	txid, blockhash string
+	//	blocknum        uint64
+	//	payload         string
+	//)
+	//
+	//err := db.Instance.QueryRow(query).Scan(&txid, &blockhash, &blocknum, &payload)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//return Tx{txid, blockhash, blocknum, payload}, nil
+	return nil, nil
 }
 
 func (db *DB) QueryAll() ([]Tx, error) {
