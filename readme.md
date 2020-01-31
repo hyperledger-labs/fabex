@@ -1,11 +1,13 @@
 **Block explorer for Hyperledger Fabric**
 
+[Prerequisites](#prerequisites)
+
 [CLI usage](#cli)
 
 [Microservice mode](#microservice)
 
 
-### <a name="cli">**CLI**</a>
+### <a name="prerequisites">**Prerequisites**</a>
 
 1. Configure `config.yaml` (it's main config of the Fabex) and `connection-profile.yaml` (Hyperledger Fabric connection profile)
 
@@ -17,19 +19,21 @@
     
     `docker run --name mongodb -d -p 27017:27017 mongo`
 
-3. Build Fabex executable binary file:  
+
+### <a name="cli">**CLI**</a>
+1. Build Fabex executable binary file:  
 
     `go build`
 
-4. Enroll admin user:  
+2. Enroll admin user:  
 
     `./fabex --enrolluser true`
 
-5. [For Postgres] Create database and table for data saving:  
+3. [For Postgres] Create database and table for data saving:  
 
     `./fabex --task initdb --configpath ./ --configname config`
 
-6. Save blocks data to db:
+4. Save blocks data to db:
 
     `./fabex --task explore --configpath ./ --configname config`
     
@@ -39,11 +43,11 @@
     `./fabex --task explore --configpath ./ --configname config --forever true --duration 1s` 
     
     
-7. Get transactions of specific block (chain operation):  
+5. Get transactions of specific block (chain operation):  
 
     `./fabex --task getblock --blocknum 14 --configpath ./ --configname config`
 
-8. Get all transactions (db operation):  
+6. Get all transactions (db operation):  
 
     `./fabex --task getall --configpath ./ --configname config`
 
