@@ -23,7 +23,7 @@ type DBmongo struct {
 }
 
 func CreateDBConfMongo(host string, port int, user, password, dbname, collection string) *DBmongo {
-	client, err := mongo.NewClient(options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%d", host, port)))
+	client, err := mongo.NewClient(options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s@%s:%d", user, password, host, port)))
 	if err != nil {
 		log.Fatalf("Mongodb client creation failed: %s", err)
 	}
@@ -50,7 +50,7 @@ func (db *DBmongo) Connect() error {
 func (db *DBmongo) Insert(txid, blockhash string, blocknum uint64, payload string) error {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	_, err := collection.InsertOne(ctx, bson.M{"Txid": txid, "Blockhash": blockhash, "Blocknum": blocknum, "Payload": payload})
+	_, err := collection.InsertOne(ctx, bson.M{"Txid": txid, "Hash": blockhash, "Blocknum": blocknum, "Payload": payload})
 	if err != nil {
 		return err
 	}
@@ -58,18 +58,35 @@ func (db *DBmongo) Insert(txid, blockhash string, blocknum uint64, payload strin
 	return nil
 }
 
-func (db *DBmongo) QueryBlockByHash(hash string) (Tx, error) {
+func (db *DBmongo) QueryBlockByHash(hash string) ([]Tx, error) {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
-	var result Tx
-	filter := bson.M{"Blockhash": hash}
+	filter := bson.M{"Hash": hash}
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	err := collection.FindOne(ctx, filter).Decode(&result)
+	cur, err := collection.Find(ctx, filter)
 	if err != nil {
-		return Tx{}, err
+		fmt.Println(err)
+		return nil, err
 	}
-	// Do something with result...
-	return Tx{result.Txid, result.Hash, result.Blocknum, result.Payload}, nil
+
+	defer cur.Close(ctx)
+
+	var results []Tx
+	for cur.Next(ctx) {
+		var result Tx
+		err = cur.Decode(&result)
+		if err != nil {
+			fmt.Println("ERR: ", err)
+			return nil, err
+		}
+		results = append(results, result)
+	}
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }
+
 
 func (db *DBmongo) GetByTxId(filter string) ([]Tx, error) {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
