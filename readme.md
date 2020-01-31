@@ -1,4 +1,4 @@
-**Block explorer for Hyperledger Fabric**
+## **Block explorer for Hyperledger Fabric**
 
 [Prerequisites](#prerequisites)
 
