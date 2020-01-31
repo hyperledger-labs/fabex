@@ -9,7 +9,6 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/vadiminshakov/fabex/blockfetcher"
-	"github.com/vadiminshakov/fabex/db"
 	"github.com/vadiminshakov/fabex/models"
 	"sync"
 )
@@ -24,8 +23,7 @@ func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
 	currentHash := hex.EncodeToString(resp.BCI.CurrentBlockHash)
 
 	//find txs from this block in db
-	tx, err := fab.Db.QueryBlockByHash(currentHash)
-
+	txs, err := fab.Db.QueryBlockByHash(currentHash)
 	if err != nil {
 		if err.Error() != "sql: no rows in result set" && err.Error() != "mongo: no documents in result" {
 			return err
@@ -34,7 +32,7 @@ func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
 
 	// update db if block with current hash not finded
 	var blockCounter uint64
-	if tx == (db.Tx{}) {
+	if txs == nil {
 		// find latest block in db
 		txs, err := fab.Db.QueryAll()
 
@@ -57,6 +55,9 @@ func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
 
 		// insert missing blocks/txs into db
 		for {
+			// increment for fetching next (after last added to DB) block from ledger
+			blockCounter++
+
 			customBlock, err := blockfetcher.GetBlock(fab.LedgerClient, blockCounter)
 			if err != nil {
 				break
@@ -67,8 +68,7 @@ func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
 					//log.Printf("\nBlock finded\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload:=%s\n", block.Blocknum, block.Hash, block.Txid, block.Payload)
 					fab.Db.Insert(block.Txid, block.Hash, block.Blocknum, block.Payload)
 				}
-			}
-			blockCounter++
+			} else { break }
 		}
 	}
 	wg.Done()
