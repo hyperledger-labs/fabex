@@ -19,6 +19,7 @@ package fabexclient
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 	"github.com/vadiminshakov/fabex/db"
 	"github.com/vadiminshakov/fabex/models"
 	pb "github.com/vadiminshakov/fabex/proto"
@@ -36,7 +37,7 @@ func New(addr, port string) (*FabexClient, error) {
 
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", addr, port), grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("failed to connect: %s", err)
+		return nil, errors.Wrap(err, "failed to connect")
 	}
 
 	return &FabexClient{pb.NewFabexClient(conn)}, nil
