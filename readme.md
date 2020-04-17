@@ -20,9 +20,10 @@
     1. set initial user name and password in `db/mongo-compose/docker-compose.yaml`
     2. start container:
     
-        `cd db/mongo-compose`
-        `docker-compose -f docker-compose.yaml up -d`
-
+    ```
+        cd db/mongo-compose
+        docker-compose -f docker-compose.yaml up -d
+    ```
 ### <a name="cli">**CLI**</a>
 1. Build Fabex executable binary file:  
 
