@@ -29,7 +29,7 @@ type DbManager interface {
 
 type Tx struct {
 	Txid     string `json:"txid" bson:"Txid"`
-	Hash     string `json:"blockhash" bson:"Blockhash"`
+	Hash     string `json:"hash" bson:"Hash"`
 	Blocknum uint64 `json:"blocknum" bson:"Blocknum"`
 	Payload  string `json:"payload" bson:"Payload"`
 }
