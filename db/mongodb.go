@@ -63,10 +63,10 @@ func (db *DBmongo) Connect() error {
 	return nil
 }
 
-func (db *DBmongo) Insert(txid, blockhash string, blocknum uint64, payload string) error {
+func (db *DBmongo) Insert(tx Tx) error {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	_, err := collection.InsertOne(ctx, bson.M{"Txid": txid, "Hash": blockhash, "Blocknum": blocknum, "Payload": payload})
+	_, err := collection.InsertOne(ctx, bson.M{"Txid": tx.Txid, "Hash": tx.Hash, "PreviousHash": tx.PreviousHash, "Blocknum": tx.Blocknum, "Payload": tx.Payload, "ValidationCode": tx.ValidationCode})
 	if err != nil {
 		return err
 	}
