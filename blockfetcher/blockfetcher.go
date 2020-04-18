@@ -19,7 +19,6 @@ package blockfetcher
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
@@ -28,6 +27,7 @@ import (
 	"github.com/hyperledger/fabric/protos/utils"
 	"github.com/vadiminshakov/fabex/db"
 	"github.com/vadiminshakov/fabex/models"
+	"strings"
 )
 
 type CustomBlock struct {
@@ -39,12 +39,18 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 
 	block, err := ledgerClient.QueryBlock(blocknum)
 	if err != nil {
-		//fmt.Printf("Failed to query block %d: %s", blocknum, err)
+		// skip if it's just the end of the blockchain
+		if strings.Contains(err.Error(), "Entry not found in index") {
+			return nil, nil
+		}
 		return nil, err
 	}
 
 	// get block hash
 	hash := hex.EncodeToString(block.Header.DataHash)
+
+	// get hash of the previous block
+	previoushash := hex.EncodeToString(block.Header.PreviousHash)
 
 	rawdata := block.GetData()
 	for _, value := range rawdata.Data {
@@ -53,68 +59,67 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 		processedtx := &peer.ProcessedTransaction{}
 		proto.Unmarshal(value, processedtx)
 		if err != nil {
-			fmt.Printf("Failed to unmarshal: %s", err)
+			return nil, err
 		}
 		validationCode := processedtx.GetValidationCode()
 
-		if validationCode == 0 {
-			envelope, err := utils.GetEnvelopeFromBlock(value)
-			if err != nil {
-				//fmt.Printf("Can't extract envelope: ", err)
-				return nil, err
-			}
+		envelope, err := utils.GetEnvelopeFromBlock(value)
+		if err != nil {
+			return nil, err
+		}
 
-			action, _ := utils.GetActionFromEnvelopeMsg(envelope)
-			actionResults := action.GetResults()
+		action, _ := utils.GetActionFromEnvelopeMsg(envelope)
+		actionResults := action.GetResults()
 
-			ReadWriteSet := &rwset.TxReadWriteSet{}
+		ReadWriteSet := &rwset.TxReadWriteSet{}
 
-			err = proto.Unmarshal(actionResults, ReadWriteSet)
-			if err != nil {
-				//fmt.Printf("Failed to unmarshal: %s", err)
-				return nil, err
-			}
+		err = proto.Unmarshal(actionResults, ReadWriteSet)
+		if err != nil {
+			//fmt.Printf("Failed to unmarshal: %s", err)
+			return nil, err
+		}
 
-			txRWSet, err := rwsetutil.TxRwSetFromProtoMsg(ReadWriteSet)
-			if err != nil {
-				//fmt.Printf("Failed to convert rwset.TxReadWriteSet to rwsetutil.TxRWSet: %s", err)
-				return nil, err
-			}
+		txRWSet, err := rwsetutil.TxRwSetFromProtoMsg(ReadWriteSet)
+		if err != nil {
+			//fmt.Printf("Failed to convert rwset.TxReadWriteSet to rwsetutil.TxRWSet: %s", err)
+			return nil, err
+		}
 
-			//get tx id
-			bytesEnvelope, err := utils.GetBytesEnvelope(envelope)
-			if err != nil {
-				//fmt.Printf("Can't convert common.Envelope to bytes: ", err)
-				return nil, err
-			}
-			bytesTxId, err := utils.GetOrComputeTxIDFromEnvelope(bytesEnvelope)
-			if err != nil {
-				return nil, err
-			}
+		//get tx id
+		bytesEnvelope, err := utils.GetBytesEnvelope(envelope)
+		if err != nil {
+			//fmt.Printf("Can't convert common.Envelope to bytes: ", err)
+			return nil, err
+		}
+		bytesTxId, err := utils.GetOrComputeTxIDFromEnvelope(bytesEnvelope)
+		if err != nil {
+			return nil, err
+		}
 
-			for _, nsRwSet := range txRWSet.NsRwSets {
+		for _, nsRwSet := range txRWSet.NsRwSets {
 
-				// get only those txs that changes state
-				if len(nsRwSet.KvRwSet.Writes) != 0 {
+			// get only those txs that changes state
+			if len(nsRwSet.KvRwSet.Writes) != 0 {
 
-					var stringedPayload []models.Chaincode
-					for _, write := range nsRwSet.KvRwSet.Writes {
-						stringedPayload = append(stringedPayload, models.Chaincode{Key: write.Key, Value: string(write.Value)})
-					}
-
-					jsonPayload, err := json.Marshal(stringedPayload)
-					if err != nil {
-						return nil, err
-					}
-					tx := db.Tx{
-						bytesTxId,
-						hash,
-						blocknum,
-						string(jsonPayload),
-					}
-					customBlock.Txs = append(customBlock.Txs, tx)
-
+				var stringedPayload []models.Chaincode
+				for _, write := range nsRwSet.KvRwSet.Writes {
+					stringedPayload = append(stringedPayload, models.Chaincode{Key: write.Key, Value: string(write.Value)})
 				}
+
+				jsonPayload, err := json.Marshal(stringedPayload)
+				if err != nil {
+					return nil, err
+				}
+				tx := db.Tx{
+					bytesTxId,
+					hash,
+					previoushash,
+					blocknum,
+					string(jsonPayload),
+					validationCode,
+				}
+				customBlock.Txs = append(customBlock.Txs, tx)
+
 			}
 		}
 	}
