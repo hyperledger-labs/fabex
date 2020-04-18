@@ -19,7 +19,7 @@ package db
 type DbManager interface {
 	Connect() error
 	Init() error
-	Insert(string, string, uint64, string) error
+	Insert(Tx) error
 	QueryBlockByHash(hash string) ([]Tx, error)
 	GetByTxId(string) ([]Tx, error)
 	GetByBlocknum(uint64) ([]Tx, error)
@@ -28,15 +28,19 @@ type DbManager interface {
 }
 
 type Tx struct {
-	Txid     string `json:"txid" bson:"Txid"`
-	Hash     string `json:"hash" bson:"Hash"`
-	Blocknum uint64 `json:"blocknum" bson:"Blocknum"`
-	Payload  string `json:"payload" bson:"Payload"`
+	Txid           string `json:"txid" bson:"Txid"`
+	Hash           string `json:"hash" bson:"Hash"`
+	PreviousHash   string `json:"previoushash" bson:"PreviousHash"`
+	Blocknum       uint64 `json:"blocknum" bson:"Blocknum"`
+	Payload        string `json:"payload" bson:"Payload"`
+	ValidationCode int32  `json:"validationcode" bson:"ValidationCode"`
 }
 
 type RequestFilter struct {
-	Txid     string
-	Hash     string
-	Blocknum uint64
-	Payload  string
+	Txid           string
+	Hash           string
+	PreviousHash   string
+	Blocknum       uint64
+	Payload        string
+	ValidationCode int32
 }
