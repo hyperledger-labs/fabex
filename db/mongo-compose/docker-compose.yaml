@@ -20,10 +20,5 @@ services:
       # seeding scripts
       - ./mongo-entrypoint:/docker-entrypoint-initdb.d
       # named volumes
-      - mongodb:/data/db
-      - mongoconfig:/data/configdb
-
-volumes:
-  # default dir on Ubuntu: /var/lib/docker/volumes
-  mongodb:
-  mongoconfig:
+      - /etc/mongodb:/data/db
+      - /etc/mongoconfig:/data/configdb
