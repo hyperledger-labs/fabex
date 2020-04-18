@@ -25,6 +25,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/vadiminshakov/fabex/blockfetcher"
@@ -54,7 +55,7 @@ func main() {
 	blocknum := flag.Uint64("blocknum", 0, "block number")
 	confpath := flag.String("configpath", "./", "path to YAML config")
 	confname := flag.String("configname", "config", "name of YAML config")
-	databaseSelected := flag.String("db", "mongo", "select database (mongo or postgres)")
+	databaseSelected := flag.String("db", "mongo", "select database")
 
 	flag.Parse()
 
@@ -72,11 +73,11 @@ func main() {
 		log.Fatalf("unable to decode into struct, %v", err)
 	}
 
-	fmt.Println("Reading connection profile..")
+	log.Println("Reading connection profile..")
 	c := config.FromFile(globalConfig.Fabric.ConnectionProfile)
 	sdk, err := fabsdk.New(c)
 	if err != nil {
-		fmt.Printf("Failed to create new SDK: %s\n", err)
+		log.Printf("Failed to create new SDK: %s\n", err)
 		os.Exit(1)
 	}
 	defer sdk.Close()
@@ -89,13 +90,13 @@ func main() {
 	clientChannelContext := sdk.ChannelContext(globalConfig.Fabric.Channel, fabsdk.WithUser(globalConfig.Fabric.User), fabsdk.WithOrg(globalConfig.Fabric.Org))
 	ledgerClient, err := ledger.New(clientChannelContext)
 	if err != nil {
-		fmt.Printf("Failed to create channel [%s] client: %#v", globalConfig.Fabric.Channel, err)
+		log.Printf("Failed to create channel [%s] client: %#v", globalConfig.Fabric.Channel, err)
 		os.Exit(1)
 	}
 
 	channelclient, err := channel.New(clientChannelContext)
 	if err != nil {
-		fmt.Printf("Failed to create channel [%s], error: %s", globalConfig.Fabric.Channel, err)
+		log.Printf("Failed to create channel [%s], error: %s", globalConfig.Fabric.Channel, err)
 	}
 
 	// choose database
@@ -103,8 +104,6 @@ func main() {
 	switch *databaseSelected {
 	case "mongo":
 		dbInstance = db.CreateDBConfMongo(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname, globalConfig.DB.Collection)
-	case "postgres":
-		dbInstance = db.CreateDBConfPostgres(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname)
 	}
 
 	var fabex *models.Fabex
@@ -120,7 +119,7 @@ func main() {
 	case "initdb":
 		err = fabex.Db.Init()
 		if err != nil {
-			fmt.Printf("Failed to create table: %s", err)
+			log.Printf("Failed to create table: %s", err)
 			return
 		}
 		log.Println("Database and table created successfully")
@@ -130,9 +129,9 @@ func main() {
 		if err != nil {
 			log.Fatalf("Can't query blockchain info: %s", err)
 		}
-		fmt.Println("BlockChainInfo:", resp.BCI)
-		fmt.Println("Endorser:", resp.Endorser)
-		fmt.Println("Status:", resp.Status)
+		log.Println("BlockChainInfo:", resp.BCI)
+		log.Println("Endorser:", resp.Endorser)
+		log.Println("Status:", resp.Status)
 
 	case "channelconfig":
 		helpers.QueryChannelConfig(fabex.LedgerClient)
@@ -140,6 +139,7 @@ func main() {
 	case "getblock":
 		customBlock, err := blockfetcher.GetBlock(fabex.LedgerClient, *blocknum)
 		if err != nil {
+			log.Printf("GetBlock error: %s", err)
 			break
 		}
 
@@ -152,9 +152,9 @@ func main() {
 					log.Printf("Unmarshalling error: %s", err)
 				}
 
-				fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", block.Blocknum, block.Hash, block.Txid)
+				log.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", block.Blocknum, block.Hash, block.Txid)
 				for _, val := range cc {
-					fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
+					log.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
 				}
 
 			}
@@ -208,9 +208,9 @@ func main() {
 				log.Printf("Unmarshalling error: %s", err)
 			}
 
-			fmt.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", tx.Blocknum, tx.Hash, tx.Txid)
+			log.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", tx.Blocknum, tx.Hash, tx.Txid)
 			for _, val := range cc {
-				fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
+				log.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
 			}
 
 		}
@@ -240,8 +240,7 @@ func (s *fabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServe
 	for blockCounter <= uint64(req.Endblock) {
 		customBlock, err := blockfetcher.GetBlock(s.Conf.LedgerClient, blockCounter)
 		if err != nil {
-			log.Printf("GetBlock error: %s", err)
-			break
+			return errors.Wrap(err, "GetBlock error")
 		}
 
 		if customBlock != nil {
