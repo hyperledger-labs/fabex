@@ -24,6 +24,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
+	"github.com/pkg/errors"
 	"github.com/vadiminshakov/fabex/blockfetcher"
 	"github.com/vadiminshakov/fabex/models"
 	"sync"
@@ -76,13 +77,13 @@ func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
 
 			customBlock, err := blockfetcher.GetBlock(fab.LedgerClient, blockCounter)
 			if err != nil {
-				break
+				return errors.Wrap(err, "GetBlock error")
 			}
 
 			if customBlock != nil {
-				for _, block := range customBlock.Txs {
+				for _, tx := range customBlock.Txs {
 					//log.Printf("\nBlock finded\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload:=%s\n", block.Blocknum, block.Hash, block.Txid, block.Payload)
-					fab.Db.Insert(block.Txid, block.Hash, block.Blocknum, block.Payload)
+					fab.Db.Insert(tx)
 				}
 			} else {
 				break
