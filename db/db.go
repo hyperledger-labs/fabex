@@ -39,11 +39,11 @@ type Tx struct {
 }
 
 type Entry struct {
-	ChannelId      string
-	Txid           string
-	Hash           string
-	PreviousHash   string
-	Blocknum       uint64
-	Payload        string
-	Time           int64
+	ChannelId    string
+	Txid         string
+	Hash         string
+	PreviousHash string
+	Blocknum     uint64
+	Payload      string
+	Time         int64
 }
