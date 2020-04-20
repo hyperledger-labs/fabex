@@ -62,7 +62,7 @@ type Chaincode struct {
 }
 
 type Block struct {
-	ChannelId    string `json:"channelid" bson:"ChannelId"`
+	ChannelId    string `json:"channelid"`
 	BlockHash    string `json:"blockhash"`
 	PreviousHash string `json:"previoushash"`
 	Blocknum     uint64 `json:"blocknum"`
