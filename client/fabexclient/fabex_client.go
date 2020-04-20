@@ -163,7 +163,7 @@ func (fabexCli *FabexClient) PackTxsToBlocks(blocks []db.Tx) ([]models.Block, er
 			tx.KW = append(tx.KW, models.KW{item.Key, item.Value})
 		}
 
-		block.Tx = append(block.Tx, tx)
+		block.Tx = append(block.Txs, tx)
 		Blocks = append(Blocks, block)
 		blockAlreadyRead[in.Blocknum] = true
 	}
