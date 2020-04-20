@@ -66,7 +66,7 @@ func (db *DBmongo) Connect() error {
 func (db *DBmongo) Insert(tx Tx) error {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	_, err := collection.InsertOne(ctx, bson.M{"Txid": tx.Txid, "Hash": tx.Hash, "PreviousHash": tx.PreviousHash, "Blocknum": tx.Blocknum, "Payload": tx.Payload, "ValidationCode": tx.ValidationCode})
+	_, err := collection.InsertOne(ctx, bson.M{"ChannelId": tx.ChannelId, "Txid": tx.Txid, "Hash": tx.Hash, "PreviousHash": tx.PreviousHash, "Blocknum": tx.Blocknum, "Payload": tx.Payload, "ValidationCode": tx.ValidationCode, "Time": tx.Time})
 	if err != nil {
 		return err
 	}

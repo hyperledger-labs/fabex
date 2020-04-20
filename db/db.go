@@ -28,19 +28,22 @@ type DbManager interface {
 }
 
 type Tx struct {
+	ChannelId      string `json:"channelid" bson:"ChannelId"`
 	Txid           string `json:"txid" bson:"Txid"`
 	Hash           string `json:"hash" bson:"Hash"`
 	PreviousHash   string `json:"previoushash" bson:"PreviousHash"`
 	Blocknum       uint64 `json:"blocknum" bson:"Blocknum"`
 	Payload        string `json:"payload" bson:"Payload"`
 	ValidationCode int32  `json:"validationcode" bson:"ValidationCode"`
+	Time           int64  `json:"time" bson:"Time"`
 }
 
-type RequestFilter struct {
+type Entry struct {
+	ChannelId      string
 	Txid           string
 	Hash           string
 	PreviousHash   string
 	Blocknum       uint64
 	Payload        string
-	ValidationCode int32
+	Time           int64
 }

@@ -245,7 +245,7 @@ func (s *fabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServe
 
 		if customBlock != nil {
 			for _, block := range customBlock.Txs {
-				stream.Send(&pb.Reply{Txid: block.Txid, Hash: block.Hash, Blocknum: block.Blocknum, Payload: block.Payload})
+				stream.Send(&pb.Entry{Txid: block.Txid, Hash: block.Hash, Blocknum: block.Blocknum, Payload: block.Payload})
 			}
 		}
 		blockCounter++
@@ -254,7 +254,7 @@ func (s *fabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServe
 	return nil
 }
 
-func (s *fabexServer) GetByTxId(req *pb.RequestFilter, stream pb.Fabex_GetByTxIdServer) error {
+func (s *fabexServer) GetByTxId(req *pb.Entry, stream pb.Fabex_GetByTxIdServer) error {
 
 	QueryResults, err := s.Conf.Db.GetByTxId(req.Txid)
 	if err != nil {
@@ -262,33 +262,33 @@ func (s *fabexServer) GetByTxId(req *pb.RequestFilter, stream pb.Fabex_GetByTxId
 	}
 
 	for _, queryResult := range QueryResults {
-		stream.Send(&pb.Reply{Txid: queryResult.Txid, Hash: queryResult.Hash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload})
+		stream.Send(&pb.Entry{Txid: queryResult.Txid, Hash: queryResult.Hash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload})
 	}
 
 	return nil
 }
 
-func (s *fabexServer) GetByBlocknum(req *pb.RequestFilter, stream pb.Fabex_GetByBlocknumServer) error {
+func (s *fabexServer) GetByBlocknum(req *pb.Entry, stream pb.Fabex_GetByBlocknumServer) error {
 	QueryResults, err := s.Conf.Db.GetByBlocknum(req.Blocknum)
 	if err != nil {
 		return err
 	}
 
 	for _, queryResult := range QueryResults {
-		stream.Send(&pb.Reply{Txid: queryResult.Txid, Hash: queryResult.Hash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload})
+		stream.Send(&pb.Entry{Txid: queryResult.Txid, Hash: queryResult.Hash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload})
 	}
 
 	return nil
 }
 
-func (s *fabexServer) GetBlockInfoByPayload(req *pb.RequestFilter, stream pb.Fabex_GetBlockInfoByPayloadServer) error {
+func (s *fabexServer) GetBlockInfoByPayload(req *pb.Entry, stream pb.Fabex_GetBlockInfoByPayloadServer) error {
 	QueryResults, err := s.Conf.Db.GetBlockInfoByPayload(req.Payload)
 	if err != nil {
 		return err
 	}
 
 	for _, queryResult := range QueryResults {
-		stream.Send(&pb.Reply{Txid: queryResult.Txid, Hash: queryResult.Hash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload})
+		stream.Send(&pb.Entry{Txid: queryResult.Txid, Hash: queryResult.Hash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload})
 	}
 
 	return nil
