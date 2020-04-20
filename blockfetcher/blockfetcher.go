@@ -20,6 +20,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
 	"github.com/hyperledger/fabric/protos/ledger/rwset"
@@ -68,6 +69,19 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 			return nil, err
 		}
 
+		// get ChannelHeader
+		channelHeader, err := utils.ChannelHeader(envelope)
+		if err != nil {
+			return nil, err
+		}
+
+		// get timestamp
+		timeInBlock, err := ptypes.Timestamp(channelHeader.Timestamp)
+		if err != nil {
+			return nil, err
+		}
+
+		// get RW sets
 		action, _ := utils.GetActionFromEnvelopeMsg(envelope)
 		actionResults := action.GetResults()
 
@@ -91,7 +105,7 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 			//fmt.Printf("Can't convert common.Envelope to bytes: ", err)
 			return nil, err
 		}
-		bytesTxId, err := utils.GetOrComputeTxIDFromEnvelope(bytesEnvelope)
+		TxId, err := utils.GetOrComputeTxIDFromEnvelope(bytesEnvelope)
 		if err != nil {
 			return nil, err
 		}
@@ -111,12 +125,14 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 					return nil, err
 				}
 				tx := db.Tx{
-					bytesTxId,
+					channelHeader.ChannelId,
+					TxId,
 					hash,
 					previoushash,
 					blocknum,
 					string(jsonPayload),
 					validationCode,
+					timeInBlock.Unix(),
 				}
 				customBlock.Txs = append(customBlock.Txs, tx)
 

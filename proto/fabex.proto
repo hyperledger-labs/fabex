@@ -1,11 +1,12 @@
 syntax = "proto3";
 package fabex;
+option go_package = "github.com/vadiminshakov/fabex/proto";
 
 service Fabex {
-    rpc Explore(RequestRange) returns (stream Reply);
-    rpc GetByTxId(RequestFilter) returns (stream Reply);
-    rpc GetByBlocknum(RequestFilter) returns (stream Reply);
-    rpc GetBlockInfoByPayload(RequestFilter) returns (stream Reply);
+    rpc Explore(RequestRange) returns (stream Entry);
+    rpc GetByTxId(Entry) returns (stream Entry);
+    rpc GetByBlocknum(Entry) returns (stream Entry);
+    rpc GetBlockInfoByPayload(Entry) returns (stream Entry);
 }
 
 message RequestRange {
@@ -13,16 +14,11 @@ message RequestRange {
     int64 endblock = 2;
 }
 
-message Reply {
-    string txid = 1;
-    string hash = 2;
-    uint64 blocknum = 3;
-    string payload = 4;
-}
-
-message RequestFilter {
-    string txid = 1;
-    string hash = 2;
-    uint64 blocknum = 3;
-    string payload = 4;
+message Entry {
+    string channelid = 1;
+    string txid = 2;
+    string hash = 3;
+    string previoushash = 4;
+    uint64 blocknum = 5;
+    string payload = 6;
 }
