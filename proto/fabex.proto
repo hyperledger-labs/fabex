@@ -21,4 +21,5 @@ message Entry {
     string previoushash = 4;
     uint64 blocknum = 5;
     string payload = 6;
+    int64  time = 7;
 }
