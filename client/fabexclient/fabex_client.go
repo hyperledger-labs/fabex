@@ -62,7 +62,7 @@ func (fabexCli *FabexClient) Explore(startblock, endblock int) error {
 			log.Println(err)
 			return err
 		}
-		log.Printf("\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload: %s\n", in.Blocknum, in.Hash, in.Txid, in.Payload)
+		log.Printf("\nChannel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\nTx id: %s\nPayload: %s\nBlock timestamp: %s\n", in.Channelid, in.Blocknum, in.Hash, in.Previoushash, in.Txid, in.Payload, in.Time)
 	}
 
 	return nil
@@ -87,7 +87,7 @@ func (fabexCli *FabexClient) GetByTxId(filter *pb.Entry) ([]db.Tx, error) {
 		if err != nil {
 			return txs, err
 		}
-		txs = append(txs, db.Tx{Hash: in.Hash, Txid: in.Txid, Blocknum: in.Blocknum, Payload: in.Payload})
+		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Payload: in.Payload, Time: in.Time})
 	}
 }
 
@@ -109,7 +109,7 @@ func (fabexCli *FabexClient) GetByBlocknum(filter *pb.Entry) ([]db.Tx, error) {
 		if err != nil {
 			return txs, err
 		}
-		txs = append(txs, db.Tx{Hash: in.Hash, Txid: in.Txid, Blocknum: in.Blocknum, Payload: in.Payload})
+		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Payload: in.Payload, Time: in.Time})
 	}
 }
 
@@ -132,7 +132,7 @@ func (fabexCli *FabexClient) GetBlockInfoByPayload(filter *pb.Entry) ([]db.Tx, e
 		if err != nil {
 			return txs, err
 		}
-		txs = append(txs, db.Tx{Hash: in.Hash, Txid: in.Txid, Blocknum: in.Blocknum, Payload: in.Payload})
+		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Payload: in.Payload, Time: in.Time})
 	}
 }
 
