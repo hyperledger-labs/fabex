@@ -62,14 +62,18 @@ type Chaincode struct {
 }
 
 type Block struct {
-	BlockHash string `json:"blockhash"`
-	Blocknum  uint64 `json:"blocknum"`
-	Tx        []Tx   `json:"txs"`
+	ChannelId    string `json:"channelid" bson:"ChannelId"`
+	BlockHash    string `json:"blockhash"`
+	PreviousHash string `json:"previoushash"`
+	Blocknum     uint64 `json:"blocknum"`
+	Txs          []Tx   `json:"txs"`
+	Time         int64  `json:"time" bson:"Time"`
 }
 
 type Tx struct {
-	Txid string `json:"txid"`
-	KW   []KW
+	Txid           string `json:"txid"`
+	KW             []KW
+	ValidationCode int32 `json:"validationcode"`
 }
 
 type KW struct {
