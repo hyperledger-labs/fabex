@@ -68,7 +68,7 @@ func (fabexCli *FabexClient) Explore(startblock, endblock int) error {
 	return nil
 }
 
-func (fabexCli *FabexClient) GetByTxId(filter *pb.RequestFilter) ([]db.Tx, error) {
+func (fabexCli *FabexClient) GetByTxId(filter *pb.Entry) ([]db.Tx, error) {
 
 	stream, err := fabexCli.Client.GetByTxId(context.Background(), filter)
 	if err != nil {
@@ -91,7 +91,7 @@ func (fabexCli *FabexClient) GetByTxId(filter *pb.RequestFilter) ([]db.Tx, error
 	}
 }
 
-func (fabexCli *FabexClient) GetByBlocknum(filter *pb.RequestFilter) ([]db.Tx, error) {
+func (fabexCli *FabexClient) GetByBlocknum(filter *pb.Entry) ([]db.Tx, error) {
 
 	stream, err := fabexCli.Client.GetByBlocknum(context.Background(), filter)
 	if err != nil {
@@ -113,7 +113,7 @@ func (fabexCli *FabexClient) GetByBlocknum(filter *pb.RequestFilter) ([]db.Tx, e
 	}
 }
 
-func (fabexCli *FabexClient) GetBlockInfoByPayload(filter *pb.RequestFilter) ([]db.Tx, error) {
+func (fabexCli *FabexClient) GetBlockInfoByPayload(filter *pb.Entry) ([]db.Tx, error) {
 
 	stream, err := fabexCli.Client.GetBlockInfoByPayload(context.Background(), filter)
 	if err != nil {
@@ -145,10 +145,13 @@ func (fabexCli *FabexClient) PackTxsToBlocks(blocks []db.Tx) ([]models.Block, er
 			block models.Block
 			tx    models.Tx
 		)
+
 		if _, ok := blockAlreadyRead[in.Blocknum]; !ok {
-			block = models.Block{Blocknum: in.Blocknum, BlockHash: in.Hash}
+			block = models.Block{ChannelId: in.ChannelId, Blocknum: in.Blocknum, BlockHash: in.Hash, PreviousHash: in.PreviousHash, Time: in.Time}
 		}
+
 		tx.Txid = in.Txid
+		tx.ValidationCode = in.ValidationCode
 
 		var ccData []models.Chaincode
 		err := json.Unmarshal([]byte(in.Payload), &ccData)
