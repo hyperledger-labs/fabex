@@ -244,8 +244,8 @@ func (s *fabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServe
 		}
 
 		if customBlock != nil {
-			for _, block := range customBlock.Txs {
-				stream.Send(&pb.Entry{Txid: block.Txid, Hash: block.Hash, Blocknum: block.Blocknum, Payload: block.Payload})
+			for _, queryResult := range customBlock.Txs {
+				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
 			}
 		}
 		blockCounter++
@@ -262,7 +262,7 @@ func (s *fabexServer) GetByTxId(req *pb.Entry, stream pb.Fabex_GetByTxIdServer) 
 	}
 
 	for _, queryResult := range QueryResults {
-		stream.Send(&pb.Entry{Txid: queryResult.Txid, Hash: queryResult.Hash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload})
+		stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
 	}
 
 	return nil
@@ -275,7 +275,7 @@ func (s *fabexServer) GetByBlocknum(req *pb.Entry, stream pb.Fabex_GetByBlocknum
 	}
 
 	for _, queryResult := range QueryResults {
-		stream.Send(&pb.Entry{Txid: queryResult.Txid, Hash: queryResult.Hash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload})
+		stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
 	}
 
 	return nil
@@ -288,7 +288,7 @@ func (s *fabexServer) GetBlockInfoByPayload(req *pb.Entry, stream pb.Fabex_GetBl
 	}
 
 	for _, queryResult := range QueryResults {
-		stream.Send(&pb.Entry{Txid: queryResult.Txid, Hash: queryResult.Hash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload})
+		stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
 	}
 
 	return nil
