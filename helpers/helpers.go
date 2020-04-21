@@ -27,10 +27,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/vadiminshakov/fabex/blockfetcher"
 	"github.com/vadiminshakov/fabex/models"
-	"sync"
 )
 
-func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
+func Explore(fab *models.Fabex) error {
 	// check we have up-to-date db or not
 	// get last block hash
 	resp, err := QueryChannelInfo(fab.LedgerClient)
@@ -90,7 +89,6 @@ func Explore(wg *sync.WaitGroup, fab *models.Fabex) error {
 			}
 		}
 	}
-	wg.Done()
 	return nil
 }
 
