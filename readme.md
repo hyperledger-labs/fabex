@@ -13,9 +13,7 @@
 
 2. Start your Fabric blockchain network or sample [fist network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network)
 
-3. Install and start PostgresSQL or MongoDB
-
-    example for MongoDB: 
+3. Install and start MongoDB
     
     1. set initial user name and password in `db/mongo-compose/docker-compose.yaml`
     2. start container:
@@ -33,11 +31,7 @@
 
     `./fabex --enrolluser true`
 
-3. [For Postgres] Create database and table for data saving:  
-
-    `./fabex --task initdb --configpath ./ --configname config`
-
-4. Save blocks data to db:
+3. Save blocks data to db:
 
     `./fabex --task explore --configpath ./ --configname config`
     
@@ -57,15 +51,11 @@ Also you can start service for fetching blocks in daemon mode:
 
 ---
 
-You can choose PostgresSQL or MongoDB for data saving and retrieving with `--db flag`:
-
-    `./fabex --task getall ---configpath ./ --configname config --db postgres`
+You can choose database for data saving and retrieving with `--db flag` (now only MongoDB supported):
 
     `./fabex --task explore --configpath ./ --configname config --db mongo`
 
 ---
-
-
 
 ### <a name="microservice">**Microservice mode**</a>
 
