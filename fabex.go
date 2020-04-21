@@ -36,8 +36,6 @@ import (
 	"google.golang.org/grpc"
 	"net"
 	"os"
-	"sync"
-	"time"
 )
 
 var (
@@ -51,7 +49,6 @@ func main() {
 	enrolluser := flag.Bool("enrolluser", false, "enroll user (true) or not (false)")
 	task := flag.String("task", "query", "choose the task to execute")
 	forever := flag.Bool("forever", false, "explore ledger forever")
-	interval := flag.String("interval", "1s", "time interval for exploring blocks in forever mode (1s, 1h, etc)")
 	blocknum := flag.Uint64("blocknum", 0, "block number")
 	confpath := flag.String("configpath", "./", "path to YAML config")
 	confname := flag.String("configname", "config", "name of YAML config")
@@ -139,8 +136,7 @@ func main() {
 	case "getblock":
 		customBlock, err := blockfetcher.GetBlock(fabex.LedgerClient, *blocknum)
 		if err != nil {
-			log.Printf("GetBlock error: %s", err)
-			break
+			log.Fatalf("GetBlock error: %s", err)
 		}
 
 		if customBlock != nil {
@@ -149,47 +145,31 @@ func main() {
 
 				err = json.Unmarshal([]byte(block.Payload), &cc)
 				if err != nil {
-					log.Printf("Unmarshalling error: %s", err)
+					log.Fatalf("Unmarshalling error: %s", err)
 				}
 
 				log.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", block.Blocknum, block.Hash, block.Txid)
 				for _, val := range cc {
-					log.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
+					log.Fatalf("Key: %s\nValue: %s\n", val.Key, val.Value)
 				}
 
 			}
 		}
 
 	case "explore":
-		wg := &sync.WaitGroup{}
 		if *forever {
-			duration, err := time.ParseDuration(*interval)
-			if err != nil {
-				log.Fatal("Can't to parse time interval")
-			}
-			ticker := time.NewTicker(duration)
 			for {
-				select {
-				case <-ticker.C:
-					wg.Add(1)
-					go func() {
-						err = helpers.Explore(wg, fabex)
-						if err != nil {
-							log.Println(err)
-						}
-					}()
-					wg.Wait()
+				err = helpers.Explore(fabex)
+				if err != nil {
+					log.Fatal(err)
 				}
 			}
 		} else {
-			wg.Add(1)
-			go func() {
-				err = helpers.Explore(wg, fabex)
+				err = helpers.Explore(fabex)
 				if err != nil {
-					log.Println(err)
+					log.Fatal(err)
 				}
-			}()
-			wg.Wait()
+
 			log.Println("All blocks saved")
 		}
 
@@ -205,19 +185,19 @@ func main() {
 
 			err = json.Unmarshal([]byte(tx.Payload), &cc)
 			if err != nil {
-				log.Printf("Unmarshalling error: %s", err)
+				log.Fatalf("Unmarshalling error: %s", err)
 			}
 
 			log.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", tx.Blocknum, tx.Hash, tx.Txid)
 			for _, val := range cc {
-				log.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
+				log.Fatalf("Key: %s\nValue: %s\n", val.Key, val.Value)
 			}
 
 		}
 
 	case "grpc":
 		serv := NewFabexServer(globalConfig.GRPCServer.Host, globalConfig.GRPCServer.Port, fabex)
-		StartGrpcServ(serv, fabex, *interval)
+		StartGrpcServ(serv, fabex)
 	}
 }
 
@@ -294,7 +274,7 @@ func (s *fabexServer) GetBlockInfoByPayload(req *pb.Entry, stream pb.Fabex_GetBl
 	return nil
 }
 
-func StartGrpcServ(serv *fabexServer, fabex *models.Fabex, interval string) {
+func StartGrpcServ(serv *fabexServer, fabex *models.Fabex) {
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterFabexServer(grpcServer, serv)
@@ -307,23 +287,10 @@ func StartGrpcServ(serv *fabexServer, fabex *models.Fabex, interval string) {
 
 	// start explorer
 	go func() {
-		wg := &sync.WaitGroup{}
-		duration, err := time.ParseDuration(interval)
-		if err != nil {
-			log.Fatal("Can't to parse time interval")
-		}
-		ticker := time.NewTicker(duration)
 		for {
-			select {
-			case <-ticker.C:
-				wg.Add(1)
-				go func() {
-					err = helpers.Explore(wg, fabex)
-					if err != nil {
-						log.Error(err)
-					}
-				}()
-				wg.Wait()
+			err = helpers.Explore(fabex)
+			if err != nil {
+				log.Fatal(err)
 			}
 		}
 	}()
