@@ -56,7 +56,7 @@ func (db *DBmongo) Connect() error {
 		log.Println("Mongodb connection failed: %s", err)
 		return err
 	}
-	ctx, _ = context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 	err = db.Instance.Ping(ctx, readpref.Primary())
 
 	log.Println("Connected to MongoDB successfully")
@@ -65,7 +65,7 @@ func (db *DBmongo) Connect() error {
 
 func (db *DBmongo) Insert(tx Tx) error {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx := context.Background()
 	_, err := collection.InsertOne(ctx, bson.M{"ChannelId": tx.ChannelId, "Txid": tx.Txid, "Hash": tx.Hash, "PreviousHash": tx.PreviousHash, "Blocknum": tx.Blocknum, "Payload": tx.Payload, "ValidationCode": tx.ValidationCode, "Time": tx.Time})
 	if err != nil {
 		return err
@@ -77,7 +77,8 @@ func (db *DBmongo) Insert(tx Tx) error {
 func (db *DBmongo) QueryBlockByHash(hash string) ([]Tx, error) {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 	filter := bson.M{"Hash": hash}
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+
+	ctx := context.Background()
 	cur, err := collection.Find(ctx, filter)
 	if err != nil {
 		fmt.Println(err)
@@ -106,8 +107,8 @@ func (db *DBmongo) QueryBlockByHash(hash string) ([]Tx, error) {
 func (db *DBmongo) GetByTxId(filter string) ([]Tx, error) {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 	filterOpts := bson.M{"Txid": filter}
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
+	ctx := context.Background()
 	cur, err := collection.Find(ctx, filterOpts)
 	if err != nil {
 		return nil, err
@@ -134,8 +135,7 @@ func (db *DBmongo) GetByBlocknum(filter uint64) ([]Tx, error) {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
 
 	filterOpts := bson.M{"Blocknum": filter}
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-
+	ctx := context.Background()
 	cur, err := collection.Find(ctx, filterOpts)
 	if err != nil {
 		fmt.Println(err)
@@ -168,7 +168,7 @@ func (db *DBmongo) GetBlockInfoByPayload(filter string) ([]Tx, error) {
 		{"Payload", primitive.Regex{Pattern: filter, Options: ""}},
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx := context.Background()
 
 	cur, err := collection.Find(ctx, filterOpts)
 	if err != nil {
@@ -199,7 +199,8 @@ func (db *DBmongo) QueryAll() ([]Tx, error) {
 	arr := []Tx{}
 
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+	ctx := context.Background()
 	cur, err := collection.Find(ctx, bson.D{})
 	if err != nil {
 		log.Fatal(err)
