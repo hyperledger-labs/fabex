@@ -49,25 +49,15 @@ func Explore(fab *models.Fabex) error {
 	// update db if block with current hash not finded
 	var blockCounter uint64
 	if txs == nil {
-		// find latest block in db
-		txs, err := fab.Db.QueryAll()
 
-		if len(txs) != 0 {
-			if err != nil {
-				return err
-			}
-			var max uint64 = txs[0].Blocknum
-			for _, tx := range txs {
-				if tx.Blocknum > max {
-					max = tx.Blocknum
-				}
-			}
-
-			// set blocks counter to latest saved in db block number value
-			blockCounter = max
-		} else {
-			blockCounter = 0
+		// find latest tx in db
+		lastTx, err := fab.Db.GetLastEntry()
+		if err != nil {
+			return errors.Wrap(err, "Can't to get last block")
 		}
+
+		// set blocks counter to latest saved in db block number value
+		blockCounter = lastTx.Blocknum
 
 		// insert missing blocks/txs into db
 		for {
