@@ -25,6 +25,7 @@ type DbManager interface {
 	GetByBlocknum(uint64) ([]Tx, error)
 	GetBlockInfoByPayload(string) ([]Tx, error)
 	QueryAll() ([]Tx, error)
+	GetLastEntry() (Tx, error)
 }
 
 type Tx struct {
