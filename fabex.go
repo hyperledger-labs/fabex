@@ -81,19 +81,21 @@ func main() {
 
 	helpers.SetupLogLevel(lvl)
 	if *enrolluser {
-		helpers.EnrollUser(sdk, globalConfig.Fabric.User, globalConfig.Fabric.Secret)
+		err = helpers.EnrollUser(sdk, globalConfig.Fabric.User, globalConfig.Fabric.Secret)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	clientChannelContext := sdk.ChannelContext(globalConfig.Fabric.Channel, fabsdk.WithUser(globalConfig.Fabric.User), fabsdk.WithOrg(globalConfig.Fabric.Org))
 	ledgerClient, err := ledger.New(clientChannelContext)
 	if err != nil {
-		log.Printf("Failed to create channel [%s] client: %#v", globalConfig.Fabric.Channel, err)
-		os.Exit(1)
+		log.Fatalf("Failed to create channel [%s] client: %#v", globalConfig.Fabric.Channel, err)
 	}
 
 	channelclient, err := channel.New(clientChannelContext)
 	if err != nil {
-		log.Printf("Failed to create channel [%s], error: %s", globalConfig.Fabric.Channel, err)
+		log.Fatalf("Failed to create channel [%s], error: %s", globalConfig.Fabric.Channel, err)
 	}
 
 	// choose database
@@ -107,7 +109,7 @@ func main() {
 	if *task != "initdb" {
 		err = dbInstance.Connect()
 		if err != nil {
-			log.Fatalln("DB connection failed:", err.Error())
+			log.Fatal("DB connection failed:", err.Error())
 		}
 	}
 	fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}
@@ -116,8 +118,7 @@ func main() {
 	case "initdb":
 		err = fabex.Db.Init()
 		if err != nil {
-			log.Printf("Failed to create table: %s", err)
-			return
+			log.Fatalf("Failed to create table: %s", err)
 		}
 		log.Println("Database and table created successfully")
 
@@ -126,12 +127,13 @@ func main() {
 		if err != nil {
 			log.Fatalf("Can't query blockchain info: %s", err)
 		}
-		log.Println("BlockChainInfo:", resp.BCI)
-		log.Println("Endorser:", resp.Endorser)
-		log.Println("Status:", resp.Status)
+		log.Printf("BlockChainInfo: %v\nEndorser: %v\nStatus: %v\n", resp.BCI, resp.Endorser, resp.Status)
 
 	case "channelconfig":
-		helpers.QueryChannelConfig(fabex.LedgerClient)
+		err = helpers.QueryChannelConfig(fabex.LedgerClient)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 	case "getblock":
 		customBlock, err := blockfetcher.GetBlock(fabex.LedgerClient, *blocknum)
@@ -165,10 +167,10 @@ func main() {
 				}
 			}
 		} else {
-				err = helpers.Explore(fabex)
-				if err != nil {
-					log.Fatal(err)
-				}
+			err = helpers.Explore(fabex)
+			if err != nil {
+				log.Fatal(err)
+			}
 
 			log.Println("All blocks saved")
 		}

@@ -18,13 +18,13 @@ package helpers
 
 import (
 	"encoding/hex"
-	"fmt"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/vadiminshakov/fabex/blockfetcher"
 	"github.com/vadiminshakov/fabex/models"
 )
@@ -71,7 +71,6 @@ func Explore(fab *models.Fabex) error {
 
 			if customBlock != nil {
 				for _, tx := range customBlock.Txs {
-					//log.Printf("\nBlock finded\nBlock number: %d\nBlock hash: %s\nTx id: %s\nPayload:=%s\n", block.Blocknum, block.Hash, block.Txid, block.Payload)
 					fab.Db.Insert(tx)
 				}
 			} else {
@@ -82,48 +81,43 @@ func Explore(fab *models.Fabex) error {
 	return nil
 }
 
-func EnrollUser(sdk *fabsdk.FabricSDK, user, secret string) {
+func EnrollUser(sdk *fabsdk.FabricSDK, user, secret string) error {
 	ctx := sdk.Context()
 	mspClient, err := msp.New(ctx)
 	if err != nil {
-		fmt.Printf("Failed to create msp client: %s\n", err)
+		return errors.Wrap(err, "Failed to create msp client")
 	}
 
 	_, err = mspClient.GetSigningIdentity(user)
 	if err == msp.ErrUserNotFound {
-		fmt.Println("Going to enroll user")
+		log.Println("Going to enroll user")
 		err = mspClient.Enroll(user, msp.WithSecret(secret))
 
 		if err != nil {
-			fmt.Printf("Failed to enroll user: %s\n", err)
-		} else {
-			fmt.Printf("Success enroll user: %s\n", user)
+			return errors.Wrap(err, "Failed to enroll user")
 		}
-
+		log.Printf("Success enroll user: %s\n", user)
 	} else if err != nil {
-		fmt.Printf("Failed to get user: %s\n", err)
-	} else {
-		fmt.Printf("User %s already enrolled, skip enrollment.\n", user)
+		return errors.Wrap(err, "Failed to get user")
 	}
+
+	log.Printf("User %s already enrolled, skip enrollment.\n", user)
+	return nil
 }
 
-func QueryChannelConfig(ledgerClient *ledger.Client) {
-	resp1, err := ledgerClient.QueryConfig()
+func QueryChannelConfig(ledgerClient *ledger.Client) error {
+	resp, err := ledgerClient.QueryConfig()
 	if err != nil {
-		fmt.Printf("Failed to queryConfig: %s", err)
+		return errors.Wrap(err, "Failed to queryConfig")
 	}
-	fmt.Println("ChannelID: ", resp1.ID())
-	fmt.Println("Channel Orderers: ", resp1.Orderers())
-	fmt.Println("Channel Versions: ", resp1.Versions())
+	log.Printf("ChannelID: %v\nChannel Orderers: %v\nChannel Versions: %v\n", resp.ID(), resp.Orderers(), resp.Versions())
+
+	return nil
 }
 
 func QueryChannelInfo(ledgerClient *ledger.Client) (*fab.BlockchainInfoResponse, error) {
 	resp, err := ledgerClient.QueryInfo()
-	if err != nil {
-		fmt.Printf("Failed to queryInfo: %s", err)
-		return nil, err
-	}
-	return resp, nil
+	return resp, err
 }
 
 func SetupLogLevel(lvl logging.Level) {
