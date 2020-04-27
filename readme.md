@@ -11,7 +11,7 @@
 
 1. Configure `config.yaml` (it's main config of the Fabex) and `connection-profile.yaml` (Hyperledger Fabric connection profile)
 
-2. Start your Fabric blockchain network or sample [fist network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network)
+2. Start your Fabric blockchain network or sample [first network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network)
 
 3. Install and start MongoDB
     

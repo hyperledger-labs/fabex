@@ -64,8 +64,6 @@ func (fabexCli *FabexClient) Explore(startblock, endblock int) error {
 		}
 		log.Printf("\nChannel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\nTx id: %s\nPayload: %s\nBlock timestamp: %s\n", in.Channelid, in.Blocknum, in.Hash, in.Previoushash, in.Txid, in.Payload, in.Time)
 	}
-
-	return nil
 }
 
 func (fabexCli *FabexClient) GetByTxId(filter *pb.Entry) ([]db.Tx, error) {
