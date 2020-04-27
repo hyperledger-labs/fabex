@@ -1,0 +1,13 @@
+version: '3.6'
+services:
+  cassandra:
+    restart: always
+    container_name: cassandra
+    image: cassandra
+    volumes:
+      - ./cassandra_data:/var/lib/cassandra
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+volumes:
+  cassandra_data:
+    driver: local

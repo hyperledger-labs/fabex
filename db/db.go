@@ -16,7 +16,7 @@
 
 package db
 
-type DbManager interface {
+type Manager interface {
 	Connect() error
 	Init() error
 	Insert(Tx) error

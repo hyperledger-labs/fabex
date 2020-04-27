@@ -99,12 +99,13 @@ func main() {
 	}
 
 	// choose database
-	var dbInstance db.DbManager
+	var dbInstance db.Manager
 	switch *databaseSelected {
 	case "mongo":
 		dbInstance = db.CreateDBConfMongo(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname, globalConfig.DB.Collection)
+	case "cassandra":
+		dbInstance = db.NewCassandraClient(globalConfig.DB.Host)
 	}
-
 	var fabex *models.Fabex
 	if *task != "initdb" {
 		err = dbInstance.Connect()
