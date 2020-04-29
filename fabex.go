@@ -99,15 +99,17 @@ func main() {
 	}
 
 	// choose database
-	var dbInstance db.DbManager
+	var dbInstance db.Manager
 	switch *databaseSelected {
 	case "mongo":
-		dbInstance = db.CreateDBConfMongo(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname, globalConfig.DB.Collection)
+		dbInstance = db.CreateDBConfMongo(globalConfig.Mongo.Host, globalConfig.Mongo.Port, globalConfig.Mongo.Dbuser, globalConfig.Mongo.Dbsecret, globalConfig.Mongo.Dbname, globalConfig.Mongo.Collection)
+	case "cassandra":
+		dbInstance = db.NewCassandraClient(globalConfig.Cassandra.Host, globalConfig.Cassandra.Dbuser, globalConfig.Cassandra.Dbsecret, globalConfig.Cassandra.Keyspace, globalConfig.Cassandra.Columnfamily)
 	}
 
 	var fabex *models.Fabex
 	if *task != "initdb" {
-		err = dbInstance.Connect()
+		err := dbInstance.Connect()
 		if err != nil {
 			log.Fatal("DB connection failed:", err.Error())
 		}
@@ -115,13 +117,6 @@ func main() {
 	fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}
 
 	switch *task {
-	case "initdb":
-		err = fabex.Db.Init()
-		if err != nil {
-			log.Fatalf("Failed to create table: %s", err)
-		}
-		log.Println("Database and table created successfully")
-
 	case "channelinfo":
 		resp, err := helpers.QueryChannelInfo(fabex.LedgerClient)
 		if err != nil {
