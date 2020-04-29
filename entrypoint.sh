@@ -1,2 +1,2 @@
 #!/bin/sh
-/app/fabex --task grpc --configpath /app --configname config --enrolluser true
+/app/fabex -task=grpc -configpath=/app -configname=config -enrolluser=true -db=cassandra

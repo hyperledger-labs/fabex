@@ -29,6 +29,8 @@ import (
 	"github.com/vadiminshakov/fabex/models"
 )
 
+const NOT_FOUND_ERR = "not found"
+
 func Explore(fab *models.Fabex) error {
 	// check we have up-to-date db or not
 	// get last block hash
@@ -48,12 +50,17 @@ func Explore(fab *models.Fabex) error {
 
 	// update db if block with current hash not finded
 	var blockCounter uint64
+
 	if txs == nil {
 
 		// find latest tx in db
 		lastTx, err := fab.Db.GetLastEntry()
-		if err != nil {
+		if err != nil && err.Error() != NOT_FOUND_ERR {
 			return errors.Wrap(err, "Can't to get last block")
+		}
+
+		if err != nil && err.Error() == NOT_FOUND_ERR {
+			lastTx.Blocknum = 0
 		}
 
 		// set blocks counter to latest saved in db block number value
@@ -71,7 +78,10 @@ func Explore(fab *models.Fabex) error {
 
 			if customBlock != nil {
 				for _, tx := range customBlock.Txs {
-					fab.Db.Insert(tx)
+					err = fab.Db.Insert(tx)
+					if err != nil {
+						return err
+					}
 				}
 			} else {
 				break
