@@ -45,9 +45,6 @@ func CreateDBConfMongo(host string, port int, user, password, dbname, collection
 	}
 	return &DBmongo{host, port, user, password, dbname, collection, client}
 }
-func (db *DBmongo) Init() error {
-	return nil
-}
 
 func (db *DBmongo) Connect() error {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
