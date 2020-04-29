@@ -135,3 +135,18 @@ func (db *DBmongo) GetLastEntry() (Tx, error) {
 
 	return tx, nil
 }
+
+func (db *DBmongo) GetLastEntry() (Tx, error) {
+	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
+
+	ctx := context.Background()
+	opts := options.FindOne().SetSort(bson.D{{"_id", -1}})
+
+	var tx Tx
+	err := collection.FindOne(ctx, bson.D{}, opts).Decode(&tx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return tx, nil
+}
