@@ -1,22 +1,27 @@
 package db
 
 import (
+	"encoding/json"
+	"fmt"
+	"bytes"
 	"github.com/gocql/gocql"
-	"log"
+	"github.com/pkg/errors"
 	"strconv"
+	"time"
 )
 
 type Cassandra struct {
-	Host    string
-	Session *gocql.Session
+	Host         string
+	User         string
+	Password     string
+	Keyspace     string
+	Columnfamily string
+	Session      *gocql.Session
 }
 
-const (
-	CREATE_KEYSPACE = " CREATE KEYSPACE IF NOT EXISTS " + KEYSPACE_NAME + " WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };"
-	CREATE_TABLE    = "create table if not exists blockchain.txs (id uuid PRIMARY KEY, text text);"
-	KEYSPACE_NAME   = "blockchain"
+var nsKeySep = []byte{0x00}
 
-	TABLE           = "txs"
+const (
 	CHANNEL_ID      = "ChannelId"
 	TXID            = "Txid"
 	HASH            = "Hash"
@@ -25,77 +30,117 @@ const (
 	PAYLOAD         = "Payload"
 	VALIDATION_CODE = "ValidationCode"
 	TIME            = "Time"
-	INSERT          = "INSERT INTO " + TABLE + " (" + CHANNEL_ID + ", " + TXID + ", " + HASH + ", " +
-		PREVIOUS_HASH + ", " + BLOCKNUM + ", " + PAYLOAD + ", " + VALIDATION_CODE + ", " + TIME + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-	SELECT = "SELECT " + CHANNEL_ID + ", " + TXID + ", " + HASH + ", " +
-		PREVIOUS_HASH + ", " + BLOCKNUM + ", " + PAYLOAD + ", " + VALIDATION_CODE + ", " + TIME + " FROM " + TABLE
-	SELECT_BLOCK_BY_HASH  = SELECT + " WHERE " + HASH + " = ?"
-	SELECT_BY_TX_ID       = SELECT + " FROM " + TABLE + " WHERE " + TXID + " = ?"
-	SELECT_LATEST_BY_TIME = "SELECT * " + " FROM " + TABLE + "ORDER BY " + TIME + " DESC LIMIT 1"
-	SELECT_BY_BLOCKNUM    = SELECT + " WHERE " + BLOCKNUM + " = ?"
+	PAYLOADKEYS     = "Payloadkeys"
 )
 
-func NewCassandraClient(host string) *Cassandra {
-	var err error
-	cluster := gocql.NewCluster(host)
-	cluster.Keyspace = KEYSPACE_NAME
-	cluster.Consistency = gocql.One
-	var c Cassandra
-	c.Session, err = cluster.CreateSession()
-	if err := c.Session.Query(CREATE_KEYSPACE).Exec(); err != nil {
-		log.Fatal("failed to create keyspace", err)
-	}
-	if err != nil {
-		log.Fatalf("cassandra client creation failed: %s", err)
-	}
-	err = c.Session.Query(CREATE_TABLE).Exec()
-	if err != nil {
-		log.Fatalf("failed to create table: %s", err)
-	}
-	return c
-
-}
-
-func (c *Cassandra) Init() error {
-	return nil
+func NewCassandraClient(host, user, password, keyspace, columnfamily string) *Cassandra {
+	return &Cassandra{host, user, password, keyspace, columnfamily, nil}
 }
 
 func (c *Cassandra) Connect() error {
-	panic("implement me")
-}
-
-func (c *Cassandra) GetBlockInfoByPayload(string) ([]Tx, error) {
-	panic("implement me")
-}
-
-func (c *Cassandra) Insert(tx Tx) error {
-	if err := c.Session.Query(INSERT, tx.ChannelId, tx.Txid, tx.Hash, tx.PreviousHash,
-		tx.Blocknum, tx.Payload, tx.ValidationCode, tx.Time).Exec(); err != nil {
-		return err
+	var err error
+	cluster := gocql.NewCluster(c.Host)
+	cluster.Timeout = 15 * time.Second
+	cluster.ConnectTimeout = 15 * time.Second
+	cluster.Keyspace = "system"
+	cluster.Consistency = gocql.One
+	cluster.Authenticator = gocql.PasswordAuthenticator{
+		Username: c.User,
+		Password: c.Password,
 	}
+	c.Session, err = cluster.CreateSession()
+	if err != nil {
+		return errors.Wrap(err, "cassandra system session creation failed")
+	}
+	if err := c.Session.Query(fmt.Sprintf("CREATE KEYSPACE IF NOT EXISTS %s WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };", c.Keyspace)).Exec(); err != nil {
+		return errors.Wrap(err, "failed to create keyspace")
+	}
+
+	// reconnect with new keyspace
+	cluster.Keyspace = c.Keyspace
+	c.Session, err = cluster.CreateSession()
+	if err != nil {
+		return errors.Wrap(err, "cassandra client creation failed")
+	}
+	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (ID UUID, %s text, %s text, %s text, %s text, %s bigint, %s text, %s int, %s int, %s list<text>, PRIMARY KEY(ID,%s))
+		WITH CLUSTERING ORDER BY (%s DESC);`, c.Columnfamily, CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, PAYLOADKEYS, BLOCKNUM, BLOCKNUM)
+	err = c.Session.Query(query).Exec()
+	if err != nil {
+		return errors.Wrapf(err, "failed to create column family: %s", c.Columnfamily)
+	}
+
+	// create payload index
+	index := fmt.Sprintf(`CREATE INDEX IF NOT EXISTS payload ON %s(%s);`, c.Columnfamily, PAYLOADKEYS)
+	err = c.Session.Query(index).Exec()
+	if err != nil {
+		return errors.Wrapf(err, "failed to create index: %s", c.Columnfamily)
+	}
+
 	return nil
 }
 
+func (c *Cassandra) Insert(tx Tx) error {
+	insert := fmt.Sprintf("INSERT INTO %s (ID, %s, %s, %s, %s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", c.Columnfamily,
+		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, PAYLOADKEYS)
+
+	var Payload []RW
+	err := json.Unmarshal([]byte(tx.Payload), &Payload)
+	if err != nil {
+		return err
+	}
+
+	// extract metadata from RWSet and insert to column (clear from separators)
+	var payloadkeys []string
+	for _, kv := range Payload {
+		if bytes.Index([]byte(kv.Key), nsKeySep) != -1 {
+			split := bytes.SplitN([]byte(kv.Key), nsKeySep, -1)
+			payloadkeys = append(payloadkeys, string(split[2][0:]))
+		} else {
+			payloadkeys = append(payloadkeys, kv.Key)
+		}
+	}
+
+	if err := c.Session.Query(insert, gocql.TimeUUID(), tx.ChannelId, tx.Txid, tx.Hash, tx.PreviousHash,
+		tx.Blocknum, tx.Payload, tx.ValidationCode, tx.Time, payloadkeys).Exec(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Cassandra) GetBlockInfoByPayload(searchExpression string) ([]Tx, error) {
+	query := fmt.Sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s CONTAINS '%s'",
+		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, c.Columnfamily, PAYLOADKEYS, searchExpression)
+	txs, err := c.getByFilter(query, "")
+	return txs, err
+}
+
 func (c *Cassandra) QueryBlockByHash(hash string) ([]Tx, error) {
-	return c.getByFilter(SELECT_BLOCK_BY_HASH, hash)
+	query := fmt.Sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = ?",
+		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, c.Columnfamily, HASH)
+	return c.getByFilter(query, hash)
 }
 
 func (c *Cassandra) GetByTxId(txID string) ([]Tx, error) {
-	return c.getByFilter(SELECT_BY_TX_ID, txID)
+	return c.getByFilter(fmt.Sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = ?",
+		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, c.Columnfamily, TXID), txID)
 }
 
 func (c *Cassandra) QueryAll() ([]Tx, error) {
-	return c.getByFilter(SELECT, "")
+	return c.getByFilter(fmt.Sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s",
+		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, c.Columnfamily), "")
 }
 
 func (c *Cassandra) GetByBlocknum(blocknum uint64) ([]Tx, error) {
-	return c.getByFilter(SELECT_BY_BLOCKNUM, strconv.FormatUint(blocknum, 10))
+	return c.getByFilter(fmt.Sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = ?",
+		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, c.Columnfamily, BLOCKNUM), strconv.FormatUint(blocknum, 10))
 }
 
 func (c *Cassandra) GetLastEntry() (Tx, error) {
 	var tx Tx
-	err := c.Session.Query(SELECT_LATEST_BY_TIME).Scan(&tx.ChannelId, &tx.Txid, &tx.Hash, &tx.PreviousHash, &tx.Blocknum,
-		&tx.Payload, &tx.ValidationCode, &tx.Time)
+	err := c.Session.Query(fmt.Sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s LIMIT 1",
+		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, c.Columnfamily)).Scan(
+		&tx.ChannelId, &tx.Txid, &tx.Hash, &tx.PreviousHash, &tx.Blocknum, &tx.Payload, &tx.ValidationCode, &tx.Time)
 	return tx, err
 }
 
@@ -104,9 +149,9 @@ func (c *Cassandra) getByFilter(sel string, filter string) ([]Tx, error) {
 	var txs []Tx
 	var it *gocql.Iter
 	if filter != "" {
-		it = c.Session.Query(sel, filter).Iter()
+		it = c.Session.Query(fmt.Sprintf("%s ALLOW FILTERING", sel), filter).Iter()
 	} else {
-		it = c.Session.Query(sel).Iter()
+		it = c.Session.Query(fmt.Sprintf("%s ALLOW FILTERING", sel)).Iter()
 	}
 	for it.Scan(&tx.ChannelId, &tx.Txid, &tx.Hash, &tx.PreviousHash, &tx.Blocknum,
 		&tx.Payload, &tx.ValidationCode, &tx.Time) {
