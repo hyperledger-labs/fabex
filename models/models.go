@@ -28,13 +28,21 @@ type Fabex struct {
 	LedgerClient  *ledger.Client
 }
 
-type DB struct {
+type Mongo struct {
 	Host       string
 	Port       int
 	Dbuser     string
 	Dbsecret   string
 	Dbname     string
 	Collection string
+}
+
+type Cassandra struct {
+	Host         string
+	Dbuser       string
+	Dbsecret     string
+	Keyspace     string
+	Columnfamily string
 }
 
 type GRPCServer struct {
@@ -51,7 +59,8 @@ type Fabric struct {
 }
 
 type Config struct {
-	DB
+	Mongo
+	Cassandra
 	Fabric
 	GRPCServer
 }
