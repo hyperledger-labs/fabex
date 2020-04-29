@@ -104,11 +104,12 @@ func main() {
 	case "mongo":
 		dbInstance = db.CreateDBConfMongo(globalConfig.DB.Host, globalConfig.DB.Port, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname, globalConfig.DB.Collection)
 	case "cassandra":
-		dbInstance = db.NewCassandraClient(globalConfig.DB.Host)
+		dbInstance = db.NewCassandraClient(globalConfig.DB.Host, globalConfig.DB.Dbuser, globalConfig.DB.Dbsecret, globalConfig.DB.Dbname, globalConfig.DB.Collection)
 	}
+
 	var fabex *models.Fabex
 	if *task != "initdb" {
-		err = dbInstance.Connect()
+		err := dbInstance.Connect()
 		if err != nil {
 			log.Fatal("DB connection failed:", err.Error())
 		}
@@ -116,13 +117,6 @@ func main() {
 	fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}
 
 	switch *task {
-	case "initdb":
-		err = fabex.Db.Init()
-		if err != nil {
-			log.Fatalf("Failed to create table: %s", err)
-		}
-		log.Println("Database and table created successfully")
-
 	case "channelinfo":
 		resp, err := helpers.QueryChannelInfo(fabex.LedgerClient)
 		if err != nil {
