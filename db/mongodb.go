@@ -45,9 +45,6 @@ func CreateDBConfMongo(host string, port int, user, password, dbname, collection
 	}
 	return &DBmongo{host, port, user, password, dbname, collection, client}
 }
-func (db *DBmongo) Init() error {
-	return nil
-}
 
 func (db *DBmongo) Connect() error {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
@@ -74,9 +71,9 @@ func (db *DBmongo) Insert(tx Tx) error {
 	return nil
 }
 
-func (db *DBmongo) QueryBlockByHash(hash string) ([]Tx, error) {
+func (db *DBmongo) getByFilter(filterValue interface{}) ([]Tx, error) {
 	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
-	filter := bson.M{"Hash": hash}
+	filter := filterValue
 
 	ctx := context.Background()
 	cur, err := collection.Find(ctx, filter)
@@ -104,122 +101,24 @@ func (db *DBmongo) QueryBlockByHash(hash string) ([]Tx, error) {
 	return results, nil
 }
 
-func (db *DBmongo) GetByTxId(filter string) ([]Tx, error) {
-	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
-	filterOpts := bson.M{"Txid": filter}
-
-	ctx := context.Background()
-	cur, err := collection.Find(ctx, filterOpts)
-	if err != nil {
-		return nil, err
-	}
-
-	defer cur.Close(ctx)
-
-	var results []Tx
-	for cur.Next(ctx) {
-		var result Tx
-		err := cur.Decode(&result)
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, result)
-	}
-	if err := cur.Err(); err != nil {
-		return nil, err
-	}
-	return results, nil
+func (db *DBmongo) QueryBlockByHash(hash string) ([]Tx, error) {
+	return db.getByFilter(bson.M{"Hash": hash})
 }
 
-func (db *DBmongo) GetByBlocknum(filter uint64) ([]Tx, error) {
-	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
-
-	filterOpts := bson.M{"Blocknum": filter}
-	ctx := context.Background()
-	cur, err := collection.Find(ctx, filterOpts)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-
-	defer cur.Close(ctx)
-
-	var results []Tx
-	for cur.Next(ctx) {
-		var result Tx
-		err = cur.Decode(&result)
-		if err != nil {
-			fmt.Println("ERR: ", err)
-			return nil, err
-		}
-		results = append(results, result)
-	}
-	if err := cur.Err(); err != nil {
-		return nil, err
-	}
-
-	return results, nil
+func (db *DBmongo) GetByTxId(txID string) ([]Tx, error) {
+	return db.getByFilter(bson.M{"Txid": txID})
 }
 
-func (db *DBmongo) GetBlockInfoByPayload(filter string) ([]Tx, error) {
-	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
+func (db *DBmongo) GetByBlocknum(blocknum uint64) ([]Tx, error) {
+	return db.getByFilter(bson.M{"Blocknum": blocknum})
+}
 
-	filterOpts := bson.D{
-		{"Payload", primitive.Regex{Pattern: filter, Options: ""}},
-	}
-
-	ctx := context.Background()
-
-	cur, err := collection.Find(ctx, filterOpts)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-
-	defer cur.Close(ctx)
-
-	var results []Tx
-	for cur.Next(ctx) {
-		var result Tx
-		err = cur.Decode(&result)
-		if err != nil {
-			fmt.Println("ERR: ", err)
-			return nil, err
-		}
-		results = append(results, result)
-	}
-	if err := cur.Err(); err != nil {
-		return nil, err
-	}
-
-	return results, nil
+func (db *DBmongo) GetBlockInfoByPayload(payload string) ([]Tx, error) {
+	return db.getByFilter(bson.D{{"Payload", primitive.Regex{Pattern: payload, Options: ""}}})
 }
 
 func (db *DBmongo) QueryAll() ([]Tx, error) {
-	arr := []Tx{}
-
-	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
-
-	ctx := context.Background()
-	cur, err := collection.Find(ctx, bson.D{})
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer cur.Close(ctx)
-	for cur.Next(ctx) {
-		var result Tx
-		err := cur.Decode(&result)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		arr = append(arr, result)
-	}
-	if err := cur.Err(); err != nil {
-		log.Fatal(err)
-	}
-	return arr, nil
+	return db.getByFilter(bson.D{})
 }
 
 func (db *DBmongo) GetLastEntry() (Tx, error) {

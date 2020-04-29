@@ -5,11 +5,18 @@ Fabric:
   channel: wheelsets
   connectionProfile: /app/config-dev-2orgs.yaml
 
-Db:
+cassandra:
   host: localhost
-  port: 27017
-  dbuser: admin
-  dbsecret: adminpw
+  dbuser: cassandra
+  dbsecret: cassandra
+  keyspace: blocks
+  columnfamily: txs
+
+mongo:
+  host: localhost
+  port: 27018
+  dbuser: mongo
+  dbsecret: mongo
   dbname: blocks
   collection: txs
 
