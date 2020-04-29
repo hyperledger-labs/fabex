@@ -18,7 +18,6 @@ package db
 
 type Manager interface {
 	Connect() error
-	Init() error
 	Insert(Tx) error
 	QueryBlockByHash(hash string) ([]Tx, error)
 	GetByTxId(string) ([]Tx, error)
@@ -47,4 +46,9 @@ type Entry struct {
 	Blocknum     uint64
 	Payload      string
 	Time         int64
+}
+
+type RW struct {
+	Key   string
+	Value string
 }
