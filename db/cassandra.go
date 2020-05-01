@@ -1,9 +1,9 @@
 package db
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"bytes"
 	"github.com/gocql/gocql"
 	"github.com/pkg/errors"
 	"strconv"
@@ -137,10 +137,29 @@ func (c *Cassandra) GetByBlocknum(blocknum uint64) ([]Tx, error) {
 }
 
 func (c *Cassandra) GetLastEntry() (Tx, error) {
-	var tx Tx
-	err := c.Session.Query(fmt.Sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s LIMIT 1",
-		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, c.Columnfamily)).Scan(
+	var (
+		tx       Tx
+		lastID string
+	)
+
+	/*
+	    There are no nested queries in Cassandra, so we do this two-step shit for getting last tx
+	 */
+
+	// id (UUID) includes timestamp, so we use it for getting last tx ID
+	err := c.Session.Query(fmt.Sprintf("SELECT MAX(id) FROM %s", c.Columnfamily)).Scan(&lastID)
+	if err != nil {
+		return Tx{}, err
+	}
+	if lastID == "" {
+		return Tx{}, errors.New("not found")
+	}
+
+	// get last tx using id as filter
+	err = c.Session.Query(fmt.Sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE id = ? LIMIT 1",
+		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, c.Columnfamily), lastID).Scan(
 		&tx.ChannelId, &tx.Txid, &tx.Hash, &tx.PreviousHash, &tx.Blocknum, &tx.Payload, &tx.ValidationCode, &tx.Time)
+
 	return tx, err
 }
 
@@ -151,7 +170,7 @@ func (c *Cassandra) getByFilter(sel string, filter string) ([]Tx, error) {
 	if filter != "" {
 		it = c.Session.Query(fmt.Sprintf("%s ALLOW FILTERING", sel), filter).Iter()
 	} else {
-		it = c.Session.Query(fmt.Sprintf("%s ALLOW FILTERING", sel)).Iter()
+		it = c.Session.Query(fmt.Sprintf("%s", sel)).Iter()
 	}
 	for it.Scan(&tx.ChannelId, &tx.Txid, &tx.Hash, &tx.PreviousHash, &tx.Blocknum,
 		&tx.Payload, &tx.ValidationCode, &tx.Time) {
