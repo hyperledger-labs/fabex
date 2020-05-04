@@ -211,15 +211,14 @@ func NewFabexServer(addr string, port string, conf *models.Fabex) *fabexServer {
 func (s *fabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServer) error {
 	log.Printf("Start stream from %d block", req.Startblock)
 	// set blocks counter to latest saved in db block number value
-	var blockCounter uint64 = uint64(req.Startblock)
+	blockCounter := req.Startblock
 
 	// insert missing blocks/txs into db
-	for blockCounter <= uint64(req.Endblock) {
-		customBlock, err := blockfetcher.GetBlock(s.Conf.LedgerClient, blockCounter)
+	for blockCounter <= req.Endblock {
+		customBlock, err := blockfetcher.GetBlock(s.Conf.LedgerClient, uint64(blockCounter))
 		if err != nil {
 			return errors.Wrap(err, "GetBlock error")
 		}
-
 		if customBlock != nil {
 			for _, queryResult := range customBlock.Txs {
 				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
