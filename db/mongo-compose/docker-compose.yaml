@@ -14,8 +14,8 @@ services:
     ports:
       - 27018:27017
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=adminpw
+      - MONGO_INITDB_ROOT_USERNAME=mongo
+      - MONGO_INITDB_ROOT_PASSWORD=mongo
     volumes:
       # seeding scripts
       - ./mongo-entrypoint:/docker-entrypoint-initdb.d
