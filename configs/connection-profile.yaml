@@ -14,12 +14,12 @@ client:
   # Some SDKs support pluggable KV stores, the properties under "credentialStore"
   # are implementation specific
   credentialStore:
-    path: /home/ubuntu/explorer/ali/credstore
+    path: /home/ubuntu/explorer/credstore
 
     # [Optional]. Specific to the CryptoSuite implementation used by GO SDK. Software-based implementations
     # requiring a key store. PKCS#11 based implementations does not.
     cryptoStore:
-      path: /home/ubuntu/explorer/ali/cryptostore
+      path: /home/ubuntu/explorer/cryptostore
 
     # BCCSP config for the client. Used by GO SDK.
   BCCSP:
@@ -67,7 +67,7 @@ organizations:
     certificateAuthorities:
       - ca-org1
     adminPrivateKey:
-      path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/e049ca4e70944b07f2aef58c5c9a9582446c79f3525afea82426de3ec689b458_sk
+      path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/5ebee3176272fe54824a5df4f97aac503cd3e25f21a65b5eeddb8c19b896ca59_sk
     signedCert:
       path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/signcerts/Admin@org1.example.com-cert.pem
 
@@ -79,7 +79,7 @@ organizations:
     certificateAuthorities:
       - ca-org2
     adminPrivateKey:
-      path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/5e9c152e19b6b87966866ce90dac65d4fb311b0a4312dea1abbd47e1c1b8a706_sk
+      path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/4b929991a646d955caf7343928550c77d0118d98d5c35b1cd7e2c9ed019021b6_sk
     signedCert:
       path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem
 
