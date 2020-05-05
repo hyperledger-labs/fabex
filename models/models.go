@@ -58,11 +58,16 @@ type Fabric struct {
 	ConnectionProfile string
 }
 
+type UI struct {
+	Port string
+}
+
 type Config struct {
 	Mongo
 	Cassandra
 	Fabric
 	GRPCServer
+	UI
 }
 
 type Chaincode struct {
