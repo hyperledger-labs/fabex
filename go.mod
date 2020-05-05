@@ -38,6 +38,7 @@ require (
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/viper v1.0.2
+	github.com/stretchr/testify v1.4.0
 	github.com/sykesm/zap-logfmt v0.0.2 // indirect
 	github.com/tidwall/pretty v1.0.1 // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
