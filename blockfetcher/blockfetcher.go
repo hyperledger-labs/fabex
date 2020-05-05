@@ -32,7 +32,6 @@ import (
 	"github.com/vadiminshakov/fabex/db"
 	"github.com/vadiminshakov/fabex/models"
 	"strings"
-	"io/ioutil"
 )
 
 type LedgerClient interface {
