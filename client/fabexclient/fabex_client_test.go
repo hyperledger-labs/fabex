@@ -19,6 +19,7 @@ package fabexclient
 import (
 	"github.com/vadiminshakov/fabex/models"
 	pb "github.com/vadiminshakov/fabex/proto"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"bytes"
 	"os"
@@ -64,7 +65,7 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 	// wait until containers start, channel and chaincode created
-	time.Sleep(105 * time.Second)
+	time.Sleep(135 * time.Second)
 
 	log.Println("Start Fabex")
 	cancelCh := make(chan bool)
@@ -83,7 +84,7 @@ func TestMain(m *testing.M) {
 			}
 		}
 	}(cancelCh)
-	time.Sleep(15 * time.Second)
+	time.Sleep(25 * time.Second)
 
 	log.Println("Run tests")
 	code := m.Run()
@@ -130,7 +131,9 @@ func TestGetByBlocknum(t *testing.T) {
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	if len(txs) == 0 {
-		t.Errorf("no transactions found")
+
+	assert.Greater(t, len(txs), 0, "No transactions found")
+	for _, tx := range txs {
+		assert.EqualValuesf(t, tx.Blocknum, 1, "Not valid tx retrieved, got %d, want %d", tx.Blocknum, 1)
 	}
 }
