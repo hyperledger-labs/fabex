@@ -55,18 +55,6 @@ func GetBlock(ledgerClient LedgerClient, blocknum uint64) (*CustomBlock, error) 
 		return nil, err
 	}
 
-	bytesbl, err := utils.Marshal(block)
-	if err != nil {
-		return nil, err
-	}
-
-	if int64(blocknum) > 2 {
-		err := ioutil.WriteFile("custom.block", bytesbl, 0644)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	// get block hash
 	hash := hex.EncodeToString(block.Header.DataHash)
 
