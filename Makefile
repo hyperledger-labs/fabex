@@ -17,3 +17,9 @@ stop-mongo-test:
 	@docker rm -f fabexmongo \
     && rm -rf credstore \
     && rm -rf cryptostore
+
+unit-tests:
+	@cd blockfetcher && go test -v
+
+integration-tests:
+	@cd client/fabexclient && go test -v
