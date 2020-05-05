@@ -32,6 +32,7 @@ import (
 	"github.com/vadiminshakov/fabex/db"
 	"github.com/vadiminshakov/fabex/helpers"
 	"github.com/vadiminshakov/fabex/models"
+	"github.com/vadiminshakov/fabex/ledgerclient"
 	pb "github.com/vadiminshakov/fabex/proto"
 	"google.golang.org/grpc"
 	"net"
@@ -42,6 +43,12 @@ var (
 	lvl          = logging.INFO
 	globalConfig models.Config
 )
+
+type fabexServer struct {
+	Address string
+	Port    string
+	Conf    *models.Fabex
+}
 
 func main() {
 
@@ -114,18 +121,19 @@ func main() {
 			log.Fatal("DB connection failed:", err.Error())
 		}
 	}
-	fabex = &models.Fabex{dbInstance, channelclient, ledgerClient}
+
+	fabex = &models.Fabex{dbInstance, channelclient, &ledgerclient.CustomLedgerClient{ledgerClient}}
 
 	switch *task {
 	case "channelinfo":
-		resp, err := helpers.QueryChannelInfo(fabex.LedgerClient)
+		resp, err := helpers.QueryChannelInfo(fabex.LedgerClient.Client)
 		if err != nil {
 			log.Fatalf("Can't query blockchain info: %s", err)
 		}
 		log.Printf("BlockChainInfo: %v\nEndorser: %v\nStatus: %v\n", resp.BCI, resp.Endorser, resp.Status)
 
 	case "channelconfig":
-		err = helpers.QueryChannelConfig(fabex.LedgerClient)
+		err = helpers.QueryChannelConfig(fabex.LedgerClient.Client)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -196,12 +204,6 @@ func main() {
 		serv := NewFabexServer(globalConfig.GRPCServer.Host, globalConfig.GRPCServer.Port, fabex)
 		StartGrpcServ(serv, fabex)
 	}
-}
-
-type fabexServer struct {
-	Address string
-	Port    string
-	Conf    *models.Fabex
 }
 
 func NewFabexServer(addr string, port string, conf *models.Fabex) *fabexServer {
