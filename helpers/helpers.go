@@ -34,7 +34,7 @@ const NOT_FOUND_ERR = "not found"
 func Explore(fab *models.Fabex) error {
 	// check we have up-to-date db or not
 	// get last block hash
-	resp, err := QueryChannelInfo(fab.LedgerClient)
+	resp, err := QueryChannelInfo(fab.LedgerClient.Client)
 	if err != nil {
 		return err
 	}
