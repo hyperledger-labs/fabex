@@ -31,11 +31,12 @@ import (
 	"github.com/vadiminshakov/fabex/blockfetcher"
 	"github.com/vadiminshakov/fabex/db"
 	"github.com/vadiminshakov/fabex/helpers"
-	"github.com/vadiminshakov/fabex/models"
 	"github.com/vadiminshakov/fabex/ledgerclient"
+	"github.com/vadiminshakov/fabex/models"
 	pb "github.com/vadiminshakov/fabex/proto"
 	"google.golang.org/grpc"
 	"net"
+	"net/http"
 	"os"
 )
 
@@ -68,7 +69,6 @@ func main() {
 	viper.SetConfigName(*confname)
 	viper.AddConfigPath(*confpath)
 	viper.SetConfigType("yaml")
-
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file, %s", err)
