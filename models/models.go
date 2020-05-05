@@ -18,14 +18,14 @@ package models
 
 import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
-	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/vadiminshakov/fabex/db"
+	"github.com/vadiminshakov/fabex/ledgerclient"
 )
 
 type Fabex struct {
 	Db            db.Manager
 	ChannelClient *channel.Client
-	LedgerClient  *ledger.Client
+	LedgerClient  *ledgerclient.CustomLedgerClient
 }
 
 type Mongo struct {
