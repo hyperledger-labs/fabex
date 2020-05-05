@@ -60,6 +60,7 @@ func main() {
 	confpath := flag.String("configpath", "./", "path to YAML config")
 	confname := flag.String("configname", "config", "name of YAML config")
 	databaseSelected := flag.String("db", "mongo", "select database")
+	ui := flag.Bool("ui", true, "with UI or without")
 
 	flag.Parse()
 
@@ -67,6 +68,7 @@ func main() {
 	viper.SetConfigName(*confname)
 	viper.AddConfigPath(*confpath)
 	viper.SetConfigType("yaml")
+
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file, %s", err)
@@ -203,6 +205,14 @@ func main() {
 	case "grpc":
 		serv := NewFabexServer(globalConfig.GRPCServer.Host, globalConfig.GRPCServer.Port, fabex)
 		StartGrpcServ(serv, fabex)
+	}
+
+	// serving frontend
+	if *ui {
+		go func() {
+			http.Handle("/", http.FileServer(http.Dir("./ui")))
+			http.ListenAndServe(fmt.Sprintf(":%s", globalConfig.UI.Port), nil)
+		}()
 	}
 }
 
