@@ -53,14 +53,14 @@ func ExecuteCMD(command string, args ...string) (*exec.Cmd, error) {
 func TestMain(m *testing.M) {
 
 	// start MongoDB
-	_, err := ExecuteCMD("make", "mongo")
+	_, err := ExecuteCMD("make", "mongo-test")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// start test network
 	log.Println("Test setup")
-	_, err = ExecuteCMD("make", "start-fabric")
+	_, err = ExecuteCMD("make", "start-fabric-test")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestMain(m *testing.M) {
 
 	go func(cancelCh chan bool) {
 
-		cmd, err := ExecuteCMD("make", "start-fabex")
+		cmd, err := ExecuteCMD("make", "start-fabex-test")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -92,8 +92,8 @@ func TestMain(m *testing.M) {
 	log.Println("Clean test artifacts")
 
 	// purge
-	_, err = ExecuteCMD("make", "stop-fabric")
-	_, err = ExecuteCMD("make", "stop-mongo")
+	_, err = ExecuteCMD("make", "stop-fabric-test")
+	_, err = ExecuteCMD("make", "stop-mongo-test")
 	if err != nil {
 		log.Fatal(err)
 	}
