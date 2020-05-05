@@ -204,15 +204,15 @@ func main() {
 
 	case "grpc":
 		serv := NewFabexServer(globalConfig.GRPCServer.Host, globalConfig.GRPCServer.Port, fabex)
+		// serving frontend
+		if *ui {
+			go func() {
+				http.Handle("/", http.FileServer(http.Dir("./ui")))
+				http.ListenAndServe(fmt.Sprintf(":%s", globalConfig.UI.Port), nil)
+			}()
+			log.Printf("Serving UI on port %s", globalConfig.UI.Port)
+		}
 		StartGrpcServ(serv, fabex)
-	}
-
-	// serving frontend
-	if *ui {
-		go func() {
-			http.Handle("/", http.FileServer(http.Dir("./ui")))
-			http.ListenAndServe(fmt.Sprintf(":%s", globalConfig.UI.Port), nil)
-		}()
 	}
 }
 
