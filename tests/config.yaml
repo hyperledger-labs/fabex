@@ -23,3 +23,6 @@ mongo:
 GRPCServer:
   host: localhost
   port: 6000
+
+UI:
+  port: 5252
