@@ -70,6 +70,7 @@ func main() {
 	viper.AddConfigPath(*confpath)
 	viper.SetConfigType("yaml")
 
+
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file, %s", err)
 	}
@@ -211,6 +212,14 @@ func main() {
 		go rest.Run(serv.Conf.Db, globalConfig.UI.Port, *ui)
 		// grpc
 		StartGrpcServ(serv, fabex)
+	}
+
+	// serving frontend
+	if *ui {
+		go func() {
+			http.Handle("/", http.FileServer(http.Dir("./ui")))
+			http.ListenAndServe(fmt.Sprintf(":%s", globalConfig.UI.Port), nil)
+		}()
 	}
 }
 
