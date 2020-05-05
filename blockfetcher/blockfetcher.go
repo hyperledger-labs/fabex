@@ -24,7 +24,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric/common/configtx"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
-	"github.com/hyperledger/fabric/protos/common"
+	fabcommon "github.com/hyperledger/fabric/protos/common"
 	"github.com/hyperledger/fabric/protos/ledger/rwset"
 	"github.com/hyperledger/fabric/protos/peer"
 	"github.com/hyperledger/fabric/protos/utils"
@@ -32,14 +32,18 @@ import (
 	"github.com/vadiminshakov/fabex/db"
 	"github.com/vadiminshakov/fabex/models"
 	"strings"
-	"unsafe"
+	"io/ioutil"
 )
+
+type LedgerClient interface {
+	QueryBlock(blockNumber uint64, options ...ledger.RequestOption) (*fabcommon.Block, error)
+}
 
 type CustomBlock struct {
 	Txs []db.Tx
 }
 
-func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error) {
+func GetBlock(ledgerClient LedgerClient, blocknum uint64) (*CustomBlock, error) {
 	customBlock := &CustomBlock{}
 
 	block, err := ledgerClient.QueryBlock(blocknum)
@@ -49,6 +53,18 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 			return nil, nil
 		}
 		return nil, err
+	}
+
+	bytesbl, err := utils.Marshal(block)
+	if err != nil {
+		return nil, err
+	}
+
+	if int64(blocknum) > 2 {
+		err := ioutil.WriteFile("custom.block", bytesbl, 0644)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// get block hash
@@ -117,8 +133,7 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 		if len(txRWSet.NsRwSets) == 0 {
 			// cast "github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/protos/common".Block to
 			// "github.com/hyperledger/fabric/protos/common".Block
-			var fabricBlock = (*common.Block)(unsafe.Pointer(block))
-			configEnvelope, err := ConfigEnvelopeFromBlock(fabricBlock)
+			configEnvelope, err := ConfigEnvelopeFromBlock(block)
 			if err != nil {
 				return nil, err
 			}
@@ -197,7 +212,7 @@ func GetBlock(ledgerClient *ledger.Client, blocknum uint64) (*CustomBlock, error
 
 // ConfigEnvelopeFromBlock extracts configuration envelope from the block based on the
 // config type, i.e. HeaderType_ORDERER_TRANSACTION or HeaderType_CONFIG
-func ConfigEnvelopeFromBlock(block *common.Block) (*common.Envelope, error) {
+func ConfigEnvelopeFromBlock(block *fabcommon.Block) (*fabcommon.Envelope, error) {
 	if block == nil {
 		return nil, errors.New("nil block")
 	}
@@ -213,7 +228,7 @@ func ConfigEnvelopeFromBlock(block *common.Block) (*common.Envelope, error) {
 	}
 
 	switch channelHeader.Type {
-	case int32(common.HeaderType_ORDERER_TRANSACTION):
+	case int32(fabcommon.HeaderType_ORDERER_TRANSACTION):
 		payload, err := utils.UnmarshalPayload(envelope.Payload)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to unmarshal envelope to extract config payload for orderer transaction")
@@ -224,7 +239,7 @@ func ConfigEnvelopeFromBlock(block *common.Block) (*common.Envelope, error) {
 		}
 
 		return configEnvelop, nil
-	case int32(common.HeaderType_CONFIG):
+	case int32(fabcommon.HeaderType_CONFIG):
 		return envelope, nil
 	default:
 		return nil, errors.Errorf("unexpected header type: %v", channelHeader.Type)
