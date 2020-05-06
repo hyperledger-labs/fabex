@@ -1,0 +1,36 @@
+name: unit-tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.13
+      id: go
+    
+    - name: setup env
+      run: |
+        echo "::set-env name=GOPATH::$(go env GOPATH)"
+        echo "::add-path::$(go env GOPATH)/bin"
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    
+    - name: download dependencies
+      run: go mod download 
+    
+    - name: fix deps of GO SDK
+      run: sudo cp tests/system.go $GOPATH/pkg/mod/github.com/hyperledger/fabric-sdk-go@v0.0.0-20190306235112-f198238ee7da/internal/github.com/hyperledger/fabric/core/operations
+
+    - name: unit tests
+      run: cd blockfetcher && go test
