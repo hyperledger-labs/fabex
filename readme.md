@@ -1,3 +1,6 @@
+![](https://github.com/vadimInshakov/fabex/workflows/go/badge.svg)
+
+
 ## **Block explorer for Hyperledger Fabric**
 
 [Prerequisites](#prerequisites)
