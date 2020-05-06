@@ -29,7 +29,7 @@ jobs:
       run: go mod download 
     
     - name: check
-      run: ls $GOPATH/pkg/mod
+      run: echo $GOPATH
     
     - name: fix deps of GO SDK
       run: cp tests/system.go $GOPATH/pkg/mod/github.com/hyperledger/fabric-sdk-go@v0.0.0-20190306235112-f198238ee7da/internal/github.com/hyperledger/fabric/core/operations
