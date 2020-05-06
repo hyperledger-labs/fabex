@@ -20,7 +20,7 @@ jobs:
       id: go
     
     - name: set GOPATH
-      run: export GOPATH=~/go
+      run: export GOPATH=$HOME/go
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
