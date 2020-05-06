@@ -19,8 +19,10 @@ jobs:
         go-version: ^1.13
       id: go
     
-    - name: set GOPATH
-      run: export GOPATH=$HOME/go
+    - name: setup env
+      run: |
+        echo "::set-env name=GOPATH::$(go env GOPATH)"
+        echo "::add-path::$(go env GOPATH)/bin"
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
