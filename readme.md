@@ -1,4 +1,4 @@
-![](https://github.com/vadimInshakov/fabex/workflows/Go/badge.svg)
+![](https://github.com/vadimInshakov/fabex/workflows/Go/badge.svg) ![](https://github.com/vadimInshakov/fabex/workflows/unit-tests/badge.svg)
 
 
 ## **Block explorer for Hyperledger Fabric**
