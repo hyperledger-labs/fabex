@@ -18,6 +18,11 @@ jobs:
       with:
         go-version: ^1.13
       id: go
+    
+    - name: setup env
+      run: |
+        echo "::set-env name=GOPATH::$(go env GOPATH)"
+        echo "::add-path::$(go env GOPATH)/bin"
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
@@ -26,7 +31,7 @@ jobs:
       run: go mod download 
     
     - name: fix deps of GO SDK
-      run: cp tests/system.go $GOPATH/pkg/mod/github.com/hyperledger/fabric-sdk-go@v0.0.0-20190306235112-f198238ee7da/internal/github.com/hyperledger/fabric/core/operations
+      run: sudo cp tests/system.go $GOPATH/pkg/mod/github.com/hyperledger/fabric-sdk-go@v0.0.0-20190306235112-f198238ee7da/internal/github.com/hyperledger/fabric/core/operations
 
     - name: Build
       run: go build -v .
