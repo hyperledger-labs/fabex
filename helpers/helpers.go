@@ -25,8 +25,8 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/vadiminshakov/fabex/blockfetcher"
-	"github.com/vadiminshakov/fabex/models"
+	"github.com/hyperledger-labs/fabex/blockfetcher"
+	"github.com/hyperledger-labs/fabex/models"
 )
 
 const NOT_FOUND_ERR = "not found"

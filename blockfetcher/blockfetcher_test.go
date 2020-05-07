@@ -2,8 +2,8 @@ package blockfetcher
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/vadiminshakov/fabex/db"
-	"github.com/vadiminshakov/fabex/ledgerclient"
+	"github.com/hyperledger-labs/fabex/db"
+	"github.com/hyperledger-labs/fabex/ledgerclient"
 	"testing"
 )
 
