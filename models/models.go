@@ -18,8 +18,8 @@ package models
 
 import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
-	"github.com/vadiminshakov/fabex/db"
-	"github.com/vadiminshakov/fabex/ledgerclient"
+	"github.com/hyperledger-labs/fabex/db"
+	"github.com/hyperledger-labs/fabex/ledgerclient"
 )
 
 type Fabex struct {

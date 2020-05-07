@@ -1,4 +1,4 @@
-![](https://github.com/vadimInshakov/fabex/workflows/build/badge.svg) ![](https://github.com/vadimInshakov/fabex/workflows/unit-tests/badge.svg)
+![](https://github.com/hyperledger-labs/fabex/workflows/build/badge.svg) ![](https://github.com/hyperledger-labs/fabex/workflows/unit-tests/badge.svg)
 
 
 ## **Block explorer for Hyperledger Fabric**
@@ -42,9 +42,9 @@ You can start Fabex as standalone microservice:
   
     `./fabex -task=grpc -configpath=configs -configname=config -enrolluser=true -db=mongo`
 
-You can use [fabex.proto](https://github.com/VadimInshakov/fabex/blob/master/proto/fabex.proto) as service contract.
+You can use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fabex.proto) as service contract.
 
-Sample client implementation [is here](https://github.com/VadimInshakov/fabex/blob/master/client/client.go). 
+Sample client implementation [is here](https://github.com/hyperledger-labs/fabex/blob/master/client/client.go). 
 You can run example client with this command:
 
     `go run ./client/client.go`
