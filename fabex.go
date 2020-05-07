@@ -20,6 +20,12 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/hyperledger-labs/fabex/blockfetcher"
+	"github.com/hyperledger-labs/fabex/db"
+	"github.com/hyperledger-labs/fabex/helpers"
+	"github.com/hyperledger-labs/fabex/ledgerclient"
+	"github.com/hyperledger-labs/fabex/models"
+	pb "github.com/hyperledger-labs/fabex/proto"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
@@ -28,12 +34,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"github.com/hyperledger-labs/fabex/blockfetcher"
-	"github.com/hyperledger-labs/fabex/db"
-	"github.com/hyperledger-labs/fabex/helpers"
-	"github.com/hyperledger-labs/fabex/ledgerclient"
-	"github.com/hyperledger-labs/fabex/models"
-	pb "github.com/hyperledger-labs/fabex/proto"
 	"google.golang.org/grpc"
 	"net"
 	"net/http"
@@ -117,12 +117,12 @@ func main() {
 	}
 
 	var fabex *models.Fabex
-	if *task != "initdb" {
-		err := dbInstance.Connect()
-		if err != nil {
-			log.Fatal("DB connection failed:", err.Error())
-		}
+
+	err = dbInstance.Connect()
+	if err != nil {
+		log.Fatal("DB connection failed:", err.Error())
 	}
+	log.Println("Connected to database successfully")
 
 	fabex = &models.Fabex{dbInstance, channelclient, &ledgerclient.CustomLedgerClient{ledgerClient}}
 
