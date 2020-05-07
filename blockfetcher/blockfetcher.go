@@ -29,8 +29,8 @@ import (
 	"github.com/hyperledger/fabric/protos/peer"
 	"github.com/hyperledger/fabric/protos/utils"
 	"github.com/pkg/errors"
-	"github.com/vadiminshakov/fabex/db"
-	"github.com/vadiminshakov/fabex/models"
+	"github.com/hyperledger-labs/fabex/db"
+	"github.com/hyperledger-labs/fabex/models"
 	"strings"
 )
 
