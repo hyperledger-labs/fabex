@@ -48,5 +48,9 @@ func main() {
 	}
 
 	blocks, err := client.PackTxsToBlocks(txs)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fmt.Printf("%#v", blocks)
 }

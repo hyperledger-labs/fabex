@@ -38,14 +38,11 @@ func (db *DBmongo) Connect() error {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err := db.Instance.Connect(ctx)
 	if err != nil {
-		log.Println("Mongodb connection failed: %s", err)
 		return err
 	}
 	ctx, _ = context.WithTimeout(context.Background(), 2*time.Second)
 	err = db.Instance.Ping(ctx, readpref.Primary())
-
-	log.Println("Connected to MongoDB successfully")
-	return nil
+	return err
 }
 
 func (db *DBmongo) Insert(txid, blockhash string, blocknum uint64, payload string) error {
