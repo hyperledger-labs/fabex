@@ -1,6 +1,6 @@
-module github.com/vadiminshakov/fabex
+module github.com/hyperledger-labs/fabex
 
-go 1.11
+go 1.14
 
 require (
 	code.cloudfoundry.org/clock v1.0.0 // indirect
