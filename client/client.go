@@ -18,8 +18,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/vadiminshakov/fabex/client/fabexclient"
-	pb "github.com/vadiminshakov/fabex/proto"
+	"github.com/hyperledger-labs/fabex/client/fabexclient"
+	pb "github.com/hyperledger-labs/fabex/proto"
 	"log"
 )
 

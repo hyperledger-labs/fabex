@@ -17,8 +17,8 @@
 package fabexclient
 
 import (
-	"github.com/vadiminshakov/fabex/models"
-	pb "github.com/vadiminshakov/fabex/proto"
+	"github.com/hyperledger-labs/fabex/models"
+	pb "github.com/hyperledger-labs/fabex/proto"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"bytes"
