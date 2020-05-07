@@ -1,4 +1,4 @@
-![](https://github.com/hyperledger-labs/fabex/workflows/build/badge.svg) ![](https://github.com/hyperledger-labs/fabex/workflows/unit-tests/badge.svg) [![Total alerts](https://img.shields.io/lgtm/alerts/g/hyperledger-labs/fabex.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/hyperledger-labs/fabex/alerts/)
+![](https://github.com/hyperledger-labs/fabex/workflows/build/badge.svg) ![](https://github.com/hyperledger-labs/fabex/workflows/unit-tests/badge.svg) 
 
 
 ## **Block explorer for Hyperledger Fabric**
@@ -8,7 +8,6 @@
 [Microservice mode](#microservice)
 
 [CLI usage](#cli)
-
 
 
 ### <a name="prerequisites">**Prerequisites**</a>
