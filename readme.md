@@ -42,24 +42,21 @@ You can start Fabex as standalone microservice:
   
     `./fabex -task=grpc -configpath=configs -configname=config -enrolluser=true -db=mongo`
 
-You can use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fabex.proto) as service contract.
+Use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fabex.proto) as service contract.
 
-Sample client implementation [is here](https://github.com/hyperledger-labs/fabex/blob/master/client/client.go). 
-You can run example client with this command:
-
-    `go run ./client/client.go`
+[Example](https://github.com/hyperledger-labs/fabex/blob/master/client/client.go) of GRPC client implementation.
 
    
 ### <a name="cli">**CLI**</a>
-1. Build Fabex executable binary file:  
+Build Fabex executable binary file:  
 
     `go build`
 
-2. Enroll admin user:  
+Enroll admin user:  
 
     `./fabex -enrolluser=true`
 
-3. Save blocks data to db:
+Save blocks data to db:
 
     `./fabex -task=explore -configpath=configs -configname=config -db=cassandra`
     
@@ -69,11 +66,11 @@ You can run example client with this command:
     `./fabex -task=explore -configpath=configs -configname=config -db=cassandra -forever=true` 
     
     
-5. Get transactions of specific block (chain operation):  
+Get transactions of specific block (chain operation):  
 
     `./fabex -task=getblock -blocknum=14 -configpath=configs -configname=config -db=cassandra`
 
-6. Get all transactions (db operation):  
+Get all transactions (db operation):  
 
     `./fabex -task=getall -configpath=configs -configname=config -db=cassandra`
 
