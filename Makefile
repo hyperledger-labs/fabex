@@ -14,7 +14,7 @@ fabex-cassandra:
 	@go run fabex.go -task=grpc -configpath=configs -configname=config -enrolluser=true -db=cassandra
 
 cassandra:
-	@docker run --name cassandra --net=host -d cassandra
+	@docker run -v /var/lib/cassandra:/var/lib/cassandra --name cassandra --net=host -d cassandra
 
 mongo:
 	@cd db/mongo-compose && docker-compose -f docker-compose.yaml up -d
