@@ -16,6 +16,8 @@
 
 package db
 
+const NOT_FOUND_ERR = "not found"
+
 type Manager interface {
 	Connect() error
 	Insert(Tx) error
