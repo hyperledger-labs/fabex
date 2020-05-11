@@ -14,10 +14,12 @@
    limitations under the License.
 */
 
+// Package db provides database interface for storing and retrieving blocks and transactions
 package db
 
 const NOT_FOUND_ERR = "not found"
 
+// Manager db interface
 type Manager interface {
 	Connect() error
 	Insert(tx Tx) error
@@ -29,6 +31,7 @@ type Manager interface {
 	GetLastEntry() (Tx, error)
 }
 
+// Tx stores info about block and tx payload
 type Tx struct {
 	ChannelId      string `json:"channelid" bson:"ChannelId"`
 	Txid           string `json:"txid" bson:"Txid"`
@@ -40,6 +43,7 @@ type Tx struct {
 	Time           int64  `json:"time" bson:"Time"`
 }
 
+// RW stores key and value of chaincode payload
 type RW struct {
 	Key   string
 	Value string
