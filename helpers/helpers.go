@@ -18,6 +18,8 @@ package helpers
 
 import (
 	"encoding/hex"
+	"github.com/hyperledger-labs/fabex/blockfetcher"
+	"github.com/hyperledger-labs/fabex/models"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
@@ -25,8 +27,6 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/hyperledger-labs/fabex/blockfetcher"
-	"github.com/hyperledger-labs/fabex/models"
 )
 
 const NOT_FOUND_ERR = "not found"
