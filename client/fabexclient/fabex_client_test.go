@@ -17,11 +17,11 @@
 package fabexclient
 
 import (
+	"bytes"
 	"github.com/hyperledger-labs/fabex/models"
 	pb "github.com/hyperledger-labs/fabex/proto"
 	"github.com/stretchr/testify/assert"
 	"log"
-	"bytes"
 	"os"
 	"os/exec"
 	"sync"
@@ -60,7 +60,7 @@ func TestMain(m *testing.M) {
 
 	// start test network
 	log.Println("Test setup")
-	_, err = ExecuteCMD("make", "start-fabric-test")
+	_, err = ExecuteCMD("make", "fabric-test")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestMain(m *testing.M) {
 
 	go func(cancelCh chan bool) {
 
-		cmd, err := ExecuteCMD("make", "start-fabex-test")
+		cmd, err := ExecuteCMD("make", "fabex-test")
 		if err != nil {
 			log.Fatal(err)
 		}
