@@ -2,7 +2,9 @@ fabric-test:
 	@cd tests/fabcar && ./startFabric.sh
 
 stop-fabric-test:
-	@cd tests/fabcar && ./stopFabric.sh
+	@cd tests/fabcar && ./stopFabric.sh \
+	&& rm -rf credstore \
+    && rm -rf cryptostore
 
 fabex-test:
 	@go run fabex.go -task=grpc -configpath=tests -configname=config -enrolluser=true -db=mongo
@@ -23,9 +25,7 @@ mongo-test:
 	@cd tests/db/mongo-compose && docker-compose -f docker-compose.yaml up -d
 
 stop-mongo-test:
-	@docker rm -f fabexmongo \
-    && rm -rf credstore \
-    && rm -rf cryptostore
+	@docker rm -f fabexmongo
 
 unit-tests:
 	@cd blockfetcher && go test -v
