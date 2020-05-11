@@ -19,10 +19,10 @@ package fabexclient
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/models"
 	pb "github.com/hyperledger-labs/fabex/proto"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io"
@@ -158,7 +158,7 @@ func (fabexCli *FabexClient) PackTxsToBlocks(blocks []db.Tx) ([]models.Block, er
 		}
 
 		for _, item := range ccData {
-			tx.KW = append(tx.KW, models.KW{item.Key, item.Value})
+			tx.KV = append(tx.KV, models.KV{item.Key, item.Value})
 		}
 
 		block.Txs = append(block.Txs, tx)
