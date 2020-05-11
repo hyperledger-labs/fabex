@@ -14,6 +14,7 @@
    limitations under the License.
 */
 
+// Package blockfetcher provides functionality for fetching blocks from blockchain
 package blockfetcher
 
 import (
@@ -21,6 +22,8 @@ import (
 	"encoding/json"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/hyperledger-labs/fabex/db"
+	"github.com/hyperledger-labs/fabex/models"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric/common/configtx"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
@@ -29,19 +32,20 @@ import (
 	"github.com/hyperledger/fabric/protos/peer"
 	"github.com/hyperledger/fabric/protos/utils"
 	"github.com/pkg/errors"
-	"github.com/hyperledger-labs/fabex/db"
-	"github.com/hyperledger-labs/fabex/models"
 	"strings"
 )
 
+// LedgerClient interface used for dependency injection of Fabric ledger client
 type LedgerClient interface {
 	QueryBlock(blockNumber uint64, options ...ledger.RequestOption) (*fabcommon.Block, error)
 }
 
+// CustomBlock stores slice of transactions (with block data)
 type CustomBlock struct {
 	Txs []db.Tx
 }
 
+// GetBlock gets information about specified block with blocknum number
 func GetBlock(ledgerClient LedgerClient, blocknum uint64) (*CustomBlock, error) {
 	customBlock := &CustomBlock{}
 
