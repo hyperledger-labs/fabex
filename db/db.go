@@ -40,16 +40,6 @@ type Tx struct {
 	Time           int64  `json:"time" bson:"Time"`
 }
 
-type Entry struct {
-	ChannelId    string
-	Txid         string
-	Hash         string
-	PreviousHash string
-	Blocknum     uint64
-	Payload      string
-	Time         int64
-}
-
 type RW struct {
 	Key   string
 	Value string
