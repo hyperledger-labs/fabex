@@ -20,11 +20,11 @@ const NOT_FOUND_ERR = "not found"
 
 type Manager interface {
 	Connect() error
-	Insert(Tx) error
+	Insert(tx Tx) error
 	QueryBlockByHash(hash string) ([]Tx, error)
-	GetByTxId(string) ([]Tx, error)
-	GetByBlocknum(uint64) ([]Tx, error)
-	GetBlockInfoByPayload(string) ([]Tx, error)
+	GetByTxId(txid string) ([]Tx, error)
+	GetByBlocknum(blocknum uint64) ([]Tx, error)
+	GetBlockInfoByPayload(payload string) ([]Tx, error)
 	QueryAll() ([]Tx, error)
 	GetLastEntry() (Tx, error)
 }
