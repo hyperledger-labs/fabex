@@ -16,13 +16,15 @@
 
 package db
 
+const NOT_FOUND_ERR = "not found"
+
 type Manager interface {
 	Connect() error
-	Insert(Tx) error
+	Insert(tx Tx) error
 	QueryBlockByHash(hash string) ([]Tx, error)
-	GetByTxId(string) ([]Tx, error)
-	GetByBlocknum(uint64) ([]Tx, error)
-	GetBlockInfoByPayload(string) ([]Tx, error)
+	GetByTxId(txid string) ([]Tx, error)
+	GetByBlocknum(blocknum uint64) ([]Tx, error)
+	GetBlockInfoByPayload(payload string) ([]Tx, error)
 	QueryAll() ([]Tx, error)
 	GetLastEntry() (Tx, error)
 }
@@ -36,16 +38,6 @@ type Tx struct {
 	Payload        string `json:"payload" bson:"Payload"`
 	ValidationCode int32  `json:"validationcode" bson:"ValidationCode"`
 	Time           int64  `json:"time" bson:"Time"`
-}
-
-type Entry struct {
-	ChannelId    string
-	Txid         string
-	Hash         string
-	PreviousHash string
-	Blocknum     uint64
-	Payload      string
-	Time         int64
 }
 
 type RW struct {

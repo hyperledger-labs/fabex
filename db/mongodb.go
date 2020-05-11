@@ -39,10 +39,7 @@ type DBmongo struct {
 	Instance   *mongo.Client
 }
 
-const (
-	NOT_FOUND_ERR    = "not found"
-	ERR_NO_DOCUMENTS = "mongo: no documents in result"
-)
+const ERR_NO_DOCUMENTS = "mongo: no documents in result"
 
 func CreateDBConfMongo(host string, port int, user, password, dbname, collection string) *DBmongo {
 	client, err := mongo.NewClient(options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s@%s:%d", user, password, host, port)))
