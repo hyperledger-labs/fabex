@@ -31,6 +31,7 @@ const (
 	VALIDATION_CODE = "ValidationCode"
 	TIME            = "Time"
 	PAYLOADKEYS     = "Payloadkeys"
+	UPDATE_MAX      = `UPDATE MAX SET id = ?, blocknum = ? where fortable = ?;`
 )
 
 func NewCassandraClient(host, user, password, keyspace, columnfamily string) *Cassandra {
@@ -40,10 +41,10 @@ func NewCassandraClient(host, user, password, keyspace, columnfamily string) *Ca
 func (c *Cassandra) Connect() error {
 	var err error
 	cluster := gocql.NewCluster(c.Host)
-	cluster.Timeout = 15 * time.Second
-	cluster.ConnectTimeout = 15 * time.Second
+	cluster.Timeout = 1000 * time.Second
+	cluster.ConnectTimeout = 30 * time.Second
 	cluster.Keyspace = "system"
-	cluster.Consistency = gocql.One
+	cluster.Consistency = gocql.All
 	cluster.Authenticator = gocql.PasswordAuthenticator{
 		Username: c.User,
 		Password: c.Password,
@@ -76,6 +77,13 @@ func (c *Cassandra) Connect() error {
 		return errors.Wrapf(err, "failed to create index: %s", c.Columnfamily)
 	}
 
+	// Normalization. We can't use slow aggregation queries, so create column family with last entry
+	aggregationTable := `CREATE TABLE IF NOT EXISTS MAX (fortable text PRIMARY KEY, id UUID, blocknum bigint);`
+	err = c.Session.Query(aggregationTable).Exec()
+	if err != nil {
+		return errors.Wrap(err, "failed to create column family: MAX")
+	}
+
 	return nil
 }
 
@@ -100,12 +108,27 @@ func (c *Cassandra) Insert(tx Tx) error {
 		}
 	}
 
-	if err := c.Session.Query(insert, gocql.TimeUUID(), tx.ChannelId, tx.Txid, tx.Hash, tx.PreviousHash,
+	id := gocql.TimeUUID()
+	if err := c.Session.Query(insert, id, tx.ChannelId, tx.Txid, tx.Hash, tx.PreviousHash,
 		tx.Blocknum, tx.Payload, tx.ValidationCode, tx.Time, payloadkeys).Exec(); err != nil {
 		return err
 	}
 
-	return nil
+	err = c.UpdateMax(id, tx.Blocknum)
+
+	return err
+}
+
+func (c *Cassandra) UpdateMax(id gocql.UUID, blocknum uint64) error {
+	err := c.Session.Query("SELECT id FROM MAX LIMIT 1;").Exec()
+	if err != nil && err.Error() != NOT_FOUND_ERR {
+		return err
+	}
+	if err != nil && err.Error() == NOT_FOUND_ERR {
+		err = c.Session.Query("INSERT INTO MAX (fortable, id, blocknum) VALUES (?, ?, ?)", c.Columnfamily, id, blocknum).Exec()
+	}
+	err = c.Session.Query(UPDATE_MAX, id, blocknum, c.Columnfamily).Exec()
+	return err
 }
 
 func (c *Cassandra) GetBlockInfoByPayload(searchExpression string) ([]Tx, error) {
@@ -138,16 +161,16 @@ func (c *Cassandra) GetByBlocknum(blocknum uint64) ([]Tx, error) {
 
 func (c *Cassandra) GetLastEntry() (Tx, error) {
 	var (
-		tx       Tx
+		tx     Tx
 		lastID string
 	)
 
 	/*
-	    There are no nested queries in Cassandra, so we do this two-step shit for getting last tx
-	 */
+	   There are no nested queries in Cassandra, so we do this two-step shit for getting last tx
+	*/
 
 	// id (UUID) includes timestamp, so we use it for getting last tx ID
-	err := c.Session.Query(fmt.Sprintf("SELECT MAX(id) FROM %s", c.Columnfamily)).Scan(&lastID)
+	err := c.Session.Query("SELECT id FROM MAX where fortable = ?;", c.Columnfamily).Scan(&lastID)
 	if err != nil {
 		return Tx{}, err
 	}
