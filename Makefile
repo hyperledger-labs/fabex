@@ -33,3 +33,4 @@ unit-tests:
 
 integration-tests:
 	@cd client/fabexclient && go test -v
+	@cd ./rest && go test -v
