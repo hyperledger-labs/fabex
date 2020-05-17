@@ -26,6 +26,7 @@ import (
 	"github.com/hyperledger-labs/fabex/ledgerclient"
 	"github.com/hyperledger-labs/fabex/models"
 	pb "github.com/hyperledger-labs/fabex/proto"
+	"github.com/hyperledger-labs/fabex/rest"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
@@ -36,7 +37,6 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"net"
-	"net/http"
 	"os"
 )
 
@@ -45,7 +45,7 @@ var (
 	globalConfig models.Config
 )
 
-type fabexServer struct {
+type FabexServer struct {
 	Address string
 	Port    string
 	Conf    *models.Fabex
@@ -206,21 +206,17 @@ func main() {
 		serv := NewFabexServer(globalConfig.GRPCServer.Host, globalConfig.GRPCServer.Port, fabex)
 		// serving frontend
 		if *ui {
-			go func() {
-				http.Handle("/", http.FileServer(http.Dir("./ui")))
-				http.ListenAndServe(fmt.Sprintf(":%s", globalConfig.UI.Port), nil)
-			}()
-			log.Printf("Serving UI on port %s", globalConfig.UI.Port)
+			go rest.Run(serv.Conf.Db, globalConfig.UI.Port)
 		}
 		StartGrpcServ(serv, fabex)
 	}
 }
 
-func NewFabexServer(addr string, port string, conf *models.Fabex) *fabexServer {
-	return &fabexServer{addr, port, conf}
+func NewFabexServer(addr string, port string, conf *models.Fabex) *FabexServer {
+	return &FabexServer{addr, port, conf}
 }
 
-func (s *fabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServer) error {
+func (s *FabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServer) error {
 	log.Printf("Start stream from %d block", req.Startblock)
 	// set blocks counter to latest saved in db block number value
 	blockCounter := req.Startblock
@@ -242,7 +238,7 @@ func (s *fabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServe
 	return nil
 }
 
-func (s *fabexServer) GetByTxId(req *pb.Entry, stream pb.Fabex_GetByTxIdServer) error {
+func (s *FabexServer) GetByTxId(req *pb.Entry, stream pb.Fabex_GetByTxIdServer) error {
 
 	QueryResults, err := s.Conf.Db.GetByTxId(req.Txid)
 	if err != nil {
@@ -256,7 +252,7 @@ func (s *fabexServer) GetByTxId(req *pb.Entry, stream pb.Fabex_GetByTxIdServer) 
 	return nil
 }
 
-func (s *fabexServer) GetByBlocknum(req *pb.Entry, stream pb.Fabex_GetByBlocknumServer) error {
+func (s *FabexServer) GetByBlocknum(req *pb.Entry, stream pb.Fabex_GetByBlocknumServer) error {
 	QueryResults, err := s.Conf.Db.GetByBlocknum(req.Blocknum)
 	if err != nil {
 		return err
@@ -269,7 +265,7 @@ func (s *fabexServer) GetByBlocknum(req *pb.Entry, stream pb.Fabex_GetByBlocknum
 	return nil
 }
 
-func (s *fabexServer) GetBlockInfoByPayload(req *pb.Entry, stream pb.Fabex_GetBlockInfoByPayloadServer) error {
+func (s *FabexServer) GetBlockInfoByPayload(req *pb.Entry, stream pb.Fabex_GetBlockInfoByPayloadServer) error {
 	QueryResults, err := s.Conf.Db.GetBlockInfoByPayload(req.Payload)
 	if err != nil {
 		return err
@@ -282,7 +278,7 @@ func (s *fabexServer) GetBlockInfoByPayload(req *pb.Entry, stream pb.Fabex_GetBl
 	return nil
 }
 
-func StartGrpcServ(serv *fabexServer, fabex *models.Fabex) {
+func StartGrpcServ(serv *FabexServer, fabex *models.Fabex) {
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterFabexServer(grpcServer, serv)
