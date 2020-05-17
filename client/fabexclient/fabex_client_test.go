@@ -84,7 +84,7 @@ func TestMain(m *testing.M) {
 			}
 		}
 	}(cancelCh)
-	time.Sleep(25 * time.Second)
+	time.Sleep(55 * time.Second)
 
 	log.Println("Run tests")
 	code := m.Run()
