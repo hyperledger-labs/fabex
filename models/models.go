@@ -17,9 +17,9 @@
 package models
 
 import (
-	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/ledgerclient"
+	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 )
 
 type Fabex struct {
@@ -86,11 +86,11 @@ type Block struct {
 
 type Tx struct {
 	Txid           string `json:"txid"`
-	KW             []KW
+	KV             []KV
 	ValidationCode int32 `json:"validationcode"`
 }
 
-type KW struct {
+type KV struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }

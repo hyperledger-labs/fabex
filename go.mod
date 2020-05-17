@@ -11,9 +11,10 @@ require (
 	github.com/coreos/etcd v3.3.20+incompatible // indirect
 	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/fsouza/go-dockerclient v1.3.6 // indirect
+	github.com/gin-gonic/gin v1.6.3
 	github.com/gocql/gocql v0.0.0-20200410100145-b454769479c6
 	github.com/golang/mock v1.2.0 // indirect
-	github.com/golang/protobuf v1.3.2
+	github.com/golang/protobuf v1.3.3
 	github.com/google/certificate-transparency-go v1.0.21 // indirect
 	github.com/gotestyourself/gotestyourself v1.4.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0 // indirect
