@@ -17,10 +17,8 @@
 package fabexclient
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/hyperledger-labs/fabex/db"
-	"github.com/hyperledger-labs/fabex/models"
 	pb "github.com/hyperledger-labs/fabex/proto"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
