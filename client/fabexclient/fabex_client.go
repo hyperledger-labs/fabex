@@ -133,38 +133,3 @@ func (fabexCli *FabexClient) GetBlockInfoByPayload(filter *pb.Entry) ([]db.Tx, e
 		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Txid: in.Txid, Payload: in.Payload, Time: in.Time})
 	}
 }
-
-func (fabexCli *FabexClient) PackTxsToBlocks(blocks []db.Tx) ([]models.Block, error) {
-	var blockAlreadyRead = make(map[uint64]bool)
-
-	var Blocks []models.Block
-	for _, in := range blocks {
-		var (
-			block models.Block
-			tx    models.Tx
-		)
-
-		if _, ok := blockAlreadyRead[in.Blocknum]; !ok {
-			block = models.Block{ChannelId: in.ChannelId, Blocknum: in.Blocknum, BlockHash: in.Hash, PreviousHash: in.PreviousHash, Time: in.Time}
-		}
-
-		tx.Txid = in.Txid
-		tx.ValidationCode = in.ValidationCode
-
-		var ccData []models.Chaincode
-		err := json.Unmarshal([]byte(in.Payload), &ccData)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, item := range ccData {
-			tx.KV = append(tx.KV, models.KV{item.Key, item.Value})
-		}
-
-		block.Txs = append(block.Txs, tx)
-		Blocks = append(Blocks, block)
-		blockAlreadyRead[in.Blocknum] = true
-	}
-
-	return Blocks, nil
-}
