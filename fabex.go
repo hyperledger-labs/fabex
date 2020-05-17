@@ -206,8 +206,7 @@ func main() {
 		serv := NewFabexServer(globalConfig.GRPCServer.Host, globalConfig.GRPCServer.Port, fabex)
 		// serving frontend
 		if *ui {
-			rest.Run(serv.Conf.Db, globalConfig.UI.Port)
-			log.Printf("Serving UI on port %s", globalConfig.UI.Port)
+			go rest.Run(serv.Conf.Db, globalConfig.UI.Port)
 		}
 		StartGrpcServ(serv, fabex)
 	}
