@@ -18,7 +18,9 @@ package helpers
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"github.com/hyperledger-labs/fabex/blockfetcher"
+	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/models"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
@@ -135,4 +137,39 @@ func SetupLogLevel(lvl logging.Level) {
 	logging.SetLevel("fabsdk/common", lvl)
 	logging.SetLevel("fabsdk/fab", lvl)
 	logging.SetLevel("fabsdk/client", lvl)
+}
+
+func PackTxsToBlocks(blocks []db.Tx) ([]models.Block, error) {
+	var blockAlreadyRead = make(map[uint64]bool)
+
+	var Blocks []models.Block
+	for _, in := range blocks {
+		var (
+			block models.Block
+			tx    models.Tx
+		)
+
+		if _, ok := blockAlreadyRead[in.Blocknum]; !ok {
+			block = models.Block{ChannelId: in.ChannelId, Blocknum: in.Blocknum, BlockHash: in.Hash, PreviousHash: in.PreviousHash, Time: in.Time}
+		}
+
+		tx.Txid = in.Txid
+		tx.ValidationCode = in.ValidationCode
+
+		var ccData []models.Chaincode
+		err := json.Unmarshal([]byte(in.Payload), &ccData)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range ccData {
+			tx.KV = append(tx.KV, models.KV{item.Key, item.Value})
+		}
+
+		block.Txs = append(block.Txs, tx)
+		Blocks = append(Blocks, block)
+		blockAlreadyRead[in.Blocknum] = true
+	}
+
+	return Blocks, nil
 }
