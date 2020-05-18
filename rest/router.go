@@ -5,8 +5,13 @@ import (
 	"github.com/hyperledger-labs/fabex/db"
 )
 
-func Run(db db.Manager, port string) {
+func Run(db db.Manager, port string, withUI bool) {
 	r := gin.Default()
+
+	if withUI {
+		r.Static("/", "./ui")
+	}
+
 	r.GET("/bytxid/:txid", bytxid(db))
 
 	r.GET("/byblocknum/:blocknum", byblocknum(db))
