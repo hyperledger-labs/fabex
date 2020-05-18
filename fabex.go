@@ -204,10 +204,10 @@ func main() {
 
 	case "grpc":
 		serv := NewFabexServer(globalConfig.GRPCServer.Host, globalConfig.GRPCServer.Port, fabex)
-		// serving frontend
-		if *ui {
-			go rest.Run(serv.Conf.Db, globalConfig.UI.Port)
-		}
+
+		// rest
+		go rest.Run(serv.Conf.Db, globalConfig.UI.Port, *ui)
+		// grpc
 		StartGrpcServ(serv, fabex)
 	}
 }
