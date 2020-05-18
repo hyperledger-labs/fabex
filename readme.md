@@ -9,35 +9,41 @@
 
 [CLI usage](#cli)
 
+[Testing](#testing)
+
+<br><br>
 
 ### <a name="prerequisites">**Prerequisites**</a>
 
 1. Configure `config.yaml` (it's main config of the Fabex) and `connection-profile.yaml` (Hyperledger Fabric connection profile)
 
-2. Start your Fabric blockchain network or sample [first network](https://github.com/hyperledger/fabric-samples/tree/release-1.4/first-network)
-
-3. Install and start database (MongoDB or CassandraDB)
+2. Install and start database (MongoDB or CassandraDB)
     
     If you choose Mongo:
       1. set initial user name and password in `db/mongo-compose/docker-compose.yaml`
       2. start container:
     
       ```
-        cd db/mongo-compose
-        docker-compose -f docker-compose.yaml up -d
+      make mongo
       ```
     If you choose Cassandra:
       ``` 
-      docker run --name cassandra --net=host -d cassandra
+      make cassandra
       ```
+3. (OPTIONAL) Start your Fabric blockchain network or sample test network with 
+   ```
+   make fabric-test
+   ```
+
+<br><br>
 
 ### <a name="microservice">**Microservice mode**</a>
 
-You can start Fabex as standalone microservice:
+You can start Fabex as standalone microservice with Cassandra blocks storage:
 
     `./fabex -task=grpc -configpath=configs -configname=config -enrolluser=true -db=cassandra`
     
-  or with Mongo
+  or with Mongo storage
   
     `./fabex -task=grpc -configpath=configs -configname=config -enrolluser=true -db=mongo`
 
@@ -45,7 +51,8 @@ Use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fa
 
 [Example](https://github.com/hyperledger-labs/fabex/blob/master/client/client.go) of GRPC client implementation.
 
-   
+<br><br>
+ 
 ### <a name="cli">**CLI**</a>
 Build Fabex executable binary file:  
 
@@ -73,7 +80,6 @@ Get all transactions (db operation):
 
     `./fabex -task=getall -configpath=configs -configname=config -db=cassandra`
 
----
 
 You can choose database for data saving and retrieving with `-db flag` (MongoDB or CassandraDB):
 
@@ -81,3 +87,10 @@ You can choose database for data saving and retrieving with `-db flag` (MongoDB 
     `./fabex -task=explore -configpath=configs -configname=config -db=cassandra`
 
 
+<br><br>
+
+### <a name="testing">**Testing**</a>
+
+unit tests: `make unit-tests`
+
+integration tests: `make integration-tests`
