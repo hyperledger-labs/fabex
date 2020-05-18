@@ -3,6 +3,7 @@ package rest
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/hyperledger-labs/fabex/db"
+	"net/http"
 )
 
 func Run(db db.Manager, port string, withUI bool) {
@@ -17,6 +18,10 @@ func Run(db db.Manager, port string, withUI bool) {
 	r.GET("/byblocknum/:blocknum", byblocknum(db))
 
 	r.GET("/bykey/:payloadkey", bypayload(db))
+
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/ui")
+	})
 
 	r.Run(":" + port)
 }
