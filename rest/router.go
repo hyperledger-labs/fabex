@@ -21,5 +21,9 @@ func Run(db db.Storage, port string, withUI bool) {
 		c.Redirect(http.StatusMovedPermanently, "/ui")
 	})
 
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/ui")
+	})
+
 	r.Run(":" + port)
 }
