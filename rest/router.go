@@ -9,7 +9,7 @@ func Run(db db.Manager, port string, withUI bool) {
 	r := gin.Default()
 
 	if withUI {
-		r.Static("/", "./ui")
+		r.Static("/ui", "./ui")
 	}
 
 	r.GET("/bytxid/:txid", bytxid(db))
