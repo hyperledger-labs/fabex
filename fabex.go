@@ -206,7 +206,7 @@ func main() {
 		serv := NewFabexServer(globalConfig.GRPCServer.Host, globalConfig.GRPCServer.Port, fabex)
 
 		// rest
-		go rest.Run(serv.Conf.Db, globalConfig.UI.Port)
+		go rest.Run(serv.Conf.Db, globalConfig.UI.Port, *ui)
 		// grpc
 		StartGrpcServ(serv, fabex)
 	}
