@@ -81,13 +81,13 @@ type Block struct {
 	PreviousHash string `json:"previoushash"`
 	Blocknum     uint64 `json:"blocknum"`
 	Txs          []Tx   `json:"txs"`
-	Time         int64  `json:"time" bson:"Time"`
 }
 
 type Tx struct {
 	Txid           string `json:"txid"`
 	KV             []KV
 	ValidationCode int32 `json:"validationcode"`
+	Time           int64 `json:"time" bson:"Time"`
 }
 
 type KV struct {
