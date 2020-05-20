@@ -150,7 +150,7 @@ func PackTxsToBlocks(blocks []db.Tx) ([]models.Block, error) {
 		)
 
 		if _, ok := blockAlreadyRead[in.Blocknum]; !ok {
-			block = models.Block{ChannelId: in.ChannelId, Blocknum: in.Blocknum, BlockHash: in.Hash, PreviousHash: in.PreviousHash, Time: in.Time}
+			block = models.Block{ChannelId: in.ChannelId, Blocknum: in.Blocknum, BlockHash: in.Hash, PreviousHash: in.PreviousHash}
 		}
 
 		tx.Txid = in.Txid
