@@ -87,7 +87,7 @@ func GetBlock(ledgerClient LedgerClient, blocknum uint64) (*CustomBlock, error) 
 		}
 
 		// get timestamp
-		timeInBlock, err := ptypes.Timestamp(channelHeader.Timestamp)
+		txtime, err := ptypes.Timestamp(channelHeader.Timestamp)
 		if err != nil {
 			return nil, err
 		}
@@ -166,7 +166,7 @@ func GetBlock(ledgerClient LedgerClient, blocknum uint64) (*CustomBlock, error) 
 				blocknum,
 				string(jsonPayload),
 				validationCode,
-				timeInBlock.Unix(),
+				txtime.Unix(),
 			}
 			customBlock.Txs = append(customBlock.Txs, tx)
 
@@ -191,7 +191,7 @@ func GetBlock(ledgerClient LedgerClient, blocknum uint64) (*CustomBlock, error) 
 					blocknum,
 					string(jsonPayload),
 					validationCode,
-					timeInBlock.Unix(),
+					txtime.Unix(),
 				}
 				customBlock.Txs = append(customBlock.Txs, tx)
 			}
