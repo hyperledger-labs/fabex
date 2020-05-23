@@ -15,7 +15,7 @@ func errorHandler(c *gin.Context, status int, err string) {
 	})
 }
 
-func bytxid(db db.Manager) func(c *gin.Context) {
+func bytxid(db db.Storage) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		txid := c.Param("txid")
 		QueryResults, err := db.GetByTxId(txid)
@@ -35,13 +35,14 @@ func bytxid(db db.Manager) func(c *gin.Context) {
 	}
 }
 
-func byblocknum(db db.Manager) func(c *gin.Context) {
+func byblocknum(db db.Storage) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		blocknum := c.Param("blocknum")
 		blocknumconverted, err := strconv.Atoi(blocknum)
 		if err != nil {
 			errorHandler(c, http.StatusInternalServerError, err.Error())
 		}
+
 		QueryResults, err := db.GetByBlocknum(uint64(blocknumconverted))
 		if err != nil {
 			errorHandler(c, http.StatusNotFound, err.Error())
@@ -59,7 +60,7 @@ func byblocknum(db db.Manager) func(c *gin.Context) {
 	}
 }
 
-func bypayload(db db.Manager) func(c *gin.Context) {
+func bypayload(db db.Storage) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		payloadkey := c.Param("payloadkey")
 		QueryResults, err := db.GetBlockInfoByPayload(payloadkey)
