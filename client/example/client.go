@@ -18,20 +18,19 @@ package main
 
 import (
 	"fmt"
-	"github.com/hyperledger-labs/fabex/client/fabexclient"
 	pb "github.com/hyperledger-labs/fabex/proto"
 	"log"
 )
 
 var (
-	client *fabexclient.FabexClient
+	client *FabexClient
 	addr   = "0.0.0.0"
 	port   = "6000"
 )
 
 func main() {
 	var err error
-	client, err = fabexclient.New(addr, port)
+	client, err = New(addr, port)
 	if err != nil {
 		panic(err)
 	}
