@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package fabexclient
+package client
 
 import (
 	"fmt"
