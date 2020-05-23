@@ -19,8 +19,8 @@ package db
 
 const NOT_FOUND_ERR = "not found"
 
-// Manager db interface
-type Manager interface {
+// Storage db interface
+type Storage interface {
 	Connect() error
 	Insert(tx Tx) error
 	QueryBlockByHash(hash string) ([]Tx, error)
