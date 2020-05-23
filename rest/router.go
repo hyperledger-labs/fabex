@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func Run(db db.Manager, port string, withUI bool) {
+func Run(db db.Storage, port string, withUI bool) {
 	r := gin.Default()
 
 	if withUI {
