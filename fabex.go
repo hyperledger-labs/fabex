@@ -108,7 +108,7 @@ func main() {
 	}
 
 	// choose database
-	var dbInstance db.Manager
+	var dbInstance db.Storage
 	switch *databaseSelected {
 	case "mongo":
 		dbInstance = db.CreateDBConfMongo(globalConfig.Mongo.Host, globalConfig.Mongo.Port, globalConfig.Mongo.Dbuser, globalConfig.Mongo.Dbsecret, globalConfig.Mongo.Dbname, globalConfig.Mongo.Collection)

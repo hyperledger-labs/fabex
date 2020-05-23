@@ -23,7 +23,7 @@ import (
 )
 
 type Fabex struct {
-	Db            db.Manager
+	Db            db.Storage
 	ChannelClient *channel.Client
 	LedgerClient  *ledgerclient.CustomLedgerClient
 }
