@@ -64,54 +64,9 @@ func (fabexCli *FabexClient) Explore(startblock, endblock int) error {
 	}
 }
 
-func (fabexCli *FabexClient) GetByTxId(filter *pb.Entry) ([]db.Tx, error) {
+func (fabexCli *FabexClient) Get(filter *pb.Entry) ([]db.Tx, error) {
 
-	stream, err := fabexCli.Client.GetByTxId(context.Background(), filter)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Println("Started stream")
-
-	var txs []db.Tx
-	for {
-		in, err := stream.Recv()
-		if err == io.EOF {
-			log.Println("Steam is empty")
-			return txs, nil
-		}
-		if err != nil {
-			return txs, err
-		}
-		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Txid: in.Txid, Payload: in.Payload, Time: in.Time})
-	}
-}
-
-func (fabexCli *FabexClient) GetByBlocknum(filter *pb.Entry) ([]db.Tx, error) {
-
-	stream, err := fabexCli.Client.GetByBlocknum(context.Background(), filter)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Println("Started stream")
-	var txs []db.Tx
-	for {
-		in, err := stream.Recv()
-		if err == io.EOF {
-			log.Println("Steam is empty")
-			return txs, nil
-		}
-		if err != nil {
-			return txs, err
-		}
-		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Txid: in.Txid, Payload: in.Payload, Time: in.Time})
-	}
-}
-
-func (fabexCli *FabexClient) GetBlockInfoByPayload(filter *pb.Entry) ([]db.Tx, error) {
-
-	stream, err := fabexCli.Client.GetBlockInfoByPayload(context.Background(), filter)
+	stream, err := fabexCli.Client.Get(context.Background(), filter)
 	if err != nil {
 		return nil, err
 	}
