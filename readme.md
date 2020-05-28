@@ -1,4 +1,7 @@
-![](https://github.com/hyperledger-labs/fabex/workflows/build/badge.svg) ![](https://github.com/hyperledger-labs/fabex/workflows/unit-tests/badge.svg) 
+<table><tr>
+<td><img src="https://github.com/hyperledger-labs/fabex/workflows/build/badge.svg" /></td>
+<td><img src="https://github.com/hyperledger-labs/fabex/workflows/unit-tests/badge.svg" /></td>
+<td><img align="right" height="100" src="https://github.com/vadimInshakov/fabex/blob/add-logo/logo.png"></td></tr></table> 
 
 <p align="center">
 <img src="https://github.com/vadiminshakov/fabex/blob/master/fabex.png">
