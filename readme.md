@@ -1,7 +1,8 @@
 <style>
-table {border: none;}
+#table {border: none;}
 </style>
-<table><tr>
+
+<table id="table"><tr>
 <td><img src="https://github.com/hyperledger-labs/fabex/workflows/build/badge.svg" /></td>
 <td><img src="https://github.com/hyperledger-labs/fabex/workflows/unit-tests/badge.svg" /></td>
 <td>supported by OCRV</td><td><img align="right" width="70" height="70" src="https://avatars0.githubusercontent.com/u/60600953?s=100&v=4"></td></tr></table> 
