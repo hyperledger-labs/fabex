@@ -1,7 +1,4 @@
-<table><tr>
-<td><img src="https://github.com/hyperledger-labs/fabex/workflows/build/badge.svg" /></td>
-<td><img src="https://github.com/hyperledger-labs/fabex/workflows/unit-tests/badge.svg" /></td>
-<td><img align="right" height="100" src="https://github.com/vadimInshakov/fabex/blob/add-logo/logo.png"></td></tr></table> 
+![](https://github.com/hyperledger-labs/fabex/workflows/build/badge.svg) ![](https://github.com/hyperledger-labs/fabex/workflows/unit-tests/badge.svg) 
 
 <p align="center">
 <img src="https://github.com/vadiminshakov/fabex/blob/1.x/fabex.png">
