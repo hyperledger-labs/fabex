@@ -183,9 +183,28 @@ func TestEndpoints(t *testing.T) {
 		if err != nil {
 			t.Errorf(err.Error())
 		}
+
 		assert.Greater(t, len(txs.Msg), 0, "No transactions found")
 		for _, tx := range txs.Msg {
 			assert.EqualValuesf(t, tx.ChannelId, "mychannel", "Not valid tx retrieved, got tx from channel %d, want %d", tx.ChannelId, "mychannel")
 		}
+	})
+
+	t.Run("InvalidBlockNumber", func(t *testing.T) {
+		resp, err := http.Get("http://localhost:5252/byblocknum/999999999999")
+		if err != nil {
+			t.Errorf(err.Error())
+		}
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Errorf(err.Error())
+		}
+
+		var txs Response
+		err = json.Unmarshal(bodyBytes, &txs)
+		if err != nil {
+			t.Errorf(err.Error())
+		}
+		assert.Equal(t, "no such data", txs.Error, "failed to handle invalid block number")
 	})
 }

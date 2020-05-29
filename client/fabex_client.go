@@ -24,7 +24,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io"
-	"log"
 )
 
 type FabexClient struct {
@@ -41,27 +40,25 @@ func New(addr, port string) (*FabexClient, error) {
 	return &FabexClient{pb.NewFabexClient(conn)}, nil
 }
 
-func (fabexCli *FabexClient) Explore(startblock, endblock int) error {
+func (fabexCli *FabexClient) Explore(startblock, endblock int) ([]db.Tx, error) {
 
 	stream, err := fabexCli.Client.Explore(context.Background(), &pb.RequestRange{Startblock: int64(startblock), Endblock: int64(endblock)})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	log.Println("Started stream")
-
+	var txs []db.Tx
 	for {
 		in, err := stream.Recv()
 		if err == io.EOF {
-			log.Println("Steam is empty")
-			return nil
+			return txs, nil
 		}
 		if err != nil {
-			log.Println(err)
-			return err
+			return txs, err
 		}
-		log.Printf("\nChannel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\nTx id: %s\nPayload: %s\nBlock timestamp: %d\n", in.Channelid, in.Blocknum, in.Hash, in.Previoushash, in.Txid, in.Payload, in.Time)
+		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Txid: in.Txid, Payload: in.Payload, Time: in.Time})
 	}
+
 }
 
 func (fabexCli *FabexClient) Get(filter *pb.Entry) ([]db.Tx, error) {
@@ -71,13 +68,10 @@ func (fabexCli *FabexClient) Get(filter *pb.Entry) ([]db.Tx, error) {
 		return nil, err
 	}
 
-	log.Println("Started stream")
-
 	var txs []db.Tx
 	for {
 		in, err := stream.Recv()
 		if err == io.EOF {
-			log.Println("Steam is empty")
 			return txs, nil
 		}
 		if err != nil {
