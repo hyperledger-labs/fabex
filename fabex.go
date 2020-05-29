@@ -55,8 +55,8 @@ func main() {
 
 	// parse flags
 	enrolluser := flag.Bool("enrolluser", false, "enroll user (true) or not (false)")
-	task := flag.String("task", "query", "choose the task to execute")
-	forever := flag.Bool("forever", false, "explore ledger forever")
+	task := flag.String("task", "grpc", "choose the task to execute")
+	forever := flag.Bool("forever", false, "explore ledger forever (for CLI mode)")
 	blocknum := flag.Uint64("blocknum", 0, "block number")
 	confpath := flag.String("configpath", "./", "path to YAML config")
 	confname := flag.String("configname", "config", "name of YAML config")
