@@ -19,8 +19,8 @@ package main
 import (
 	"fmt"
 	fabcli "github.com/hyperledger-labs/fabex/client"
-	pb "github.com/hyperledger-labs/fabex/proto"
 	"github.com/hyperledger-labs/fabex/helpers"
+	pb "github.com/hyperledger-labs/fabex/proto"
 	"log"
 )
 
@@ -37,10 +37,14 @@ func main() {
 		panic(err)
 	}
 
-	txs, err := client.Explore(1, 15)
+	/*
+	    Use this commented lines for your experiments!
+	 */
+
+	//txs, err := client.Explore(1, 15)
 	//txs, err := client.Get(&pb.Entry{Txid:"3a3e933a3d9953b0b10e6573254b6d3cf2347d72058c0347a55054babdd8e1a1"})
-	//txs, err := client.Get(&pb.Entry{Blocknum: 2})
 	//txs, err := client.Get(&pb.Entry{Payload: "WriteSet"})
+	txs, err := client.Get(&pb.Entry{Blocknum: 5})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,5 +54,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%#v", blocks)
+	fmt.Printf("%#v\n", blocks)
 }
