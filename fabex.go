@@ -148,16 +148,17 @@ func main() {
 
 		if customBlock != nil {
 			var cc []models.Chaincode
-			for _, block := range customBlock.Txs {
+			for _, tx := range customBlock.Txs {
 
-				err = json.Unmarshal([]byte(block.Payload), &cc)
+				err = json.Unmarshal([]byte(tx.Payload), &cc)
 				if err != nil {
 					log.Fatalf("Unmarshalling error: %s", err)
 				}
 
-				log.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", block.Blocknum, block.Hash, block.Txid)
+				fmt.Printf("Channel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\nTxid: %s\nTx validation code: %d\nTime: %d\nPayload:\n",
+					tx.ChannelId, tx.Blocknum, tx.Hash, tx.PreviousHash, tx.Txid, tx.ValidationCode, tx.Time)
 				for _, val := range cc {
-					log.Fatalf("Key: %s\nValue: %s\n", val.Key, val.Value)
+					fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
 				}
 
 			}
@@ -195,9 +196,10 @@ func main() {
 				log.Fatalf("Unmarshalling error: %s", err)
 			}
 
-			log.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", tx.Blocknum, tx.Hash, tx.Txid)
+			fmt.Printf("Channel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\nTxid: %s\nTx validation code: %d\nTime: %d\nPayload:\n",
+				tx.ChannelId, tx.Blocknum, tx.Hash, tx.PreviousHash, tx.Txid, tx.ValidationCode, tx.Time)
 			for _, val := range cc {
-				log.Fatalf("Key: %s\nValue: %s\n", val.Key, val.Value)
+				fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
 			}
 
 		}
