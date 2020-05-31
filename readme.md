@@ -14,8 +14,11 @@
 
 [Testing](#testing)
 
-<br><br>
+<br>
 
+##### _FabEx is inspired by [ledgerfsck](https://github.com/C0rWin/ledgerfsck)_
+
+<br>
 ### <a name="prerequisites">**Prerequisites**</a>
 
 1. Configure `config.yaml` (it's main config of the Fabex) and `connection-profile.yaml` (Hyperledger Fabric connection profile)
