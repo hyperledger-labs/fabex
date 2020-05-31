@@ -14,6 +14,8 @@
 
 [Testing](#testing)
 
+[Troubleshooting](#troubleshooting)
+
 <br>
 
 ##### _FabEx is inspired by [ledgerfsck](https://github.com/C0rWin/ledgerfsck)_
@@ -101,3 +103,28 @@ You can choose database for data saving and retrieving with `-db flag` (MongoDB 
 unit tests: `make unit-tests`
 
 integration tests: `make integration-tests`
+
+<br>
+
+### <a name="troubleshooting">Troubleshooting</a>
+
+Error:
+```
+# github.com/hyperledger/fabric-sdk-go/internal/github.com/hyperledger/fabric/core/operations
+../../../../pkg/mod/github.com/hyperledger/fabric-sdk-go@v0.0.0-20190306235112-f198238ee7da/internal/github.com/hyperledger/fabric/core/operations/system.go:227:23: not enough arguments in call to s.statsd.SendLoop
+ have (<-chan time.Time, string, string)
+ want (context.Context, <-chan time.Time, string, string)
+```
+It's known issue [FABG-885](https://jira.hyperledger.org/browse/FABG-885)
+
+Solution:
+
+open SDK file `$GOPATH/pkg/mod/github.com/hyperledger/fabric-sdk-go@v0.0.0-20190306235112-f198238ee7da/internal/github.com/hyperledger/fabric/core/operations/system.go`
+
+on the line 227 replace this:
+
+`go s.statsd.SendLoop(s.sendTicker.C, network, address)`
+
+to:
+
+`go s.statsd.SendLoop(context.Background(), s.sendTicker.C, network, address)`
