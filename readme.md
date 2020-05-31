@@ -2,6 +2,9 @@
 
 
 ## **Block explorer for Hyperledger Fabric**
+<br>
+
+### Reference
 
 [Prerequisites](#prerequisites)
 
@@ -49,7 +52,7 @@ You can start Fabex as standalone microservice with Cassandra blocks storage:
 
 Use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fabex.proto) as service contract.
 
-[Example](https://github.com/hyperledger-labs/fabex/blob/master/client/client.go) of GRPC client implementation.
+[Example](https://github.com/hyperledger-labs/fabex/blob/master/client/example/client.go) of GRPC client implementation.
 
 <br><br>
  

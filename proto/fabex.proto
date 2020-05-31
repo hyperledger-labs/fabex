@@ -4,9 +4,7 @@ option go_package = "github.com/hyperledger-labs/fabex/proto";
 
 service Fabex {
     rpc Explore(RequestRange) returns (stream Entry);
-    rpc GetByTxId(Entry) returns (stream Entry);
-    rpc GetByBlocknum(Entry) returns (stream Entry);
-    rpc GetBlockInfoByPayload(Entry) returns (stream Entry);
+    rpc Get(Entry) returns (stream Entry);
 }
 
 message RequestRange {

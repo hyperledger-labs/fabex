@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package fabexclient
+package client
 
 import (
 	"bytes"
@@ -36,7 +36,7 @@ var (
 
 func ExecuteCMD(command string, args ...string) (*exec.Cmd, error) {
 	cmd := exec.Command(command, args...)
-	cmd.Dir = "../../"
+	cmd.Dir = "../"
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
@@ -122,18 +122,31 @@ func TestExplore(t *testing.T) {
 	}
 }
 
-func TestGetByBlocknum(t *testing.T) {
+func TestGet(t *testing.T) {
 	fabcli, err := New("localhost", "6000")
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	txs, err := fabcli.GetByBlocknum(&pb.Entry{Blocknum: 1})
+
+	txs, err := fabcli.Get(&pb.Entry{Blocknum: 1})
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-
 	assert.Greater(t, len(txs), 0, "No transactions found")
 	for _, tx := range txs {
 		assert.EqualValuesf(t, tx.Blocknum, 1, "Not valid tx retrieved, got %d, want %d", tx.Blocknum, 1)
 	}
+
+	txs, err = fabcli.Get(&pb.Entry{Txid: txs[0].Txid})
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	assert.Greater(t, len(txs), 0, "No transactions found")
+
+	txs, err = fabcli.Get(&pb.Entry{Payload: "WriteSet"})
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	assert.Greater(t, len(txs), 0, "No transactions found")
+
 }

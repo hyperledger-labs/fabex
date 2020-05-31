@@ -55,8 +55,8 @@ func main() {
 
 	// parse flags
 	enrolluser := flag.Bool("enrolluser", false, "enroll user (true) or not (false)")
-	task := flag.String("task", "query", "choose the task to execute")
-	forever := flag.Bool("forever", false, "explore ledger forever")
+	task := flag.String("task", "grpc", "choose the task to execute")
+	forever := flag.Bool("forever", false, "explore ledger forever (for CLI mode)")
 	blocknum := flag.Uint64("blocknum", 0, "block number")
 	confpath := flag.String("configpath", "./", "path to YAML config")
 	confname := flag.String("configname", "config", "name of YAML config")
@@ -108,7 +108,7 @@ func main() {
 	}
 
 	// choose database
-	var dbInstance db.Manager
+	var dbInstance db.Storage
 	switch *databaseSelected {
 	case "mongo":
 		dbInstance = db.CreateDBConfMongo(globalConfig.Mongo.Host, globalConfig.Mongo.Port, globalConfig.Mongo.Dbuser, globalConfig.Mongo.Dbsecret, globalConfig.Mongo.Dbname, globalConfig.Mongo.Collection)
@@ -148,16 +148,17 @@ func main() {
 
 		if customBlock != nil {
 			var cc []models.Chaincode
-			for _, block := range customBlock.Txs {
+			for _, tx := range customBlock.Txs {
 
-				err = json.Unmarshal([]byte(block.Payload), &cc)
+				err = json.Unmarshal([]byte(tx.Payload), &cc)
 				if err != nil {
 					log.Fatalf("Unmarshalling error: %s", err)
 				}
 
-				log.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", block.Blocknum, block.Hash, block.Txid)
+				fmt.Printf("Channel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\nTxid: %s\nTx validation code: %d\nTime: %d\nPayload:\n",
+					tx.ChannelId, tx.Blocknum, tx.Hash, tx.PreviousHash, tx.Txid, tx.ValidationCode, tx.Time)
 				for _, val := range cc {
-					log.Fatalf("Key: %s\nValue: %s\n", val.Key, val.Value)
+					fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
 				}
 
 			}
@@ -195,9 +196,10 @@ func main() {
 				log.Fatalf("Unmarshalling error: %s", err)
 			}
 
-			log.Printf("\nBlock number: %d\nBlock hash: %s\nTxid: %s\nPayload:\n", tx.Blocknum, tx.Hash, tx.Txid)
+			fmt.Printf("Channel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\nTxid: %s\nTx validation code: %d\nTime: %d\nPayload:\n",
+				tx.ChannelId, tx.Blocknum, tx.Hash, tx.PreviousHash, tx.Txid, tx.ValidationCode, tx.Time)
 			for _, val := range cc {
-				log.Fatalf("Key: %s\nValue: %s\n", val.Key, val.Value)
+				fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
 			}
 
 		}
@@ -238,41 +240,35 @@ func (s *FabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServe
 	return nil
 }
 
-func (s *FabexServer) GetByTxId(req *pb.Entry, stream pb.Fabex_GetByTxIdServer) error {
+func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
+	switch {
+	case req.Txid != "":
+		QueryResults, err := s.Conf.Db.GetByTxId(req.Txid)
+		if err != nil {
+			return err
+		}
 
-	QueryResults, err := s.Conf.Db.GetByTxId(req.Txid)
-	if err != nil {
-		return err
-	}
+		for _, queryResult := range QueryResults {
+			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
+		}
+	case req.Blocknum != 0:
+		QueryResults, err := s.Conf.Db.GetByBlocknum(req.Blocknum)
+		if err != nil {
+			return err
+		}
 
-	for _, queryResult := range QueryResults {
-		stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
-	}
+		for _, queryResult := range QueryResults {
+			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
+		}
+	case req.Payload != "":
+		QueryResults, err := s.Conf.Db.GetBlockInfoByPayload(req.Payload)
+		if err != nil {
+			return err
+		}
 
-	return nil
-}
-
-func (s *FabexServer) GetByBlocknum(req *pb.Entry, stream pb.Fabex_GetByBlocknumServer) error {
-	QueryResults, err := s.Conf.Db.GetByBlocknum(req.Blocknum)
-	if err != nil {
-		return err
-	}
-
-	for _, queryResult := range QueryResults {
-		stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
-	}
-
-	return nil
-}
-
-func (s *FabexServer) GetBlockInfoByPayload(req *pb.Entry, stream pb.Fabex_GetBlockInfoByPayloadServer) error {
-	QueryResults, err := s.Conf.Db.GetBlockInfoByPayload(req.Payload)
-	if err != nil {
-		return err
-	}
-
-	for _, queryResult := range QueryResults {
-		stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
+		for _, queryResult := range QueryResults {
+			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
+		}
 	}
 
 	return nil

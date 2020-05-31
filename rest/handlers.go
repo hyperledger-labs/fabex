@@ -8,24 +8,35 @@ import (
 	"strconv"
 )
 
-func errorHandler(c *gin.Context, status int, err string) {
-	c.JSON(status, gin.H{
-		"error": err,
-		"msg":   "",
-	})
-}
-
-func bytxid(db db.Manager) func(c *gin.Context) {
+func bytxid(db db.Storage) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		txid := c.Param("txid")
 		QueryResults, err := db.GetByTxId(txid)
 		if err != nil {
-			errorHandler(c, http.StatusNotFound, err.Error())
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+				"msg":   nil,
+			})
+			return
+		}
+
+		if len(QueryResults) == 0 {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "no such data",
+				"msg":   nil,
+			})
+			return
 		}
 
 		blocks, err := helpers.PackTxsToBlocks(QueryResults)
 		if err != nil {
-			errorHandler(c, http.StatusInternalServerError, err.Error())
+			if len(QueryResults) == 0 {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": err.Error(),
+					"msg":   nil,
+				})
+				return
+			}
 		}
 
 		c.JSON(200, gin.H{
@@ -35,21 +46,44 @@ func bytxid(db db.Manager) func(c *gin.Context) {
 	}
 }
 
-func byblocknum(db db.Manager) func(c *gin.Context) {
+func byblocknum(db db.Storage) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		blocknum := c.Param("blocknum")
 		blocknumconverted, err := strconv.Atoi(blocknum)
 		if err != nil {
-			errorHandler(c, http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+				"msg":   nil,
+			})
+			return
 		}
+
 		QueryResults, err := db.GetByBlocknum(uint64(blocknumconverted))
 		if err != nil {
-			errorHandler(c, http.StatusNotFound, err.Error())
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+				"msg":   nil,
+			})
+			return
+		}
+
+		if len(QueryResults) == 0 {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "no such data",
+				"msg":   nil,
+			})
+			return
 		}
 
 		blocks, err := helpers.PackTxsToBlocks(QueryResults)
 		if err != nil {
-			errorHandler(c, http.StatusInternalServerError, err.Error())
+			if len(QueryResults) == 0 {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": err.Error(),
+					"msg":   nil,
+				})
+				return
+			}
 		}
 
 		c.JSON(200, gin.H{
@@ -59,17 +93,35 @@ func byblocknum(db db.Manager) func(c *gin.Context) {
 	}
 }
 
-func bypayload(db db.Manager) func(c *gin.Context) {
+func bypayload(db db.Storage) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		payloadkey := c.Param("payloadkey")
 		QueryResults, err := db.GetBlockInfoByPayload(payloadkey)
 		if err != nil {
-			errorHandler(c, http.StatusNotFound, err.Error())
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+				"msg":   nil,
+			})
+			return
+		}
+
+		if len(QueryResults) == 0 {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "no such data",
+				"msg":   nil,
+			})
+			return
 		}
 
 		blocks, err := helpers.PackTxsToBlocks(QueryResults)
 		if err != nil {
-			errorHandler(c, http.StatusInternalServerError, err.Error())
+			if len(QueryResults) == 0 {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": err.Error(),
+					"msg":   nil,
+				})
+				return
+			}
 		}
 
 		c.JSON(200, gin.H{
