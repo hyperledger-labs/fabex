@@ -47,11 +47,11 @@
 
 You can start Fabex as standalone microservice with Cassandra blocks storage:
 
-    `./fabex -task=grpc -configpath=configs -configname=config -enrolluser=true -db=cassandra`
+    ./fabex -task=grpc -configpath=configs -configname=config -enrolluser=true -db=cassandra
     
   or with Mongo storage
   
-    `./fabex -task=grpc -configpath=configs -configname=config -enrolluser=true -db=mongo`
+    ./fabex -task=grpc -configpath=configs -configname=config -enrolluser=true -db=mongo
 
 Use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fabex.proto) as service contract.
 
@@ -62,35 +62,35 @@ Use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fa
 ### <a name="cli">**CLI**</a>
 Build Fabex executable binary file:  
 
-    `go build`
+    go build
 
 Enroll admin user:  
 
-    `./fabex -enrolluser=true`
+    ./fabex -enrolluser=true
 
 Save blocks data to db:
 
-    `./fabex -task=explore -configpath=configs -configname=config -db=cassandra`
+    ./fabex -task=explore -configpath=configs -configname=config -db=cassandra
     
 
 Also you can start service for fetching blocks in daemon mode: 
  
-    `./fabex -task=explore -configpath=configs -configname=config -db=cassandra -forever=true` 
+    ./fabex -task=explore -configpath=configs -configname=config -db=cassandra -forever=true
     
     
 Get transactions of specific block (chain operation):  
 
-    `./fabex -task=getblock -blocknum=14 -configpath=configs -configname=config -db=cassandra`
+    ./fabex -task=getblock -blocknum=14 -configpath=configs -configname=config -db=cassandra
 
 Get all transactions (db operation):  
 
-    `./fabex -task=getall -configpath=configs -configname=config -db=cassandra`
+    ./fabex -task=getall -configpath=configs -configname=config -db=cassandra
 
 
 You can choose database for data saving and retrieving with `-db flag` (MongoDB or CassandraDB):
 
-    `./fabex -task=explore -configpath=configs -configname=config -db=mongo`
-    `./fabex -task=explore -configpath=configs -configname=config -db=cassandra`
+    ./fabex -task=explore -configpath=configs -configname=config -db=mongo
+    ./fabex -task=explore -configpath=configs -configname=config -db=cassandra
 
 
 <br><br>
