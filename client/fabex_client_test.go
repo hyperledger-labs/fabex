@@ -116,10 +116,11 @@ func TestExplore(t *testing.T) {
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	err = fabcli.Explore(0, 3)
+	txs, err := fabcli.Explore(0, 3)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
+	assert.Greater(t, len(txs), 0, "No transactions found")
 }
 
 func TestGet(t *testing.T) {
