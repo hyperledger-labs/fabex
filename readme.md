@@ -14,8 +14,6 @@
 
 [Testing](#testing)
 
-[Troubleshooting](#troubleshooting)
-
 <br>
 
 ##### _FabEx is inspired by [ledgerfsck](https://github.com/C0rWin/ledgerfsck)_
