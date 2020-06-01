@@ -29,9 +29,6 @@ jobs:
     
     - name: download dependencies
       run: go mod download 
-    
-    - name: fix deps of GO SDK
-      run: sudo cp tests/system.go $GOPATH/pkg/mod/github.com/hyperledger/fabric-sdk-go@v0.0.0-20190306235112-f198238ee7da/internal/github.com/hyperledger/fabric/core/operations
 
     - name: Build
       run: go build -v .
