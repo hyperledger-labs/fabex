@@ -14,6 +14,8 @@
 
 [Testing](#testing)
 
+[Troubleshooting](#troubleshooting)
+
 <br>
 
 ##### _FabEx is inspired by [ledgerfsck](https://github.com/C0rWin/ledgerfsck)_
@@ -101,3 +103,6 @@ You can choose database for data saving and retrieving with `-db flag` (MongoDB 
 unit tests: `make unit-tests`
 
 integration tests: `make integration-tests`
+
+<br>
+
