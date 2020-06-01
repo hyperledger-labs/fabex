@@ -17,13 +17,13 @@
 package client
 
 import (
-	"fmt"
 	"github.com/hyperledger-labs/fabex/db"
 	pb "github.com/hyperledger-labs/fabex/proto"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io"
+	"net"
 )
 
 type FabexClient struct {
@@ -32,7 +32,7 @@ type FabexClient struct {
 
 func New(addr, port string) (*FabexClient, error) {
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", addr, port), grpc.WithInsecure())
+	conn, err := grpc.Dial(net.JoinHostPort(addr, port), grpc.WithInsecure())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect")
 	}
