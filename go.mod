@@ -7,13 +7,14 @@ require (
 	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/Shopify/sarama v1.21.0 // indirect
-	github.com/cloudflare/cfssl v0.0.0-20180705210102-ff56ab5eb62a // indirect
+	github.com/cloudflare/cfssl v0.0.0-20190409034051-768cd563887f // indirect
 	github.com/coreos/etcd v3.3.20+incompatible // indirect
 	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/fsouza/go-dockerclient v1.3.6 // indirect
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/gocql/gocql v0.0.0-20200410100145-b454769479c6
-	github.com/golang/mock v1.2.0 // indirect
+	github.com/golang/mock v1.3.0 // indirect
 	github.com/golang/protobuf v1.3.3
 	github.com/google/certificate-transparency-go v1.0.21 // indirect
 	github.com/gotestyourself/gotestyourself v1.4.0 // indirect
@@ -23,7 +24,7 @@ require (
 	github.com/hyperledger/fabric v1.4.2
 	github.com/hyperledger/fabric-amcl v0.0.0-20181230093703-5ccba6eab8d6 // indirect
 	github.com/hyperledger/fabric-lib-go v1.0.0 // indirect
-	github.com/hyperledger/fabric-sdk-go v0.0.0-20190306235112-f198238ee7da
+	github.com/hyperledger/fabric-sdk-go v1.0.0-alpha4
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/lib/pq v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.0 // indirect
@@ -34,11 +35,11 @@ require (
 	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/pkg/errors v0.8.1
+	github.com/prometheus/client_golang v0.9.2 // indirect
 	github.com/sirupsen/logrus v1.4.2
-	github.com/spf13/afero v1.1.1 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/viper v1.0.2
+	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.4.0
 	github.com/sykesm/zap-logfmt v0.0.2 // indirect
 	github.com/tidwall/pretty v1.0.1 // indirect
