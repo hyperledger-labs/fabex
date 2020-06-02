@@ -219,7 +219,6 @@ func NewFabexServer(addr string, port string, conf *models.Fabex) *FabexServer {
 }
 
 func (s *FabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServer) error {
-	log.Printf("Start stream from %d block", req.Startblock)
 	// set blocks counter to latest saved in db block number value
 	blockCounter := req.Startblock
 
