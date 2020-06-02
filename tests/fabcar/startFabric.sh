@@ -43,7 +43,7 @@ rm -rf ./hfc-key-store
 # launch network; create channel and join peer to channel
 cd ../first-network
 echo y | ./byfn.sh down
-echo y | ./byfn.sh up -a -n -s couchdb -i 1.4.4
+echo y | ./byfn.sh up -a -n -s couchdb
 
 CONFIG_ROOT=/opt/gopath/src/github.com/hyperledger/fabric/peer
 ORG1_MSPCONFIGPATH=${CONFIG_ROOT}/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
