@@ -144,7 +144,7 @@ func TestGet(t *testing.T) {
 	}
 	assert.Greater(t, len(txs), 0, "No transactions found")
 
-	txs, err = fabcli.Get(&pb.Entry{Payload: "WriteSet"})
+	txs, err = fabcli.Get(&pb.Entry{Payload: "CAR0"})
 	if err != nil {
 		t.Errorf(err.Error())
 	}
