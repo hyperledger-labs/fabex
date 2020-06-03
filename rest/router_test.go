@@ -170,7 +170,7 @@ func TestEndpoints(t *testing.T) {
 	})
 
 	t.Run("bykey", func(t *testing.T) {
-		resp, err := http.Get("http://localhost:5252/bykey/WriteSet")
+		resp, err := http.Get("http://localhost:5252/bykey/car0")
 		if err != nil {
 			t.Errorf(err.Error())
 		}
