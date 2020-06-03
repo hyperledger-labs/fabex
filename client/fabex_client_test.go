@@ -156,4 +156,10 @@ func TestGet(t *testing.T) {
 	}
 	assert.Greater(t, len(txs), 0, "No transactions found")
 
+	txs, err = fabcli.Get(nil)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	assert.Greater(t, len(txs), 0, "No transactions found")
+
 }
