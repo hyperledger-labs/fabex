@@ -32,5 +32,6 @@ unit-tests:
 	@cd blockfetcher && go test -v
 
 integration-tests:
+	@cd tests/chaincode/fabcar/go && GOPROXY="https://goproxy.io" GOSUMDB=off go mod vendor
 	@cd client/ && go test -v
 	@cd ./rest && go test -v
