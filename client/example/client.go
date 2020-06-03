@@ -41,10 +41,11 @@ func main() {
 	    Use this commented lines for your experiments!
 	 */
 
-	//txs, err := client.Explore(1, 15)
+	//txs, err := client.GetRange(1, 15)
 	//txs, err := client.Get(&pb.Entry{Txid:"3a3e933a3d9953b0b10e6573254b6d3cf2347d72058c0347a55054babdd8e1a1"})
 	//txs, err := client.Get(&pb.Entry{Payload: "WriteSet"})
-	txs, err := client.Get(&pb.Entry{Blocknum: 5})
+	//txs, err := client.Get(&pb.Entry{Blocknum: 5})
+	txs, err := client.Get(&pb.Entry{Blocknum: 0})
 	if err != nil {
 		log.Fatal(err)
 	}
