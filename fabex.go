@@ -218,18 +218,18 @@ func NewFabexServer(addr string, port string, conf *models.Fabex) *FabexServer {
 	return &FabexServer{addr, port, conf}
 }
 
-func (s *FabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServer) error {
+func (s *FabexServer) GetRange(req *pb.RequestRange, stream pb.Fabex_GetRangeServer) error {
 	// set blocks counter to latest saved in db block number value
 	blockCounter := req.Startblock
 
 	// insert missing blocks/txs into db
 	for blockCounter <= req.Endblock {
-		customBlock, err := blockfetcher.GetBlock(s.Conf.LedgerClient, uint64(blockCounter))
+		QueryResults, err := s.Conf.Db.GetByBlocknum(uint64(blockCounter))
 		if err != nil {
-			return errors.Wrap(err, "GetBlock error")
+			return errors.Wrapf(err, "failed to get txs by block number %d", blockCounter)
 		}
-		if customBlock != nil {
-			for _, queryResult := range customBlock.Txs {
+		if QueryResults != nil {
+			for _, queryResult := range QueryResults {
 				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
 			}
 		}
@@ -240,6 +240,7 @@ func (s *FabexServer) Explore(req *pb.RequestRange, stream pb.Fabex_ExploreServe
 }
 
 func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
+
 	switch {
 	case req.Txid != "":
 		QueryResults, err := s.Conf.Db.GetByTxId(req.Txid)
@@ -267,6 +268,25 @@ func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
 
 		for _, queryResult := range QueryResults {
 			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
+		}
+	default:
+		// set blocks counter to latest saved in db block number value
+		blockCounter := 1
+
+		// insert missing blocks/txs into db
+		for {
+			queryResults, err := s.Conf.Db.GetByBlocknum(uint64(blockCounter))
+			if err != nil {
+				return errors.Wrapf(err, "failed to get txs by block number %d", blockCounter)
+			}
+			if queryResults == nil {
+				break
+			}
+			for _, queryResult := range queryResults {
+				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
+			}
+
+			blockCounter++
 		}
 	}
 
