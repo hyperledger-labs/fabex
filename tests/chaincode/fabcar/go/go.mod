@@ -1,6 +1,6 @@
 module fabcar
 
-go 1.13
+go 1.14
 
 require (
 	github.com/fsouza/go-dockerclient v1.6.5 // indirect
