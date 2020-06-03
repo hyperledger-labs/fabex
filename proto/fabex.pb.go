@@ -338,27 +338,6 @@ func (x *fabexGetRangeServer) Send(m *Entry) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _Fabex_GetRange_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(RequestRange)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(FabexServer).GetRange(m, &fabexGetRangeServer{stream})
-}
-
-type Fabex_GetRangeServer interface {
-	Send(*Entry) error
-	grpc.ServerStream
-}
-
-type fabexGetRangeServer struct {
-	grpc.ServerStream
-}
-
-func (x *fabexGetRangeServer) Send(m *Entry) error {
-	return x.ServerStream.SendMsg(m)
-}
-
 var _Fabex_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "fabex.Fabex",
 	HandlerType: (*FabexServer)(nil),

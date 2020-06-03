@@ -17,7 +17,6 @@
 package client
 
 import (
-	"fmt"
 	"github.com/hyperledger-labs/fabex/db"
 	pb "github.com/hyperledger-labs/fabex/proto"
 	"github.com/pkg/errors"
