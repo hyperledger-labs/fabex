@@ -144,7 +144,7 @@ func TestGet(t *testing.T) {
 	}
 	assert.Greater(t, len(txs), 0, "No transactions found")
 
-	txs, err = fabcli.Get(&pb.Entry{Payload: "car0"})
+	txs, err = fabcli.Get(&pb.Entry{Payload: "WriteSet"})
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -156,26 +156,4 @@ func TestGet(t *testing.T) {
 	}
 	assert.Greater(t, len(txs), 0, "No transactions found")
 
-	txs, err = fabcli.Get(nil)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	assert.Greater(t, len(txs), 0, "No transactions found")
-}
-
-func TestGetAllAndCheckValidationCode(t *testing.T) {
-	fabcli, err := New("localhost", "6000")
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-
-	txs, err := fabcli.Get(nil)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	assert.Greater(t, len(txs), 0, "No transactions found")
-
-	for _, tx := range txs {
-		assert.Equal(t, tx.ValidationCode, int32(0), "Validation code of tx %s is %d (invalid)", tx.Txid, tx.ValidationCode)
-	}
 }
