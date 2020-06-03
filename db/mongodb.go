@@ -111,7 +111,7 @@ func (db *DBmongo) GetByBlocknum(blocknum uint64) ([]Tx, error) {
 }
 
 func (db *DBmongo) GetBlockInfoByPayload(payload string) ([]Tx, error) {
-	return db.getByFilter(bson.D{{"Payload", primitive.Regex{Pattern: payload, Options: ""}}})
+	return db.getByFilter(bson.D{{"Payload", primitive.Regex{Pattern: payload, Options: "i"}}})
 }
 
 func (db *DBmongo) QueryAll() ([]Tx, error) {
