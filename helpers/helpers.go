@@ -19,6 +19,7 @@ package helpers
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/hyperledger-labs/fabex/blockfetcher"
 	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/models"
@@ -29,6 +30,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"unicode/utf8"
 )
 
 const NOT_FOUND_ERR = "not found"
@@ -172,4 +174,37 @@ func PackTxsToBlocks(blocks []db.Tx) ([]models.Block, error) {
 	}
 
 	return Blocks, nil
+}
+
+const (
+	minUnicodeRuneValue   = 0            //U+0000
+	maxUnicodeRuneValue   = utf8.MaxRune //U+10FFFF - maximum (and unallocated) code point
+	compositeKeyNamespace = "\x00"
+)
+
+func CreateCompositeKey(objectType string, attributes []string) (string, error) {
+	if err := validateCompositeKeyAttribute(objectType); err != nil {
+		return "", err
+	}
+	ck := compositeKeyNamespace + objectType + string(minUnicodeRuneValue)
+	for _, att := range attributes {
+		if err := validateCompositeKeyAttribute(att); err != nil {
+			return "", err
+		}
+		ck += att + string(minUnicodeRuneValue)
+	}
+	return ck, nil
+}
+
+func validateCompositeKeyAttribute(str string) error {
+	if !utf8.ValidString(str) {
+		return fmt.Errorf("not a valid utf8 string: [%x]", str)
+	}
+	for index, runeValue := range str {
+		if runeValue == minUnicodeRuneValue || runeValue == maxUnicodeRuneValue {
+			return fmt.Errorf(`input contains unicode %#U starting at position [%d]. %#U and %#U are not allowed in the input attribute of a composite key`,
+				runeValue, index, minUnicodeRuneValue, maxUnicodeRuneValue)
+		}
+	}
+	return nil
 }
