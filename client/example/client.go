@@ -40,10 +40,26 @@ func main() {
 	    Use this commented lines for your experiments!
 	 */
 
+	// get txs from blocks with block number range
 	//txs, err := client.GetRange(1, 15)
+
+	// get tx with tx ID
 	//txs, err := client.Get(&pb.Entry{Txid:"3a3e933a3d9953b0b10e6573254b6d3cf2347d72058c0347a55054babdd8e1a1"})
-	//txs, err := client.Get(&pb.Entry{Payload: "WriteSet"})
+
+	// get tx with payload key X
+	//txs, err := client.Get(&pb.Entry{Payload: "X"})
+
+	// get txs from specific block
 	//txs, err := client.Get(&pb.Entry{Blocknum: 5})
+
+	// get entry with composite key
+	//key, err := helpers.CreateCompositeKey("RAIL", []string{"1"})
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//txs, err := client.Get(&pb.Entry{Payload: key})
+
+    // get all
 	txs, err := client.Get(nil)
 	if err != nil {
 		log.Fatal(err)
