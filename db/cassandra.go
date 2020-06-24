@@ -1,7 +1,6 @@
 package db
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gocql/gocql"
@@ -97,15 +96,10 @@ func (c *Cassandra) Insert(tx Tx) error {
 		return err
 	}
 
-	// extract metadata from RWSet and insert to column (clear from separators)
+	// extract keys from RWSet
 	var payloadkeys []string
 	for _, kv := range Payload {
-		if bytes.Index([]byte(kv.Key), nsKeySep) != -1 {
-			split := bytes.SplitN([]byte(kv.Key), nsKeySep, -1)
-			payloadkeys = append(payloadkeys, string(split[2][0:]))
-		} else {
-			payloadkeys = append(payloadkeys, kv.Key)
-		}
+		payloadkeys = append(payloadkeys, kv.Key)
 	}
 
 	id := gocql.TimeUUID()
