@@ -33,7 +33,7 @@ unit-tests:
 
 integration-tests:
 	@cd tests/chaincode/fabcar/go && tar -zxvf vendor.tar.gz && GOPROXY="https://goproxy.io" GOSUMDB=off go mod vendor
-	@sleep 5
+	@sleep 10
 	@cd client/ && go test -v
-	@sleep 5
+	@sleep 10
 	@cd ./rest && go test -v
