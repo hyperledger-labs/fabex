@@ -169,13 +169,13 @@ func TestGetAllAndCheckValidationCode(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	txs, err = fabcli.Get(nil)
+	txs, err := fabcli.Get(nil)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 	assert.Greater(t, len(txs), 0, "No transactions found")
 
-	for tx := range txs {
-		assert.Equal(t, tx.ValidationCode, 0, "Validation code of tx %s is %d (invalid)", tx.Txid, tx.ValidationCode)
+	for _, tx := range txs {
+		assert.Equal(t, tx.ValidationCode, int32(0), "Validation code of tx %s is %d (invalid)", tx.Txid, tx.ValidationCode)
 	}
 }
