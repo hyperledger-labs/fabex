@@ -288,6 +288,25 @@ func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
 
 			blockCounter++
 		}
+	default:
+		// set blocks counter to latest saved in db block number value
+		blockCounter := 1
+
+		// insert missing blocks/txs into db
+		for {
+			queryResults, err := s.Conf.Db.GetByBlocknum(uint64(blockCounter))
+			if err != nil {
+				return errors.Wrapf(err, "failed to get txs by block number %d", blockCounter)
+			}
+			if queryResults == nil {
+				break
+			}
+			for _, queryResult := range queryResults {
+				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
+			}
+
+			blockCounter++
+		}
 	}
 
 	return nil
