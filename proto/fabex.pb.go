@@ -166,13 +166,6 @@ func (m *Entry) GetValidationcode() int32 {
 	return 0
 }
 
-func (m *Entry) GetValidationcode() int32 {
-	if m != nil {
-		return m.Validationcode
-	}
-	return 0
-}
-
 func init() {
 	proto.RegisterType((*RequestRange)(nil), "fabex.RequestRange")
 	proto.RegisterType((*Entry)(nil), "fabex.Entry")
