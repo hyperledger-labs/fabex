@@ -161,7 +161,7 @@ func TestGetAllAndCheckValidationCode(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	for tx := range txs {
+	for _, tx := range txs {
 		assert.Equal(t, tx.ValidationCode, int32(0), "validation code of tx %s is %d (invalid)", tx.Txid, tx.ValidationCode)
 	}
 }
