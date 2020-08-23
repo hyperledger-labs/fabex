@@ -230,7 +230,7 @@ func (s *FabexServer) GetRange(req *pb.RequestRange, stream pb.Fabex_GetRangeSer
 		}
 		if QueryResults != nil {
 			for _, queryResult := range QueryResults {
-				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
+				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
 			}
 		}
 		blockCounter++
@@ -249,7 +249,7 @@ func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
 		}
 
 		for _, queryResult := range QueryResults {
-			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
+			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
 		}
 	case req.Blocknum != 0:
 		QueryResults, err := s.Conf.Db.GetByBlocknum(req.Blocknum)
@@ -258,7 +258,7 @@ func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
 		}
 
 		for _, queryResult := range QueryResults {
-			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
+			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
 		}
 	case req.Payload != "":
 		QueryResults, err := s.Conf.Db.GetBlockInfoByPayload(req.Payload)
@@ -267,7 +267,7 @@ func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
 		}
 
 		for _, queryResult := range QueryResults {
-			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
+			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
 		}
 	default:
 		// set blocks counter to latest saved in db block number value
@@ -283,7 +283,7 @@ func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
 				break
 			}
 			for _, queryResult := range queryResults {
-				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time})
+				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
 			}
 
 			blockCounter++
