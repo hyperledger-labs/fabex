@@ -116,6 +116,7 @@ func TestGetRange(t *testing.T) {
 	if err != nil {
 		t.Errorf(err.Error())
 	}
+  
 	txs, err := fabcli.GetRange(0, 3)
 	if err != nil {
 		t.Errorf(err.Error())
@@ -164,4 +165,5 @@ func TestGetAllAndCheckValidationCode(t *testing.T) {
 	for _, tx := range txs {
 		assert.Equal(t, tx.ValidationCode, int32(0), "validation code of tx %s is %d (invalid)", tx.Txid, tx.ValidationCode)
 	}
+
 }

@@ -57,6 +57,7 @@ func (fabexCli *FabexClient) GetRange(startblock, endblock int) ([]db.Tx, error)
 		if err != nil {
 			return txs, err
 		}
+    
 		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Txid: in.Txid, Payload: in.Payload, Time: in.Time, ValidationCode: in.Validationcode})
 	}
 
@@ -71,6 +72,7 @@ func (fabexCli *FabexClient) Get(filter *pb.Entry) ([]db.Tx, error) {
 	if filter == nil {
 		filter = &pb.Entry{}
 	}
+
 	stream, err := fabexCli.Client.Get(context.Background(), filter)
 	if err != nil {
 		return nil, err
@@ -85,6 +87,7 @@ func (fabexCli *FabexClient) Get(filter *pb.Entry) ([]db.Tx, error) {
 		if err != nil {
 			return txs, err
 		}
+
 		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Txid: in.Txid, Payload: in.Payload, Time: in.Time, ValidationCode: in.Validationcode})
 	}
 }

@@ -277,6 +277,7 @@ type fabexGetRangeClient struct {
 }
 
 func (x *fabexGetRangeClient) Recv() (*Entry, error) {
+
 	m := new(Entry)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -297,6 +298,7 @@ type UnimplementedFabexServer struct {
 func (*UnimplementedFabexServer) Get(req *Entry, srv Fabex_GetServer) error {
 	return status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
+
 func (*UnimplementedFabexServer) GetRange(req *RequestRange, srv Fabex_GetRangeServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetRange not implemented")
 }
