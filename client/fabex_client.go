@@ -24,6 +24,7 @@ import (
 	"google.golang.org/grpc"
 	"io"
 	"net"
+	"reflect"
 )
 
 type FabexClient struct {
@@ -40,9 +41,9 @@ func New(addr, port string) (*FabexClient, error) {
 	return &FabexClient{pb.NewFabexClient(conn)}, nil
 }
 
-func (fabexCli *FabexClient) Explore(startblock, endblock int) ([]db.Tx, error) {
+func (fabexCli *FabexClient) GetRange(startblock, endblock int) ([]db.Tx, error) {
 
-	stream, err := fabexCli.Client.Explore(context.Background(), &pb.RequestRange{Startblock: int64(startblock), Endblock: int64(endblock)})
+	stream, err := fabexCli.Client.GetRange(context.Background(), &pb.RequestRange{Startblock: int64(startblock), Endblock: int64(endblock)})
 	if err != nil {
 		return nil, err
 	}
@@ -56,12 +57,21 @@ func (fabexCli *FabexClient) Explore(startblock, endblock int) ([]db.Tx, error) 
 		if err != nil {
 			return txs, err
 		}
-		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Txid: in.Txid, Payload: in.Payload, Time: in.Time})
+    
+		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Txid: in.Txid, Payload: in.Payload, Time: in.Time, ValidationCode: in.Validationcode})
 	}
 
 }
 
 func (fabexCli *FabexClient) Get(filter *pb.Entry) ([]db.Tx, error) {
+	checknull := &pb.Entry{}
+	checknull.Blocknum = 0
+	if reflect.DeepEqual(filter, checknull) {
+		return nil, errors.New("requests for blocks with a number less than 1 are not allowed")
+	}
+	if filter == nil {
+		filter = &pb.Entry{}
+	}
 
 	stream, err := fabexCli.Client.Get(context.Background(), filter)
 	if err != nil {
@@ -77,6 +87,7 @@ func (fabexCli *FabexClient) Get(filter *pb.Entry) ([]db.Tx, error) {
 		if err != nil {
 			return txs, err
 		}
-		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Txid: in.Txid, Payload: in.Payload, Time: in.Time})
+
+		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Txid: in.Txid, Payload: in.Payload, Time: in.Time, ValidationCode: in.Validationcode})
 	}
 }
