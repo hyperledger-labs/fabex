@@ -3,8 +3,8 @@ package fabex;
 option go_package = "github.com/hyperledger-labs/fabex/proto";
 
 service Fabex {
-    rpc Explore(RequestRange) returns (stream Entry);
     rpc Get(Entry) returns (stream Entry);
+    rpc GetRange(RequestRange) returns (stream Entry);
 }
 
 message RequestRange {
@@ -20,4 +20,5 @@ message Entry {
     uint64 blocknum = 5;
     string payload = 6;
     int64  time = 7;
+    int32  validationcode = 8;
 }
