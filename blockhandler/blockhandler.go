@@ -20,17 +20,17 @@ package blockhandler
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/models"
+	fabcommon "github.com/hyperledger/fabric-protos-go/common"
+	"github.com/hyperledger/fabric-protos-go/ledger/rwset"
+	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
-	"github.com/hyperledger/fabric/common/configtx"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
-	fabcommon "github.com/hyperledger/fabric/protos/common"
-	"github.com/hyperledger/fabric/protos/ledger/rwset"
-	"github.com/hyperledger/fabric/protos/peer"
-	"github.com/hyperledger/fabric/protos/utils"
+	"github.com/hyperledger/fabric/protoutil"
 	"github.com/pkg/errors"
 )
 
@@ -44,7 +44,7 @@ type CustomBlock struct {
 	Txs []db.Tx
 }
 
-// HandleBlock extracts and format information from specified block
+// GetBlock gets information about specified block with blocknum number
 func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 	customBlock := &CustomBlock{}
 
@@ -65,13 +65,13 @@ func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 		}
 		validationCode := processedtx.GetValidationCode()
 
-		envelope, err := utils.GetEnvelopeFromBlock(value)
+		envelope, err := protoutil.GetEnvelopeFromBlock(value)
 		if err != nil {
 			return nil, err
 		}
 
 		// get ChannelHeader
-		channelHeader, err := utils.ChannelHeader(envelope)
+		channelHeader, err := protoutil.ChannelHeader(envelope)
 		if err != nil {
 			return nil, err
 		}
@@ -83,14 +83,13 @@ func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 		}
 
 		// get RW sets
-		action, _ := utils.GetActionFromEnvelopeMsg(envelope)
+		action, _ := protoutil.GetActionFromEnvelopeMsg(envelope)
 		actionResults := action.GetResults()
 
 		ReadWriteSet := &rwset.TxReadWriteSet{}
 
 		err = proto.Unmarshal(actionResults, ReadWriteSet)
 		if err != nil {
-			//fmt.Printf("Failed to unmarshal: %s", err)
 			return nil, err
 		}
 
@@ -101,47 +100,99 @@ func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 		}
 
 		//get tx id
-		bytesEnvelope, err := utils.GetBytesEnvelope(envelope)
+		bytesEnvelope, err := protoutil.GetBytesEnvelope(envelope)
 		if err != nil {
 			//fmt.Printf("Can't convert common.Envelope to bytes: ", err)
 			return nil, err
 		}
-		TxId, err := utils.GetOrComputeTxIDFromEnvelope(bytesEnvelope)
+		TxId, err := protoutil.GetOrComputeTxIDFromEnvelope(bytesEnvelope)
 		if err != nil {
 			return nil, err
 		}
 
-		if len(txRWSet.NsRwSets) == 0 {
+		if protoutil.IsConfigBlock(block) {
 			// cast "github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/protos/common".Block to
-			// "github.com/hyperledger/fabric/protos/common".Block
-			configEnvelope, err := ConfigEnvelopeFromBlock(block)
+			// "github.com/hyperledger/fabric/fabric-protos-go/common".Block
+			configEnvelope, blockType, err := ConfigEnvelopeFromBlock(block)
 			if err != nil {
 				return nil, err
-			}
-
-			payload, err := utils.ExtractPayload(configEnvelope)
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to extract payload from config envelope")
-			}
-
-			// get config update
-			configUpdate, err := configtx.UnmarshalConfigUpdateFromPayload(payload)
-			if err != nil {
-				return nil, errors.Wrap(err, "could not read config update")
 			}
 
 			var stringedPayload []models.Chaincode
-			ReadSet, err := json.Marshal(configUpdate.ReadSet)
-			if err != nil {
-				return nil, err
+			switch blockType {
+			case "Config":
+				configPayload, err := protoutil.UnmarshalPayload(configEnvelope.Payload)
+				if err != nil {
+					return nil, errors.Wrap(err, "failed to unmarshal config payload")
+				}
+
+				configEnv := &fabcommon.ConfigEnvelope{}
+				err = proto.Unmarshal(configPayload.Data, configEnv)
+				if err != nil {
+					return nil, errors.Wrap(err, "failed to unmarshal config envelope")
+				}
+
+				config := configEnv.GetConfig()
+
+				configGroup := config.GetChannelGroup()
+
+				groups, err := json.Marshal(configGroup.Groups)
+				if err != nil {
+					return nil, errors.Wrap(err, "failed to marshal config groups")
+				}
+
+				values, err := json.Marshal(configGroup.Values)
+				if err != nil {
+					return nil, errors.Wrap(err, "failed to marshal config values")
+				}
+
+				policies, err := json.Marshal(configGroup.Policies)
+				if err != nil {
+					return nil, errors.Wrap(err, "failed to marshal config policies")
+				}
+
+				modpolicy, err := json.Marshal(configGroup.ModPolicy)
+				if err != nil {
+					return nil, errors.Wrap(err, "failed to marshal config ModPolicy")
+				}
+
+				stringedPayload = append(stringedPayload, models.Chaincode{Key: "Type", Value: blockType})
+				stringedPayload = append(stringedPayload, models.Chaincode{Key: "Sequence", Value: fmt.Sprint(config.GetSequence())})
+				stringedPayload = append(stringedPayload, models.Chaincode{Key: "Version", Value: fmt.Sprint(configGroup.Version)})
+				stringedPayload = append(stringedPayload, models.Chaincode{Key: "Groups", Value: string(groups)})
+				stringedPayload = append(stringedPayload, models.Chaincode{Key: "Values", Value: string(values)})
+				stringedPayload = append(stringedPayload, models.Chaincode{Key: "Policies", Value: string(policies)})
+				stringedPayload = append(stringedPayload, models.Chaincode{Key: "ModPolicy", Value: string(modpolicy)})
+
+			// get config update
+			case "ConfigUpdate":
+				configUpdateEnvelope, err := protoutil.EnvelopeToConfigUpdate(configEnvelope)
+				if err != nil {
+					return nil, errors.Wrap(err, "failed read config update")
+				}
+				fmt.Println(configUpdateEnvelope)
+				configUpdateBytes := configUpdateEnvelope.GetConfigUpdate()
+				var configUpdate = &fabcommon.ConfigUpdate{}
+				err = proto.Unmarshal(configUpdateBytes, configUpdate)
+				if err != nil {
+					return nil, errors.Wrap(err, "failed to unmarshal config update")
+				}
+
+				// extract config update data
+				ReadSet, err := json.Marshal(configUpdate.GetReadSet())
+				if err != nil {
+					return nil, err
+				}
+				WriteSet, err := json.Marshal(configUpdate.GetWriteSet())
+				if err != nil {
+					return nil, err
+				}
+
+				stringedPayload = append(stringedPayload, models.Chaincode{Key: "ChannelId", Value: configUpdate.GetChannelId()})
+				stringedPayload = append(stringedPayload, models.Chaincode{Key: "ReadSet", Value: string(ReadSet)})
+				stringedPayload = append(stringedPayload, models.Chaincode{Key: "WriteSet", Value: string(WriteSet)})
+
 			}
-			WriteSet, err := json.Marshal(configUpdate.WriteSet)
-			if err != nil {
-				return nil, err
-			}
-			stringedPayload = append(stringedPayload, models.Chaincode{Key: "ChannelId", Value: configUpdate.ChannelId})
-			stringedPayload = append(stringedPayload, models.Chaincode{Key: "ReadSet", Value: string(ReadSet)})
-			stringedPayload = append(stringedPayload, models.Chaincode{Key: "WriteSet", Value: string(WriteSet)})
 
 			jsonPayload, err := json.Marshal(stringedPayload)
 			if err != nil {
@@ -193,36 +244,38 @@ func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 
 // ConfigEnvelopeFromBlock extracts configuration envelope from the block based on the
 // config type, i.e. HeaderType_ORDERER_TRANSACTION or HeaderType_CONFIG
-func ConfigEnvelopeFromBlock(block *fabcommon.Block) (*fabcommon.Envelope, error) {
+func ConfigEnvelopeFromBlock(block *fabcommon.Block) (*fabcommon.Envelope, string, error) {
 	if block == nil {
-		return nil, errors.New("nil block")
+		return nil, "", errors.New("nil block")
 	}
 
-	envelope, err := utils.ExtractEnvelope(block, 0)
+	envelope, err := protoutil.ExtractEnvelope(block, 0)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to extract envelope from the block")
+		return nil, "", errors.Wrapf(err, "failed to extract envelope from the block")
 	}
 
-	channelHeader, err := utils.ChannelHeader(envelope)
+	channelHeader, err := protoutil.ChannelHeader(envelope)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot extract channel header")
+		return nil, "", errors.Wrap(err, "cannot extract channel header")
 	}
 
 	switch channelHeader.Type {
 	case int32(fabcommon.HeaderType_ORDERER_TRANSACTION):
-		payload, err := utils.UnmarshalPayload(envelope.Payload)
+		payload, err := protoutil.UnmarshalPayload(envelope.Payload)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal envelope to extract config payload for orderer transaction")
+			return nil, "OrdererTx", errors.Wrap(err, "failed to unmarshal envelope to extract config payload for orderer transaction")
 		}
-		configEnvelop, err := utils.UnmarshalEnvelope(payload.Data)
+		configEnvelop, err := protoutil.UnmarshalEnvelope(payload.Data)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal config envelope for orderer type transaction")
+			return nil, "OrdererTx", errors.Wrap(err, "failed to unmarshal config envelope for orderer type transaction")
 		}
 
-		return configEnvelop, nil
+		return configEnvelop, "OrdererTx", nil
 	case int32(fabcommon.HeaderType_CONFIG):
-		return envelope, nil
+		return envelope, "Config", nil
+	case int32(fabcommon.HeaderType_CONFIG_UPDATE):
+		return envelope, "ConfigUpdate", nil
 	default:
-		return nil, errors.Errorf("unexpected header type: %v", channelHeader.Type)
+		return nil, "", errors.Errorf("unexpected header type: %v", channelHeader.Type)
 	}
 }
