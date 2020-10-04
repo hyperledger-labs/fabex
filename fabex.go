@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/hyperledger-labs/fabex/blockfetcher"
 	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/helpers"
 	"github.com/hyperledger-labs/fabex/ledgerclient"
@@ -56,7 +55,6 @@ func main() {
 	// parse flags
 	enrolluser := flag.Bool("enrolluser", false, "enroll user (true) or not (false)")
 	task := flag.String("task", "grpc", "choose the task to execute")
-	forever := flag.Bool("forever", false, "explore ledger forever (for CLI mode)")
 	blocknum := flag.Uint64("blocknum", 0, "block number")
 	confpath := flag.String("configpath", "./", "path to YAML config")
 	confname := flag.String("configname", "config", "name of YAML config")
@@ -116,15 +114,13 @@ func main() {
 		dbInstance = db.NewCassandraClient(globalConfig.Cassandra.Host, globalConfig.Cassandra.Dbuser, globalConfig.Cassandra.Dbsecret, globalConfig.Cassandra.Keyspace, globalConfig.Cassandra.Columnfamily)
 	}
 
-	var fabex *models.Fabex
-
 	err = dbInstance.Connect()
 	if err != nil {
 		log.Fatal("DB connection failed:", err.Error())
 	}
 	log.Println("Connected to database successfully")
 
-	fabex = &models.Fabex{dbInstance, channelclient, &ledgerclient.CustomLedgerClient{ledgerClient}}
+	fabex := &models.Fabex{dbInstance, channelclient, &ledgerclient.CustomLedgerClient{ledgerClient}, clientChannelContext}
 
 	switch *task {
 	case "channelinfo":
@@ -141,46 +137,32 @@ func main() {
 		}
 
 	case "getblock":
-		customBlock, err := blockfetcher.GetBlock(fabex.LedgerClient, *blocknum)
+		txs, err := fabex.Db.GetByBlocknum(*blocknum)
 		if err != nil {
 			log.Fatalf("GetBlock error: %s", err)
 		}
 
-		if customBlock != nil {
-			var cc []models.Chaincode
-			for _, tx := range customBlock.Txs {
+		if txs == nil {
+			log.Fatal("empty block")
+		}
+		var cc []models.Chaincode
+		for _, tx := range txs {
 
-				err = json.Unmarshal([]byte(tx.Payload), &cc)
-				if err != nil {
-					log.Fatalf("Unmarshalling error: %s", err)
-				}
-
-				fmt.Printf("Channel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\nTxid: %s\nTx validation code: %d\nTime: %d\nPayload:\n",
-					tx.ChannelId, tx.Blocknum, tx.Hash, tx.PreviousHash, tx.Txid, tx.ValidationCode, tx.Time)
-				for _, val := range cc {
-					fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
-				}
-
+			err = json.Unmarshal([]byte(tx.Payload), &cc)
+			if err != nil {
+				log.Fatalf("Unmarshalling error: %s", err)
 			}
+
+			fmt.Printf("Channel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\nTxid: %s\nTx validation code: %d\nTime: %d\nPayload:\n",
+				tx.ChannelId, tx.Blocknum, tx.Hash, tx.PreviousHash, tx.Txid, tx.ValidationCode, tx.Time)
+			for _, val := range cc {
+				fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
+			}
+
 		}
 
 	case "explore":
-		if *forever {
-			for {
-				err = helpers.Explore(fabex)
-				if err != nil {
-					log.Fatal(err)
-				}
-			}
-		} else {
-			err = helpers.Explore(fabex)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			log.Println("All blocks saved")
-		}
-
+		log.Fatal(helpers.Explore(fabex))
 	case "getall":
 		txs, err := fabex.Db.QueryAll()
 		if err != nil {
@@ -306,12 +288,7 @@ func StartGrpcServ(serv *FabexServer, fabex *models.Fabex) {
 
 	// start explorer
 	go func() {
-		for {
-			err = helpers.Explore(fabex)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
+		log.Fatal(helpers.Explore(fabex))
 	}()
 
 	// start server
