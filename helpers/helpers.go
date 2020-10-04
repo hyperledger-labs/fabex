@@ -20,13 +20,15 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/hyperledger-labs/fabex/blockfetcher"
+	"github.com/hyperledger-labs/fabex/blockhandler"
 	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/models"
+	"github.com/hyperledger/fabric-sdk-go/pkg/client/event"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
+	"github.com/hyperledger/fabric-sdk-go/pkg/fab/events/deliverclient/seek"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -52,9 +54,6 @@ func Explore(fab *models.Fabex) error {
 		}
 	}
 
-	// update db if block with current hash not finded
-	var blockCounter uint64
-
 	if txs == nil {
 
 		// find latest tx in db
@@ -67,15 +66,26 @@ func Explore(fab *models.Fabex) error {
 			lastTx.Blocknum = 0
 		}
 
-		// set blocks counter to latest saved in db block number value
-		blockCounter = lastTx.Blocknum
+		// set blocks listener from latest saved in db blockchain height
+		eventClient, err := event.New(
+			fab.ChannelContext,
+			event.WithBlockEvents(),
+			event.WithSeekType(seek.FromBlock),
+			event.WithBlockNum(lastTx.Blocknum+1), // increment for fetching next (after last added to DB) block from ledger
+		)
+		if err != nil {
+			return errors.Wrap(err, "event service error")
+		}
+		_, notifier, err := eventClient.RegisterBlockEvent()
+		if err != nil {
+			return errors.Wrap(err, "event service registration error")
+		}
 
 		// insert missing blocks/txs into db
 		for {
-			// increment for fetching next (after last added to DB) block from ledger
-			blockCounter++
+			blockEvent := <-notifier
 
-			customBlock, err := blockfetcher.GetBlock(fab.LedgerClient, blockCounter)
+			customBlock, err := blockhandler.HandleBlock(blockEvent.Block)
 			if err != nil {
 				return errors.Wrap(err, "GetBlock error")
 			}
