@@ -10,7 +10,6 @@ stop-fabric-test:
     && rm -rf cryptostore
 
 fabex-test:
-	@cd tests/chaincode/fabcar/go && GOPROXY="https://goproxy.io" GOSUMDB=off go mod vendor
 	@go run fabex.go -task=grpc -configpath=tests -configname=config -enrolluser=true -db=mongo
 
 fabex-mongo:
