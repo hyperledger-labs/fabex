@@ -1,7 +1,7 @@
 ![](https://github.com/hyperledger-labs/fabex/workflows/build/badge.svg) ![](https://github.com/hyperledger-labs/fabex/workflows/unit-tests/badge.svg) 
 
 <p align="center">
-<img src="https://github.com/vadiminshakov/fabex/blob/master/fabex.png">
+<img src="https://github.com/vadiminshakov/fabex/blob/1.x/fabex.png">
 </p>
 
 ## **Block explorer for Hyperledger Fabric**
