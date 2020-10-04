@@ -1,6 +1,6 @@
 fabric-test:
 	@cd tests/chaincode/fabcar/go && tar -zxvf vendor.tar.gz
-	@cd /tmp/ && curl -sSL https://raw.githubusercontent.com/hyperledger/fabric/master/scripts/bootstrap.sh | bash -s 2.2.1
+	@cd /tmp/ && curl -sSL https://raw.githubusercontent.com/hyperledger/fabric/master/scripts/bootstrap.sh | bash -s 1.4.6
 	@cd tests/fabcar && ./startFabric.sh
 
 stop-fabric-test:
