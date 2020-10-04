@@ -1,7 +1,7 @@
 ![](https://github.com/hyperledger-labs/fabex/workflows/build/badge.svg) ![](https://github.com/hyperledger-labs/fabex/workflows/unit-tests/badge.svg) 
 
 <p align="center">
-<img src="https://github.com/vadiminshakov/fabex/blob/master/fabex.png">
+<img src="https://github.com/vadiminshakov/fabex/blob/1.x/fabex.png">
 </p>
 
 ## **Block explorer for Hyperledger Fabric**
@@ -87,7 +87,7 @@ Save blocks data to db:
     ./fabex -task=explore -configpath=configs -configname=config -db=cassandra
     
 
-   Also you can start service for fetching blocks in daemon mode: 
+Also you can start service for fetching blocks in daemon mode: 
  
     ./fabex -task=explore -configpath=configs -configname=config -db=cassandra
     
