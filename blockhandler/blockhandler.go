@@ -14,8 +14,8 @@
    limitations under the License.
 */
 
-// Package blockfetcher provides functionality for fetching blocks from blockchain
-package blockfetcher
+// Package blockhandler provides functionality for fetching blocks from blockchain
+package blockhandler
 
 import (
 	"encoding/hex"
@@ -32,7 +32,6 @@ import (
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
 	"github.com/hyperledger/fabric/protoutil"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 // LedgerClient interface used for dependency injection of Fabric ledger client
@@ -46,17 +45,8 @@ type CustomBlock struct {
 }
 
 // GetBlock gets information about specified block with blocknum number
-func GetBlock(ledgerClient LedgerClient, blocknum uint64) (*CustomBlock, error) {
+func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 	customBlock := &CustomBlock{}
-
-	block, err := ledgerClient.QueryBlock(blocknum)
-	if err != nil {
-		// skip if it's just the end of the blockchain
-		if strings.Contains(err.Error(), "Entry not found in index") {
-			return nil, nil
-		}
-		return nil, err
-	}
 
 	// get block hash
 	hash := hex.EncodeToString(block.Header.DataHash)
@@ -69,7 +59,7 @@ func GetBlock(ledgerClient LedgerClient, blocknum uint64) (*CustomBlock, error) 
 
 		// get validation code (0 is valid)
 		processedtx := &peer.ProcessedTransaction{}
-		proto.Unmarshal(value, processedtx)
+		err := proto.Unmarshal(value, processedtx)
 		if err != nil {
 			return nil, err
 		}
@@ -214,7 +204,7 @@ func GetBlock(ledgerClient LedgerClient, blocknum uint64) (*CustomBlock, error) 
 				TxId,
 				hash,
 				previoushash,
-				blocknum,
+				block.Header.Number,
 				string(jsonPayload),
 				validationCode,
 				txtime.Unix(),
@@ -239,7 +229,7 @@ func GetBlock(ledgerClient LedgerClient, blocknum uint64) (*CustomBlock, error) 
 					TxId,
 					hash,
 					previoushash,
-					blocknum,
+					block.Header.Number,
 					string(jsonPayload),
 					validationCode,
 					txtime.Unix(),
