@@ -13,6 +13,8 @@
 
 [Microservice mode](#microservice)
 
+[UI](#ui)
+
 [CLI usage](#cli)
 
 [Testing](#testing)
@@ -62,6 +64,14 @@ Use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fa
 [Example](https://github.com/hyperledger-labs/fabex/blob/master/client/example/client.go) of GRPC client implementation.
 
 <br><br>
+
+### <a name="ui">**UI**</a>
+
+UI is available on port 5252
+
+![UI](https://github.com/hyperledger-labs/fabex/blob/2.x/ui.png)
+
+<br><br>
  
 ### <a name="cli">**CLI**</a>
 Build Fabex executable binary file:  
@@ -79,7 +89,7 @@ Save blocks data to db:
 
 Also you can start service for fetching blocks in daemon mode: 
  
-    ./fabex -task=explore -configpath=configs -configname=config -db=cassandra -forever=true
+    ./fabex -task=explore -configpath=configs -configname=config -db=cassandra
     
     
 Get transactions of specific block (chain operation):  
