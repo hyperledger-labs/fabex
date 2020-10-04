@@ -69,7 +69,7 @@ Use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fa
 
 UI is available on port 5252
 
-![UI](https://github.com/hyperledger-labs/fabex/blob/2.x/ui.png)
+![UI](https://github.com/hyperledger-labs/fabex/blob/1.x/ui.png)
 
 <br><br>
  
