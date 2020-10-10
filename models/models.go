@@ -20,12 +20,14 @@ import (
 	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/ledgerclient"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
+	contextApi "github.com/hyperledger/fabric-sdk-go/pkg/common/providers/context"
 )
 
 type Fabex struct {
-	Db            db.Storage
-	ChannelClient *channel.Client
-	LedgerClient  *ledgerclient.CustomLedgerClient
+	Db             db.Storage
+	ChannelClient  *channel.Client
+	LedgerClient   *ledgerclient.CustomLedgerClient
+	ChannelContext contextApi.ChannelProvider
 }
 
 type Mongo struct {
