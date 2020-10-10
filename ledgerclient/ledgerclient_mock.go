@@ -1,9 +1,9 @@
 package ledgerclient
 
 import (
+	"github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
-	"github.com/hyperledger/fabric/protos/common"
-	"github.com/hyperledger/fabric/protos/utils"
+	"github.com/hyperledger/fabric/protoutil"
 	"io/ioutil"
 	"unsafe"
 )
@@ -16,7 +16,7 @@ func FakeBlock() *common.Block {
 	if err != nil {
 		panic(err)
 	}
-	block, err := utils.UnmarshalBlock(blockBytes)
+	block, err := protoutil.UnmarshalBlock(blockBytes)
 	if err != nil {
 		panic(err)
 	}
