@@ -30,9 +30,11 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/events/deliverclient/seek"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
+	"github.com/hyperledger/fabric/protos/common"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"unicode/utf8"
+	"unsafe"
 )
 
 const NOT_FOUND_ERR = "not found"
@@ -85,7 +87,7 @@ func Explore(fab *models.Fabex) error {
 		for {
 			blockEvent := <-notifier
 
-			customBlock, err := blockhandler.HandleBlock(blockEvent.Block)
+			customBlock, err := blockhandler.HandleBlock((*common.Block)(unsafe.Pointer(blockEvent.Block)))
 			if err != nil {
 				return errors.Wrap(err, "GetBlock error")
 			}
