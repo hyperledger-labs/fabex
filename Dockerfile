@@ -1,8 +1,8 @@
-FROM golang:1.12 as build-stage
+FROM golang:1.14 as build-stage
 LABEL maintainer="Vadim Inshakov <vadiminshakov@gmail.com>"
 WORKDIR /app
 COPY . .
-RUN GOPROXY="https://goproxy.io" go build
+RUN tar -zxvf vendor.tar.gz && go build -mod=vendor
 
 # production stage
 FROM alpine:3.9 as production-stage
