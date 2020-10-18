@@ -10,9 +10,8 @@ require (
 	github.com/gocql/gocql v0.0.0-20200410100145-b454769479c6
 	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/golang/protobuf v1.3.3
-	github.com/hashicorp/go-version v1.2.0 // indirect
+	github.com/hashicorp/go-version v1.2.0 // indirect; indirectW
 	github.com/hyperledger/fabric v2.1.1+incompatible
-	github.com/hyperledger/fabric-amcl v0.0.0-20181230093703-5ccba6eab8d6 // indirect
 	github.com/hyperledger/fabric-protos-go v0.0.0-20200707132912-fee30f3ccd23
 	github.com/hyperledger/fabric-sdk-go v1.0.0-beta3
 	github.com/kr/pretty v0.2.0 // indirect
