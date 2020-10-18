@@ -25,9 +25,9 @@ jobs:
         echo "::add-path::$(go env GOPATH)/bin"
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-    
+
     - name: extract dependencies
-      run: tar -xf vendor.tar.xz
+      run: tar -xzf vendor.tar.gz
 
     - name: unit tests
       run: cd blockhandler && go test
