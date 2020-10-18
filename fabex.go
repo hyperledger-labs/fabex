@@ -97,7 +97,7 @@ func main() {
 	clientChannelContext := sdk.ChannelContext(globalConfig.Fabric.Channel, fabsdk.WithUser(globalConfig.Fabric.User), fabsdk.WithOrg(globalConfig.Fabric.Org))
 	ledgerClient, err := ledger.New(clientChannelContext)
 	if err != nil {
-		log.Fatalf("Failed to create channel [%s] client: %#v", globalConfig.Fabric.Channel, err)
+		log.Fatalf("Failed to create ledger [%s] client: %#v", globalConfig.Fabric.Channel, err)
 	}
 
 	channelclient, err := channel.New(clientChannelContext)
