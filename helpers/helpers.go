@@ -170,14 +170,15 @@ func PackTxsToBlocks(blocks []db.Tx) ([]models.Block, error) {
 		tx.Txid = in.Txid
 		tx.ValidationCode = in.ValidationCode
 
-		var ccData []models.Chaincode
-		err := json.Unmarshal([]byte(in.Payload), &ccData)
+		var ccData []models.WriteKV
+
+		err := json.Unmarshal(in.Payload, &ccData)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, item := range ccData {
-			tx.KV = append(tx.KV, models.KV{item.Key, item.Value})
+			tx.KV = append(tx.KV, models.WriteKV{item.Key, item.Value})
 		}
 
 		block.Txs = append(block.Txs, tx)

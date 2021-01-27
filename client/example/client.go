@@ -17,7 +17,7 @@
 package main
 
 import (
-	"fmt"
+	"encoding/base64"
 	fabcli "github.com/hyperledger-labs/fabex/client"
 	"github.com/hyperledger-labs/fabex/helpers"
 	"log"
@@ -37,17 +37,14 @@ func main() {
 	}
 
 	/*
-	    Use this commented lines for your experiments!
-	 */
+	   Use this commented lines for your experiments!
+	*/
 
 	// get txs from blocks with block number range
 	//txs, err := client.GetRange(1, 15)
 
 	// get tx with tx ID
 	//txs, err := client.Get(&pb.Entry{Txid:"3a3e933a3d9953b0b10e6573254b6d3cf2347d72058c0347a55054babdd8e1a1"})
-
-	// get tx with payload key X
-	//txs, err := client.Get(&pb.Entry{Payload: "X"})
 
 	// get txs from specific block
 	//txs, err := client.Get(&pb.Entry{Blocknum: 5})
@@ -59,7 +56,7 @@ func main() {
 	//}
 	//txs, err := client.Get(&pb.Entry{Payload: key})
 
-    // get all
+	// get all
 	txs, err := client.Get(nil)
 	if err != nil {
 		log.Fatal(err)
@@ -70,5 +67,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%#v\n", blocks)
+	for _, block := range blocks {
+		log.Printf("Blocknum: %d\nChannel:%s", block.Blocknum, block.ChannelId)
+		for _, tx := range block.Txs {
+			log.Printf("Tx ID: %s\nValidation code: %d", tx.Txid, tx.ValidationCode)
+			log.Println("Write set:")
+			for _, write := range tx.KV {
+				// decode base64-encoded value, coz bytes array can't be json serialized
+				value, err := base64.StdEncoding.DecodeString(write.Value)
+				if err != nil {
+					log.Fatal(err)
+				}
+				log.Printf("Key: %s, Value: %s", write.Key, string(value))
+			}
+		}
+	}
 }

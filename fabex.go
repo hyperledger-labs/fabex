@@ -45,6 +45,7 @@ var (
 )
 
 type FabexServer struct {
+	pb.UnimplementedFabexServer
 	Address string
 	Port    string
 	Conf    *models.Fabex
@@ -56,7 +57,7 @@ func main() {
 	enrolluser := flag.Bool("enrolluser", false, "enroll user (true) or not (false)")
 	task := flag.String("task", "grpc", "choose the task to execute")
 	blocknum := flag.Uint64("blocknum", 0, "block number")
-	confpath := flag.String("configpath", "./", "path to YAML config")
+	confpath := flag.String("configpath", "./configs/", "path to YAML config")
 	confname := flag.String("configname", "config", "name of YAML config")
 	databaseSelected := flag.String("db", "mongo", "select database")
 	ui := flag.Bool("ui", true, "with UI or without")
@@ -145,7 +146,7 @@ func main() {
 		if txs == nil {
 			log.Fatal("empty block")
 		}
-		var cc []models.Chaincode
+		var cc []models.WriteKV
 		for _, tx := range txs {
 
 			err = json.Unmarshal([]byte(tx.Payload), &cc)
@@ -171,7 +172,7 @@ func main() {
 
 		for _, tx := range txs {
 
-			var cc []models.Chaincode
+			var cc []models.WriteKV
 
 			err = json.Unmarshal([]byte(tx.Payload), &cc)
 			if err != nil {
@@ -197,7 +198,7 @@ func main() {
 }
 
 func NewFabexServer(addr string, port string, conf *models.Fabex) *FabexServer {
-	return &FabexServer{addr, port, conf}
+	return &FabexServer{Address: addr, Port: port, Conf: conf}
 }
 
 func (s *FabexServer) GetRange(req *pb.RequestRange, stream pb.Fabex_GetRangeServer) error {
@@ -242,15 +243,17 @@ func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
 		for _, queryResult := range QueryResults {
 			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
 		}
-	case req.Payload != "":
-		QueryResults, err := s.Conf.Db.GetBlockInfoByPayload(req.Payload)
-		if err != nil {
-			return err
-		}
 
-		for _, queryResult := range QueryResults {
-			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
-		}
+		// DEPRECATED: payload is not string anymore, so we can't do search
+	//case len(req.Payload) != 0:
+	//	QueryResults, err := s.Conf.Db.GetBlockInfoByPayload(req.Payload)
+	//	if err != nil {
+	//		return err
+	//	}
+	//
+	//	for _, queryResult := range QueryResults {
+	//		stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
+	//	}
 	default:
 		// set blocks counter to latest saved in db block number value
 		blockCounter := 1
