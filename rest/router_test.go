@@ -74,7 +74,7 @@ func TestMain(m *testing.M) {
 
 	go func(cancelCh chan bool) {
 
-		cmd, err := ExecuteCMD("make", "fabex-test")
+		cmd, err := ExecuteCMD("make", "fabex-test-integration")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -166,27 +166,6 @@ func TestEndpoints(t *testing.T) {
 		assert.Greater(t, len(txs.Msg), 0, "No transactions found")
 		for _, tx := range txs.Msg {
 			assert.EqualValuesf(t, tx.Txs[0].Txid, TXID, "Not valid tx retrieved, got tx ID %d, want %d", tx.Txs[0].Txid, TXID)
-		}
-	})
-
-	t.Run("bykey", func(t *testing.T) {
-		resp, err := http.Get("http://localhost:5252/bykey/car0")
-		if err != nil {
-			t.Errorf(err.Error())
-		}
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			t.Errorf(err.Error())
-		}
-		var txs Response
-		err = json.Unmarshal(bodyBytes, &txs)
-		if err != nil {
-			t.Errorf(err.Error())
-		}
-
-		assert.Greater(t, len(txs.Msg), 0, "No transactions found")
-		for _, tx := range txs.Msg {
-			assert.EqualValuesf(t, tx.ChannelId, "mychannel", "Not valid tx retrieved, got tx from channel %d, want %d", tx.ChannelId, "mychannel")
 		}
 	})
 

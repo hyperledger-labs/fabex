@@ -1,0 +1,28 @@
+Fabric:
+  user: admin
+  secret: adminpw
+  org: Org1
+  channel: mychannel
+  connectionProfile: ./tests/connection-integration-tests.yaml
+
+cassandra:
+  host: localhost
+  dbuser: cassandra
+  dbsecret: cassandra
+  keyspace: blocks
+  columnfamily: txs
+
+mongo:
+  host: localhost
+  port: 27018
+  dbuser: mongo
+  dbsecret: mongo
+  dbname: blocks
+  collection: txs
+
+GRPCServer:
+  host: localhost
+  port: 6000
+
+UI:
+  port: 5252

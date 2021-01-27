@@ -91,7 +91,7 @@ func (c *Cassandra) Insert(tx Tx) error {
 		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, PAYLOADKEYS)
 
 	var Payload []RW
-	err := json.Unmarshal([]byte(tx.Payload), &Payload)
+	err := json.Unmarshal(tx.Payload, &Payload)
 	if err != nil {
 		return err
 	}

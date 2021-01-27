@@ -37,8 +37,8 @@ client:
 
     # [Optional]. Client key and cert for TLS handshake with peers and orderers
     client:
-      keyfile: ${HOME}/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/tls/client.key
-      certfile: ${HOME}/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/tls/client.crt
+      keyfile: ${PWD}/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/tls/client.key
+      certfile: ${PWD}/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/tls/client.crt
 
 
 channels:
@@ -60,28 +60,28 @@ channels:
 organizations:
   Org1:
     mspid: Org1MSP
-    cryptoPath:  ${HOME}/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/
+    cryptoPath:  ${PWD}/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/
     peers:
       - peer0.org1.example.com
 
     certificateAuthorities:
       - ca-org1
     adminPrivateKey:
-      path: ${HOME}/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/f5cdf64ba83d47e0b7dbbf82fa2ed24d7efde77b0aa0e2026ce8c0fa916aaf97_sk
+      path: ${PWD}/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/f5cdf64ba83d47e0b7dbbf82fa2ed24d7efde77b0aa0e2026ce8c0fa916aaf97_sk
     signedCert:
-      path: ${HOME}/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/signcerts/Admin@org1.example.com-cert.pem
+      path: ${PWD}/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/signcerts/Admin@org1.example.com-cert.pem
 
   Org2:
     mspid: Org2MSP
-    cryptoPath:  ${HOME}/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/ms
+    cryptoPath:  ${PWD}/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/ms
     peers:
       - peer0.org2.example.com
     certificateAuthorities:
       - ca-org2
     adminPrivateKey:
-      path: ${HOME}/git/fabex/tests/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/019dab7c5882b4e45264897361b0f2239069a1c355287231e905229dc2bbfe2b_sk
+      path: ${PWD}/tests/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/019dab7c5882b4e45264897361b0f2239069a1c355287231e905229dc2bbfe2b_sk
     signedCert:
-      path: ${HOME}/git/fabex/tests/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem
+      path: ${PWD}/tests/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem
 
 orderers:
   orderer.example.com:
@@ -90,7 +90,7 @@ orderers:
       ssl-target-name-override: orderer.example.com
       grpc-max-send-message-length: 15
     tlsCACerts:
-      path: ${HOME}/git/fabex/tests/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+      path: ${PWD}/tests/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 
 peers:
   peer0.org1.example.com:
@@ -100,7 +100,7 @@ peers:
       ssl-target-name-override: peer0.org1.example.com
       grpc.keepalive_time_ms: 600000
     tlsCACerts:
-      path: ${HOME}/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/tlscacerts/tlsca.org1.example.com-cert.pem
+      path: ${PWD}/tests/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/tlscacerts/tlsca.org1.example.com-cert.pem
 
   peer0.org2.example.com:
     url: grpcs://localhost:9051
@@ -108,7 +108,7 @@ peers:
     grpcOptions:
       ssl-target-name-override: peer0.org2.example.com
     tlsCACerts:
-      path: ${HOME}/git/fabex/tests/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp/tlscacerts/tlsca.org2.example.com-cert.pem
+      path: ${PWD}/tests/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp/tlscacerts/tlsca.org2.example.com-cert.pem
 
 certificateAuthorities:
   ca-org1:
@@ -116,7 +116,7 @@ certificateAuthorities:
     httpOptions:
       verify: false
     tlsCACerts:
-      path: ${HOME}/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
+      path: ${PWD}/tests/first-network/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
     registrar:
       enrollId: admin
       enrollSecret: adminpw
@@ -127,7 +127,7 @@ certificateAuthorities:
     httpOptions:
       verify: false
     tlsCACerts:
-      path: ${HOME}/git/fabex/tests/first-network/crypto-config/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem
+      path: ${PWD}/tests/first-network/crypto-config/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem
     registrar:
       enrollId: admin
       enrollSecret: adminpw
