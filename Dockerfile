@@ -1,4 +1,4 @@
-FROM golang:1.12 as build-stage
+FROM golang:1.14 as build-stage
 LABEL maintainer="Vadim Inshakov <vadiminshakov@gmail.com>"
 ADD . /app
 WORKDIR /app
