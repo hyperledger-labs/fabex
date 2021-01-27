@@ -38,7 +38,7 @@ type Tx struct {
 	Hash           string `json:"hash" bson:"Hash"`
 	PreviousHash   string `json:"previoushash" bson:"PreviousHash"`
 	Blocknum       uint64 `json:"blocknum" bson:"Blocknum"`
-	Payload        string `json:"payload" bson:"Payload"`
+	Payload        []byte `json:"payload" bson:"Payload"`
 	ValidationCode int32  `json:"validationcode" bson:"ValidationCode"`
 	Time           int64  `json:"time" bson:"Time"`
 }

@@ -1,0 +1,134 @@
+name: "Network"
+x-type: "hlfv1"
+version: "1.0"
+client:
+  # defined under "organizations"
+  organization: Org1
+
+  logging:
+    level: info
+
+  cryptoconfig:
+    path: ./crypto-config
+
+  # Some SDKs support pluggable KV stores, the properties under "credentialStore"
+  # are implementation specific
+  credentialStore:
+    path: ./credstore
+
+    # [Optional]. Specific to the CryptoSuite implementation used by GO SDK. Software-based implementations
+    # requiring a key store. PKCS#11 based implementations does not.
+    cryptoStore:
+      path: ./cryptostore
+
+    # BCCSP config for the client. Used by GO SDK.
+  BCCSP:
+    security:
+      enabled: true
+      default:
+        provider: "SW"
+      hashAlgorithm: "SHA2"
+      softVerify: true
+      level: 256
+
+  tlsCerts:
+    # [Optional]. Use system certificate pool when connecting to peers, orderers (for negotiating TLS) Default: false
+    systemCertPool: false
+
+    # [Optional]. Client key and cert for TLS handshake with peers and orderers
+    client:
+      keyfile: /home/vadim/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/tls/client.key
+      certfile: /home/vadim/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/tls/client.crt
+
+
+channels:
+  mychannel:
+    orderers:
+      - orderer.example.com
+    peers:
+      peer0.org1.example.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+      peer0.org2.example.com:
+        endorsingPeer: true
+        chaincodeQuery: false
+        ledgerQuery: true
+        eventSource: false
+
+organizations:
+  Org1:
+    mspid: Org1MSP
+    cryptoPath:  /home/vadim/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/
+    peers:
+      - peer0.org1.example.com
+
+    certificateAuthorities:
+      - ca-org1
+    adminPrivateKey:
+      path: /home/vadim/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/f5cdf64ba83d47e0b7dbbf82fa2ed24d7efde77b0aa0e2026ce8c0fa916aaf97_sk
+    signedCert:
+      path: /home/vadim/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/signcerts/Admin@org1.example.com-cert.pem
+
+  Org2:
+    mspid: Org2MSP
+    cryptoPath:  /home/vadim/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/ms
+    peers:
+      - peer0.org2.example.com
+    certificateAuthorities:
+      - ca-org2
+    adminPrivateKey:
+      path: /home/vadim/git/fabex/tests/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/019dab7c5882b4e45264897361b0f2239069a1c355287231e905229dc2bbfe2b_sk
+    signedCert:
+      path: /home/vadim/git/fabex/tests/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem
+
+orderers:
+  orderer.example.com:
+    url: grpcs://localhost:7050
+    grpcOptions:
+      ssl-target-name-override: orderer.example.com
+      grpc-max-send-message-length: 15
+    tlsCACerts:
+      path: /home/vadim/git/fabex/tests/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+peers:
+  peer0.org1.example.com:
+    url: grpcs://localhost:7051
+    eventUrl: grpcs://localhost:7053
+    grpcOptions:
+      ssl-target-name-override: peer0.org1.example.com
+      grpc.keepalive_time_ms: 600000
+    tlsCACerts:
+      path: /home/vadim/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/tlscacerts/tlsca.org1.example.com-cert.pem
+
+  peer0.org2.example.com:
+    url: grpcs://localhost:9051
+    eventUrl: grpcs://localhost:9053
+    grpcOptions:
+      ssl-target-name-override: peer0.org2.example.com
+    tlsCACerts:
+      path: /home/vadim/git/fabex/tests/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp/tlscacerts/tlsca.org2.example.com-cert.pem
+
+certificateAuthorities:
+  ca-org1:
+    url: https://ca.org1.example.com:7054
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: /home/vadim/git/fabex/tests/first-network/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+    caName: ca-org1
+
+  ca-org2:
+    url: https://ca.org2.example.com:8054
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: /home/vadim/git/fabex/tests/first-network/crypto-config/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+    caName: ca-org2
