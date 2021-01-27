@@ -17,8 +17,6 @@ func Run(db db.Storage, port string, withUI bool) {
 
 	r.GET("/byblocknum/:blocknum", byblocknum(db))
 
-	r.GET("/bykey/:payloadkey", bypayload(db))
-
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/ui")
 	})
