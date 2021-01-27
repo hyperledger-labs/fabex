@@ -27,7 +27,7 @@ jobs:
       uses: actions/checkout@v2
     
     - name: extract dependencies
-      run: tar -xf vendor.tar.xz
+      run: tar -xvf vendor.tar
 
     - name: unit tests
       run: cd blockhandler && go test
