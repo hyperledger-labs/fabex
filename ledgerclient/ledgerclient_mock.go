@@ -1,9 +1,9 @@
 package ledgerclient
 
 import (
+	"github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
-	"github.com/hyperledger/fabric/protos/common"
-	protoutil "github.com/hyperledger/fabric/protos/utils"
+	"github.com/hyperledger/fabric/protoutil"
 	"io/ioutil"
 	"unsafe"
 )

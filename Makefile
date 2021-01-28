@@ -1,6 +1,6 @@
 fabric-test:
 	@cd tests/chaincode/fabcar/go && tar -zxvf vendor.tar.gz
-	@cd /tmp/ && curl -sSL https://raw.githubusercontent.com/hyperledger/fabric/master/scripts/bootstrap.sh | bash -s 1.4.6
+	@cd tmp/ && curl -sSL https://raw.githubusercontent.com/hyperledger/fabric/master/scripts/bootstrap.sh | bash -s 2.2.1
 	@cd tests/fabcar && ./startFabric.sh
 
 stop-fabric-test:
@@ -11,6 +11,10 @@ stop-fabric-test:
 
 fabex-test:
 	@go run fabex.go -task=grpc -configpath=tests -configname=config -enrolluser=true -db=mongo
+
+fabex-test-integration:
+	@go run fabex.go -task=grpc -configpath=tests -configname=config-integration-tests -enrolluser=false -db=mongo
+
 
 fabex-mongo:
 	@go run fabex.go -task=grpc -configpath=configs -configname=config -enrolluser=true -db=mongo
@@ -31,11 +35,11 @@ stop-mongo-test:
 	@docker rm -f fabexmongo
 
 unit-tests:
-	@cd blockfetcher && go test -v
+	@cd blockhandler && go test -v
 
 integration-tests:
-	@cd tests/chaincode/fabcar/go && tar -zxvf vendor.tar.gz
+	@cd tests/chaincode/fabcar/go && tar -zxf vendor.tar.gz
 	@sleep 10
 	@cd client/ && go test -v
-	@sleep 10
+	@sleep 20
 	@cd ./rest && go test -v
