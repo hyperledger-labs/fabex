@@ -30,11 +30,9 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/events/deliverclient/seek"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
-	"github.com/hyperledger/fabric/protos/common"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"unicode/utf8"
-	"unsafe"
 )
 
 const NOT_FOUND_ERR = "not found"
@@ -87,7 +85,7 @@ func Explore(fab *models.Fabex) error {
 		for {
 			blockEvent := <-notifier
 
-			customBlock, err := blockhandler.HandleBlock((*common.Block)(unsafe.Pointer(blockEvent.Block)))
+			customBlock, err := blockhandler.HandleBlock(blockEvent.Block)
 			if err != nil {
 				return errors.Wrap(err, "GetBlock error")
 			}
@@ -170,14 +168,15 @@ func PackTxsToBlocks(blocks []db.Tx) ([]models.Block, error) {
 		tx.Txid = in.Txid
 		tx.ValidationCode = in.ValidationCode
 
-		var ccData []models.Chaincode
-		err := json.Unmarshal([]byte(in.Payload), &ccData)
+		var ccData []models.WriteKV
+
+		err := json.Unmarshal(in.Payload, &ccData)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, item := range ccData {
-			tx.KV = append(tx.KV, models.KV{item.Key, item.Value})
+			tx.KV = append(tx.KV, models.WriteKV{item.Key, item.Value})
 		}
 
 		block.Txs = append(block.Txs, tx)

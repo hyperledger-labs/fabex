@@ -1,12 +1,12 @@
 Fabric:
-  user: User1
-  secret:
+  user: Admin
+  secret: adminpw
   org: Org1
-  channel:
-  connectionProfile:
+  channel: mychannel
+  connectionProfile: /app/configs/connection-profile.yaml
 
 cassandra:
-  host: localhost
+  host: cassandra
   dbuser: cassandra
   dbsecret: cassandra
   keyspace: blocks
