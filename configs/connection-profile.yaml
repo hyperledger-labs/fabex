@@ -1,25 +1,16 @@
-name: "Network"
-x-type: "hlfv1"
-version: "1.0"
+---
+name: test-network-org1
+version: 1.0.0
 client:
-  # defined under "organizations"
   organization: Org1
-
-  logging:
-    level: info
+  connection:
+    timeout:
+      peer:
+        endorser: '300'
 
   cryptoconfig:
-    path: /home/ubuntu/fabric-samples/first-network/crypto-config
+    path: /crypto
 
-  # Some SDKs support pluggable KV stores, the properties under "credentialStore"
-  # are implementation specific
-  credentialStore:
-    path: /home/ubuntu/explorer/credstore
-
-    # [Optional]. Specific to the CryptoSuite implementation used by GO SDK. Software-based implementations
-    # requiring a key store. PKCS#11 based implementations does not.
-    cryptoStore:
-      path: /home/ubuntu/explorer/cryptostore
 
     # BCCSP config for the client. Used by GO SDK.
   BCCSP:
@@ -37,98 +28,68 @@ client:
 
     # [Optional]. Client key and cert for TLS handshake with peers and orderers
     client:
-      keyfile: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/tls/client.key
-      certfile: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/tls/client.crt
-
-
-channels:
-  mychannel:
-    orderers:
-      - orderer.example.com
-    peers:
-      peer0.org1.example.com:
-        endorsingPeer: true
-        chaincodeQuery: true
-        ledgerQuery: true
-        eventSource: true
-      peer0.org2.example.com:
-        endorsingPeer: true
-        chaincodeQuery: false
-        ledgerQuery: true
-        eventSource: false
+      keyfile:
+      certfile:
 
 organizations:
   Org1:
     mspid: Org1MSP
-    cryptoPath:  /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/
+    cryptoPath: peerOrganizations/peerOrganizations/org1.example.com/users/{username}@org1.example.com/msp/
     peers:
       - peer0.org1.example.com
-
     certificateAuthorities:
-      - ca-org1
-    adminPrivateKey:
-      path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/5ebee3176272fe54824a5df4f97aac503cd3e25f21a65b5eeddb8c19b896ca59_sk
-    signedCert:
-      path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/signcerts/Admin@org1.example.com-cert.pem
-
-  Org2:
-    mspid: Org2MSP
-    cryptoPath:  /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/ms
-    peers:
-      - peer0.org2.example.com
-    certificateAuthorities:
-      - ca-org2
-    adminPrivateKey:
-      path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/4b929991a646d955caf7343928550c77d0118d98d5c35b1cd7e2c9ed019021b6_sk
-    signedCert:
-      path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem
-
-orderers:
-  orderer.example.com:
-    url: grpcs://localhost:7050
-    grpcOptions:
-      ssl-target-name-override: orderer.example.com
-      grpc-max-send-message-length: 15
-    tlsCACerts:
-      path: /home/ubuntu/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
-
+      - ca.org1.example.com
 peers:
   peer0.org1.example.com:
-    url: grpcs://localhost:7051
-    eventUrl: grpcs://localhost:7053
+    url: grpcs://0.0.0.0:7051
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICJjCCAc2gAwIBAgIUCRialDuqW4ucJukeDWIg9Cm9gHEwCgYIKoZIzj0EAwIw
+        cDELMAkGA1UEBhMCVVMxFzAVBgNVBAgTDk5vcnRoIENhcm9saW5hMQ8wDQYDVQQH
+        EwZEdXJoYW0xGTAXBgNVBAoTEG9yZzEuZXhhbXBsZS5jb20xHDAaBgNVBAMTE2Nh
+        Lm9yZzEuZXhhbXBsZS5jb20wHhcNMjEwMTI3MDg1NzAwWhcNMzYwMTI0MDg1NzAw
+        WjBwMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xpbmExDzANBgNV
+        BAcTBkR1cmhhbTEZMBcGA1UEChMQb3JnMS5leGFtcGxlLmNvbTEcMBoGA1UEAxMT
+        Y2Eub3JnMS5leGFtcGxlLmNvbTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABPY5
+        yWqYaqifvWa3+9RyeZXToVEz5fEMCUaGr1g9z1ry0cgCjG2Z8hr02NcYSIr4iX4a
+        Fm1gJw4Oq6zB8/I/+lSjRTBDMA4GA1UdDwEB/wQEAwIBBjASBgNVHRMBAf8ECDAG
+        AQH/AgEBMB0GA1UdDgQWBBRIi0OR28Rxdf40/1eTQxuX+dV1tTAKBggqhkjOPQQD
+        AgNHADBEAiBShIIHhuxS2eg8UMmKNSarpVR7/awBvvjQljP+encuSgIgAqfT9L57
+        M3h8GKQGoS5/Qjj+TS2KPLXgiw47oTGDwFw=
+        -----END CERTIFICATE-----
+
     grpcOptions:
       ssl-target-name-override: peer0.org1.example.com
-      grpc.keepalive_time_ms: 600000
-    tlsCACerts:
-      path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/tlscacerts/tlsca.org1.example.com-cert.pem
-
-  peer0.org2.example.com:
-    url: grpcs://localhost:9051
-    eventUrl: grpcs://localhost:9053
-    grpcOptions:
-      ssl-target-name-override: peer0.org2.example.com
-    tlsCACerts:
-      path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp/tlscacerts/tlsca.org2.example.com-cert.pem
-
+      hostnameOverride: peer0.org1.example.com
 certificateAuthorities:
-  ca-org1:
-    url: https://ca.org1.example.com:7054
-    httpOptions:
-      verify: false
-    tlsCACerts:
-      path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
-    registrar:
-        enrollId: admin
-        enrollSecret: adminpw
+  ca.org1.example.com:
+    url: https://org1.example.com:7054
     caName: ca-org1
+    tlsCACerts:
+      pem:
+        - |
+          -----BEGIN CERTIFICATE-----
+          MIICJjCCAc2gAwIBAgIUCRialDuqW4ucJukeDWIg9Cm9gHEwCgYIKoZIzj0EAwIw
+          cDELMAkGA1UEBhMCVVMxFzAVBgNVBAgTDk5vcnRoIENhcm9saW5hMQ8wDQYDVQQH
+          EwZEdXJoYW0xGTAXBgNVBAoTEG9yZzEuZXhhbXBsZS5jb20xHDAaBgNVBAMTE2Nh
+          Lm9yZzEuZXhhbXBsZS5jb20wHhcNMjEwMTI3MDg1NzAwWhcNMzYwMTI0MDg1NzAw
+          WjBwMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xpbmExDzANBgNV
+          BAcTBkR1cmhhbTEZMBcGA1UEChMQb3JnMS5leGFtcGxlLmNvbTEcMBoGA1UEAxMT
+          Y2Eub3JnMS5leGFtcGxlLmNvbTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABPY5
+          yWqYaqifvWa3+9RyeZXToVEz5fEMCUaGr1g9z1ry0cgCjG2Z8hr02NcYSIr4iX4a
+          Fm1gJw4Oq6zB8/I/+lSjRTBDMA4GA1UdDwEB/wQEAwIBBjASBgNVHRMBAf8ECDAG
+          AQH/AgEBMB0GA1UdDgQWBBRIi0OR28Rxdf40/1eTQxuX+dV1tTAKBggqhkjOPQQD
+          AgNHADBEAiBShIIHhuxS2eg8UMmKNSarpVR7/awBvvjQljP+encuSgIgAqfT9L57
+          M3h8GKQGoS5/Qjj+TS2KPLXgiw47oTGDwFw=
+          -----END CERTIFICATE-----
 
-  ca-org2:
-    url: https://ca.org2.example.com:8054
     httpOptions:
       verify: false
-    tlsCACerts:
-      path: /home/ubuntu/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem
-    registrar:
-        enrollId: admin
-        enrollSecret: adminpw
-    caName: ca-org2
+
+entityMatchers:
+  certificateAuthorities:
+    - pattern: (\w*)org1.example.com(\w*)
+      urlSubstitutionExp: https://tlsca.org1.example.com:7054
+      sslTargetOverrideUrlSubstitutionExp: org1.example.com
+      mappedHost: org1.example.com
