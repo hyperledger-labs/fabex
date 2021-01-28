@@ -24,6 +24,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"sync"
 	"testing"
 	"time"
@@ -36,7 +37,8 @@ var (
 
 func ExecuteCMD(command string, args ...string) (*exec.Cmd, error) {
 	cmd := exec.Command(command, args...)
-	cmd.Dir = "../"
+	dir, _ := os.Getwd()
+	cmd.Dir = path.Join(dir, "../")
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
@@ -51,7 +53,6 @@ func ExecuteCMD(command string, args ...string) (*exec.Cmd, error) {
 }
 
 func TestMain(m *testing.M) {
-
 	// start MongoDB
 	_, err := ExecuteCMD("make", "mongo-test")
 	if err != nil {
@@ -71,8 +72,7 @@ func TestMain(m *testing.M) {
 	cancelCh := make(chan bool)
 
 	go func(cancelCh chan bool) {
-
-		cmd, err := ExecuteCMD("make", "fabex-test")
+		cmd, err := ExecuteCMD("make", "fabex-test-integration")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -139,12 +139,6 @@ func TestGet(t *testing.T) {
 	}
 
 	txs, err = fabcli.Get(&pb.Entry{Txid: txs[0].Txid})
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	assert.Greater(t, len(txs), 0, "No transactions found")
-
-	txs, err = fabcli.Get(&pb.Entry{Payload: "car0"})
 	if err != nil {
 		t.Errorf(err.Error())
 	}

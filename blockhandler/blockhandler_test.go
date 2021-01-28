@@ -1,7 +1,7 @@
 package blockhandler
 
 import (
-	protoutil "github.com/hyperledger/fabric/protos/utils"
+	"github.com/hyperledger/fabric/protoutil"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"

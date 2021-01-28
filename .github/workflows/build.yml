@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
-    branches: [ master, 1.x, 2.x  ]
+    branches: [ master, 1.x, 2.x ]
   pull_request:
-    branches: [ master, 1.x, 2.x  ]
+    branches: [ master, 1.x, 2.x ]
 
 jobs:
 
@@ -21,14 +21,13 @@ jobs:
     
     - name: setup env
       run: |
-        echo "::set-env name=GOPATH::$(go env GOPATH)"
-        echo "::add-path::$(go env GOPATH)/bin"
+        echo "GO111MODULE=on" >> $GITHUB_ENV
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
     - name: extract dependencies
-      run: tar -xzf vendor.tar.gz
+      run: tar -xvf vendor.tar
 
     - name: Build
       run: go build -v .
