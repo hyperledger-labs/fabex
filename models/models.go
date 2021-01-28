@@ -72,7 +72,7 @@ type Config struct {
 	UI
 }
 
-type Chaincode struct {
+type WriteKV struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
@@ -87,12 +87,7 @@ type Block struct {
 
 type Tx struct {
 	Txid           string `json:"txid"`
-	KV             []KV
+	KV             []WriteKV
 	ValidationCode int32 `json:"validationcode"`
 	Time           int64 `json:"time" bson:"Time"`
-}
-
-type KV struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
 }

@@ -18,6 +18,7 @@
 package blockhandler
 
 import (
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -25,13 +26,14 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/models"
+	fabcommon "github.com/hyperledger/fabric-protos-go/common"
+	"github.com/hyperledger/fabric-protos-go/ledger/rwset"
+	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
-	fabcommon "github.com/hyperledger/fabric/protos/common"
-	"github.com/hyperledger/fabric/protos/ledger/rwset"
-	"github.com/hyperledger/fabric/protos/peer"
-	protoutil "github.com/hyperledger/fabric/protos/utils"
+	"github.com/hyperledger/fabric/protoutil"
 	"github.com/pkg/errors"
+	"strconv"
 )
 
 // LedgerClient interface used for dependency injection of Fabric ledger client
@@ -118,7 +120,7 @@ func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 				return nil, err
 			}
 
-			var stringedPayload []models.Chaincode
+			var writeSet []models.WriteKV
 			switch blockType {
 			case "Config":
 				configPayload, err := protoutil.UnmarshalPayload(configEnvelope.Payload)
@@ -156,13 +158,13 @@ func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 					return nil, errors.Wrap(err, "failed to marshal config ModPolicy")
 				}
 
-				stringedPayload = append(stringedPayload, models.Chaincode{Key: "Type", Value: blockType})
-				stringedPayload = append(stringedPayload, models.Chaincode{Key: "Sequence", Value: fmt.Sprint(config.GetSequence())})
-				stringedPayload = append(stringedPayload, models.Chaincode{Key: "Version", Value: fmt.Sprint(configGroup.Version)})
-				stringedPayload = append(stringedPayload, models.Chaincode{Key: "Groups", Value: string(groups)})
-				stringedPayload = append(stringedPayload, models.Chaincode{Key: "Values", Value: string(values)})
-				stringedPayload = append(stringedPayload, models.Chaincode{Key: "Policies", Value: string(policies)})
-				stringedPayload = append(stringedPayload, models.Chaincode{Key: "ModPolicy", Value: string(modpolicy)})
+				writeSet = append(writeSet, models.WriteKV{Key: "Type", Value: base64.StdEncoding.EncodeToString([]byte(blockType))})
+				writeSet = append(writeSet, models.WriteKV{Key: "Sequence", Value: base64.StdEncoding.EncodeToString([]byte(strconv.Itoa(int(config.GetSequence()))))})
+				writeSet = append(writeSet, models.WriteKV{Key: "Version", Value: base64.StdEncoding.EncodeToString([]byte(strconv.Itoa(int(configGroup.Version))))})
+				writeSet = append(writeSet, models.WriteKV{Key: "Groups", Value: base64.StdEncoding.EncodeToString(groups)})
+				writeSet = append(writeSet, models.WriteKV{Key: "Values", Value: base64.StdEncoding.EncodeToString(values)})
+				writeSet = append(writeSet, models.WriteKV{Key: "Policies", Value: base64.StdEncoding.EncodeToString(policies)})
+				writeSet = append(writeSet, models.WriteKV{Key: "ModPolicy", Value: base64.StdEncoding.EncodeToString(modpolicy)})
 
 			// get config update
 			case "ConfigUpdate":
@@ -188,13 +190,13 @@ func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 					return nil, err
 				}
 
-				stringedPayload = append(stringedPayload, models.Chaincode{Key: "ChannelId", Value: configUpdate.GetChannelId()})
-				stringedPayload = append(stringedPayload, models.Chaincode{Key: "ReadSet", Value: string(ReadSet)})
-				stringedPayload = append(stringedPayload, models.Chaincode{Key: "WriteSet", Value: string(WriteSet)})
+				writeSet = append(writeSet, models.WriteKV{Key: "ChannelId", Value: base64.StdEncoding.EncodeToString([]byte(configUpdate.GetChannelId()))})
+				writeSet = append(writeSet, models.WriteKV{Key: "ReadSet", Value: base64.StdEncoding.EncodeToString(ReadSet)})
+				writeSet = append(writeSet, models.WriteKV{Key: "WriteSet", Value: base64.StdEncoding.EncodeToString(WriteSet)})
 
 			}
 
-			jsonPayload, err := json.Marshal(stringedPayload)
+			jsonPayload, err := json.Marshal(writeSet)
 			if err != nil {
 				return nil, err
 			}
@@ -205,7 +207,7 @@ func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 				hash,
 				previoushash,
 				block.Header.Number,
-				string(jsonPayload),
+				jsonPayload,
 				validationCode,
 				txtime.Unix(),
 			}
@@ -215,12 +217,12 @@ func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 		for _, nsRwSet := range txRWSet.NsRwSets {
 			// get only those txs that changes state
 			if len(nsRwSet.KvRwSet.Writes) != 0 {
-				var stringedPayload []models.Chaincode
+				var writeSet []models.WriteKV
 				for _, write := range nsRwSet.KvRwSet.Writes {
-					stringedPayload = append(stringedPayload, models.Chaincode{Key: write.Key, Value: string(write.Value)})
+					writeSet = append(writeSet, models.WriteKV{Key: write.Key, Value: base64.StdEncoding.EncodeToString(write.Value)})
 				}
 
-				jsonPayload, err := json.Marshal(stringedPayload)
+				jsonPayload, err := json.Marshal(writeSet)
 				if err != nil {
 					return nil, err
 				}
@@ -230,7 +232,7 @@ func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 					hash,
 					previoushash,
 					block.Header.Number,
-					string(jsonPayload),
+					jsonPayload,
 					validationCode,
 					txtime.Unix(),
 				}

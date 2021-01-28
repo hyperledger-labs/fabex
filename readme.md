@@ -1,7 +1,7 @@
 ![](https://github.com/hyperledger-labs/fabex/workflows/build/badge.svg) ![](https://github.com/hyperledger-labs/fabex/workflows/unit-tests/badge.svg) 
 
 <p align="center">
-<img src="https://github.com/vadiminshakov/fabex/blob/1.x/fabex.png">
+<img src="https://github.com/hyperledger-labs/fabex/blob/2.x/fabex.png">
 </p>
 
 ## **Block explorer for Hyperledger Fabric**
@@ -69,7 +69,7 @@ Use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fa
 
 UI is available on port 5252
 
-![UI](https://github.com/hyperledger-labs/fabex/blob/1.x/ui.png)
+![UI](https://github.com/hyperledger-labs/fabex/blob/2.x/ui.png)
 
 <br><br>
  

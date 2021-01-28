@@ -18,7 +18,7 @@ message Entry {
     string hash = 3;
     string previoushash = 4;
     uint64 blocknum = 5;
-    string payload = 6;
+    bytes  payload = 6;
     int64  time = 7;
     int32  validationcode = 8;
 }
