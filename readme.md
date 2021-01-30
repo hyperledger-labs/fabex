@@ -9,6 +9,8 @@
 
 ### Reference
 
+[Tutorial](#tutorial)
+
 [Prerequisites](#prerequisites)
 
 [Microservice mode](#microservice)
@@ -26,6 +28,9 @@
 ##### _FabEx is inspired by [ledgerfsck](https://github.com/C0rWin/ledgerfsck)_
 
 <br>
+
+### <a name="tutorial">**Tutorial**</a>
+the tutorial is available at [this link](https://vadiminshakov.medium.com/fabex-tutorial-an-introduction-to-the-right-hyperledger-fabric-explorer-cd9ee1848cd9).
 
 ### <a name="prerequisites">**Prerequisites**</a>
 
