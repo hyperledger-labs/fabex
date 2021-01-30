@@ -55,7 +55,6 @@ func Explore(fab *models.Fabex) error {
 	}
 
 	if txs == nil {
-
 		// find latest tx in db
 		lastTx, err := fab.Db.GetLastEntry()
 		if err != nil && err.Error() != NOT_FOUND_ERR {
@@ -129,14 +128,8 @@ func EnrollUser(sdk *fabsdk.FabricSDK, user, secret string) error {
 	return nil
 }
 
-func QueryChannelConfig(ledgerClient *ledger.Client) error {
-	resp, err := ledgerClient.QueryConfig()
-	if err != nil {
-		return errors.Wrap(err, "Failed to queryConfig")
-	}
-	log.Printf("ChannelID: %v\nChannel Orderers: %v\nChannel Versions: %v\n", resp.ID(), resp.Orderers(), resp.Versions())
-
-	return nil
+func QueryChannelConfig(ledgerClient *ledger.Client) (fab.ChannelCfg, error) {
+	return ledgerClient.QueryConfig()
 }
 
 func QueryChannelInfo(ledgerClient *ledger.Client) (*fab.BlockchainInfoResponse, error) {
