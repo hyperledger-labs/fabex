@@ -17,6 +17,8 @@
 package main
 
 import (
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -129,13 +131,14 @@ func main() {
 		if err != nil {
 			log.Fatalf("Can't query blockchain info: %s", err)
 		}
-		log.Printf("BlockChainInfo: %v\nEndorser: %v\nStatus: %v\n", resp.BCI, resp.Endorser, resp.Status)
+		log.Printf("Blockchain height: %d\nCurrent block hash: %s\nPrevious block hash: %s\nEndorser: %v\nStatus: %v\n", resp.BCI.Height, hex.EncodeToString(resp.BCI.CurrentBlockHash), hex.EncodeToString(resp.BCI.PreviousBlockHash), resp.Endorser, resp.Status)
 
 	case "channelconfig":
-		err = helpers.QueryChannelConfig(fabex.LedgerClient.Client)
+		cfg, err := helpers.QueryChannelConfig(fabex.LedgerClient.Client)
 		if err != nil {
 			log.Fatal(err)
 		}
+		log.Printf("ChannelID: %v\nChannel Orderers: %v\nChannel Versions: %v\n", cfg.ID(), cfg.Orderers(), cfg.Versions())
 
 	case "getblock":
 		txs, err := fabex.Db.GetByBlocknum(*blocknum)
@@ -148,8 +151,7 @@ func main() {
 		}
 		var cc []models.WriteKV
 		for _, tx := range txs {
-
-			err = json.Unmarshal([]byte(tx.Payload), &cc)
+			err = json.Unmarshal(tx.Payload, &cc)
 			if err != nil {
 				log.Fatalf("Unmarshalling error: %s", err)
 			}
@@ -159,32 +161,35 @@ func main() {
 			for _, val := range cc {
 				fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
 			}
-
 		}
 
 	case "explore":
 		log.Fatal(helpers.Explore(fabex))
 	case "getall":
-		txs, err := fabex.Db.QueryAll()
+		allTxs, err := fabex.Db.QueryAll()
 		if err != nil {
 			log.Fatal("Can't query data: ", err)
 		}
 
-		for _, tx := range txs {
+		for _, singleTx := range allTxs {
+			fmt.Printf("Channel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\n",
+				singleTx.ChannelId, singleTx.Blocknum, singleTx.Hash, singleTx.PreviousHash)
 
-			var cc []models.WriteKV
-
-			err = json.Unmarshal([]byte(tx.Payload), &cc)
+			var writeSet []models.WriteKV
+			err = json.Unmarshal(singleTx.Payload, &writeSet)
 			if err != nil {
 				log.Fatalf("Unmarshalling error: %s", err)
 			}
 
-			fmt.Printf("Channel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\nTxid: %s\nTx validation code: %d\nTime: %d\nPayload:\n",
-				tx.ChannelId, tx.Blocknum, tx.Hash, tx.PreviousHash, tx.Txid, tx.ValidationCode, tx.Time)
-			for _, val := range cc {
-				fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
+			fmt.Printf("Txid: %s\nTx validation code: %d\nTime: %d\nPayload:\n",
+				singleTx.Txid, singleTx.ValidationCode, singleTx.Time)
+			for _, val := range writeSet {
+				decoded, err := base64.StdEncoding.DecodeString(val.Value)
+				if err != nil {
+					log.Fatal("base64 decoding error", err)
+				}
+				fmt.Printf("Key: %s\nValue: %s\n", val.Key, string(decoded))
 			}
-
 		}
 
 	case "grpc":
