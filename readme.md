@@ -30,7 +30,7 @@
 <br>
 
 ### <a name="tutorial">**Tutorial**</a>
-the tutorial is available at [this link](https://vadiminshakov.medium.com/fabex-tutorial-an-introduction-to-the-right-hyperledger-fabric-explorer-cd9ee1848cd9).
+the tutorial is available at [this link](https://medium.com/@vadiminshakov/fabex-tutorial-an-introduction-to-the-right-hyperledger-fabric-explorer-cd9ee1848cd9).
 
 ### <a name="prerequisites">**Prerequisites**</a>
 
