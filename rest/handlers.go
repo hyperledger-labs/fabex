@@ -41,7 +41,7 @@ func bytxid(db db.Storage) func(c *gin.Context) {
 
 		c.JSON(200, gin.H{
 			"error": "",
-			"msg":   blocks,
+			"msg":   blocks[0],
 		})
 	}
 }
@@ -88,7 +88,7 @@ func byblocknum(db db.Storage) func(c *gin.Context) {
 
 		c.JSON(200, gin.H{
 			"error": "",
-			"msg":   blocks,
+			"msg":   blocks[0],
 		})
 	}
 }
