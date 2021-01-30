@@ -21,7 +21,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/hyperledger-labs/fabex/db"
@@ -153,18 +152,13 @@ func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 					return nil, errors.Wrap(err, "failed to marshal config policies")
 				}
 
-				modpolicy, err := json.Marshal(configGroup.ModPolicy)
-				if err != nil {
-					return nil, errors.Wrap(err, "failed to marshal config ModPolicy")
-				}
-
 				writeSet = append(writeSet, models.WriteKV{Key: "Type", Value: base64.StdEncoding.EncodeToString([]byte(blockType))})
 				writeSet = append(writeSet, models.WriteKV{Key: "Sequence", Value: base64.StdEncoding.EncodeToString([]byte(strconv.Itoa(int(config.GetSequence()))))})
 				writeSet = append(writeSet, models.WriteKV{Key: "Version", Value: base64.StdEncoding.EncodeToString([]byte(strconv.Itoa(int(configGroup.Version))))})
 				writeSet = append(writeSet, models.WriteKV{Key: "Groups", Value: base64.StdEncoding.EncodeToString(groups)})
 				writeSet = append(writeSet, models.WriteKV{Key: "Values", Value: base64.StdEncoding.EncodeToString(values)})
 				writeSet = append(writeSet, models.WriteKV{Key: "Policies", Value: base64.StdEncoding.EncodeToString(policies)})
-				writeSet = append(writeSet, models.WriteKV{Key: "ModPolicy", Value: base64.StdEncoding.EncodeToString(modpolicy)})
+				writeSet = append(writeSet, models.WriteKV{Key: "ModPolicy", Value: base64.StdEncoding.EncodeToString([]byte(configGroup.ModPolicy))})
 
 			// get config update
 			case "ConfigUpdate":
@@ -172,7 +166,6 @@ func HandleBlock(block *fabcommon.Block) (*CustomBlock, error) {
 				if err != nil {
 					return nil, errors.Wrap(err, "failed read config update")
 				}
-				fmt.Println(configUpdateEnvelope)
 				configUpdateBytes := configUpdateEnvelope.GetConfigUpdate()
 				var configUpdate = &fabcommon.ConfigUpdate{}
 				err = proto.Unmarshal(configUpdateBytes, configUpdate)
