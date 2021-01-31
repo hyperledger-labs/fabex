@@ -65,12 +65,16 @@ func Explore(fab *models.Fabex) error {
 			lastTx.Blocknum = 0
 		}
 
-		// set blocks listener from latest saved in db blockchain height
+		// set blocks listener from latest saved in db blockchain height+1
+		var blockNumber uint64
+		if lastTx.Hash != "" {
+			blockNumber += 1
+		}
 		eventClient, err := event.New(
 			fab.ChannelContext,
 			event.WithBlockEvents(),
 			event.WithSeekType(seek.FromBlock),
-			event.WithBlockNum(lastTx.Blocknum+1), // increment for fetching next (after last added to DB) block from ledger
+			event.WithBlockNum(blockNumber), // increment for fetching next (after last added to DB) block from ledger
 		)
 		if err != nil {
 			return errors.Wrap(err, "event service error")
