@@ -9,11 +9,7 @@
     <script src="https://use.fontawesome.com/bc7671744e.js"></script>
     <script src="https://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css"></script>
 
-    <!-- версия для разработки, отображает полезные предупреждения в консоли -->
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script> -->
 
     <script src="index.js"></script>
     <link rel="stylesheet" href="styles.css">
@@ -37,8 +33,8 @@
                         <div class="modal-footer">
                             <slot name="footer">
                                 <button class="modal-default-button" @click="$emit('close')">
-                      OK
-                    </button>
+                                    OK
+                                </button>
                             </slot>
                         </div>
                     </div>
@@ -50,72 +46,69 @@
 
 <body>
 
-    <div class="search-block">
+<div class="search-block">
 
-        <div id="checkbox">
-            <select v-model="block" @change="onChange($event)" type="checkbox" class="dropdown">
+    <div id="checkbox">
+        <select v-model="block" @change="onChange($event)" type="checkbox" class="dropdown">
             <!-- <option disabled value="">Выберите один из вариантов</option> -->
-            <option>Block number</option>   // 0
-            <option>Tx ID</option>          // af589062d2e699c9b0ba38663c6df3b6e07d8701320336e831609876f0ebae99
-            <option>WriteSet key</option>   // payload key name
-            </select>
-        </div>
-
-        <br/>
-
-        <div id="input">
-            <input v-model="message" :placeholder="placeholder" type="input" class="form-control">
-        </div>
-
-        <br/>
-
-        <div id="button">
-            <button v-on:click="getAns()" class="search-button">Get block</button>
-        </div>
-
+            <option>Block number</option>
+            // 0
+            <option>Tx ID</option>
+            // af589062d2e699c9b0ba38663c6df3b6e07d8701320336e831609876f0ebae99
+        </select>
     </div>
 
-    <br/><br/>
+    <br/>
 
-    <div class="center">
-
-        <script type="text/x-template" id="item-template">
-            <li>
-                <div :class="{bold: isFolder}" @click="toggle">
-                    {{ item.name }}
-                    <span v-if="isFolder">[{{ isOpen ? '-' : '+' }}]</span>
-                </div>
-                <ul v-show="isOpen" v-if="isFolder">
-                    <tree-item class="item" v-for="(child, index) in item.children" :key="index" :item="child" @add-item="$emit('add-item', $event)"></tree-item>
-                </ul>
-            </li>
-        </script>
-
-        <ul id="demo">
-            <tree-item class="item" :item="treeData" @make-folder="makeFolder" @add-item="addItem"></tree-item>
-        </ul>
-
+    <div id="input">
+        <input v-model="message" :placeholder="placeholder" type="input" class="form-control">
     </div>
 
-    <a onclick="GetNewBlock('left');" class="arrows left" style="display: inline;">
-        <i class="fa fa-angle-double-left" aria-hidden="true"></i>
-    </a>
+    <br/>
 
-    <a onclick="GetNewBlock('right');" class="arrows right" style="display: inline;">
-        <i class="fa fa-angle-double-right" aria-hidden="true"></i>
-    </a>
-
-    <div id="app">
-        <!-- <button id="show-modal" @click="showModal = true">Show Modal</button> -->
-        <!-- use the modal component, pass in the prop -->
-        <modal v-if="showModal" @close="showModal = false" v-model="httpCode">
-            <!--you can use custom content here to overwrite default content
-      -->
-            <h3 slot="header">{{ httpCode }}</h3>
-            <h3 slot="body">{{ error }}</h3>
-            <!-- <h3 slot="footer">Error {{ httpCode }}</h3> -->
-        </modal>
+    <div id="button">
+        <button v-on:click="getAns()" class="search-button">Get block</button>
     </div>
+
+</div>
+
+<br/><br/>
+
+<div class="center">
+
+    <script type="text/x-template" id="item-template">
+        <li>
+            <div :class="{bold: isFolder}" @click="toggle">
+                {{ item.name }}
+                <span v-if="isFolder">[{{ isOpen ? '-' : '+' }}]</span>
+            </div>
+            <ul v-show="isOpen" v-if="isFolder">
+                <tree-item class="item" v-for="(child, index) in item.children" :key="index" :item="child"
+                           @add-item="$emit('add-item', $event)"></tree-item>
+            </ul>
+        </li>
+    </script>
+
+    <ul id="demo">
+        <tree-item class="item" :item="treeData" @make-folder="makeFolder" @add-item="addItem"></tree-item>
+    </ul>
+
+</div>
+
+<a onclick="GetNewBlock('left');" class="arrows left" style="display: inline;">
+    <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+</a>
+
+<a onclick="GetNewBlock('right');" class="arrows right" style="display: inline;">
+    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+</a>
+
+<div id="app">
+    <modal v-if="showModal" @close="showModal = false" v-model="httpCode">
+        <h3 slot="header">{{ httpCode }}</h3>
+        <h3 slot="body">{{ error }}</h3>
+    </modal>
+</div>
 
 </body>
 
