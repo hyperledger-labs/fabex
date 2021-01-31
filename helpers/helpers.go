@@ -61,14 +61,10 @@ func Explore(fab *models.Fabex) error {
 			return errors.Wrap(err, "Can't to get last block")
 		}
 
-		if err != nil && err.Error() == NOT_FOUND_ERR {
-			lastTx.Blocknum = 0
-		}
-
 		// set blocks listener from latest saved in db blockchain height+1
 		var blockNumber uint64
 		if lastTx.Hash != "" {
-			blockNumber += 1
+			blockNumber = lastTx.Blocknum + 1
 		}
 		eventClient, err := event.New(
 			fab.ChannelContext,
