@@ -1,4 +1,3 @@
-let currentBlock;
 let action;
 let search;
 
@@ -9,6 +8,7 @@ let treeData = {
 let errorModal,
     input;
 
+// Initialization of Vuew.js components
 window.onload = function () {
 
     // define the tree-item component
@@ -58,7 +58,7 @@ window.onload = function () {
                     name: name
                 });
 
-                // возвращает внесённый элемент
+                // returns the inserted item
                 return item
             }
         }
@@ -127,25 +127,12 @@ window.onload = function () {
 };
 
 function GetNewBlock(param) {
-    let min = 200000000;
-    let max = -200000000;
+    var newBlockNum;
 
-    console.log("INTO GETNEWBLOCK")
-    console.log("param : ", param)
-    console.log("blocknum : ", currentBlock.data.msg[0].blocknum)
+    if (param == 'left') newBlockNum = parseInt(input.message) - 1;
+    if (param == 'right') newBlockNum = parseInt(input.message) + 1;
 
-    for (let i = 0; i < currentBlock.data.msg.length; i++) {
-        console.log(`currentBlock.data.msg[i].blocknum = ${currentBlock.data.msg[i].blocknum} ; i = ${i}`)
-        if (currentBlock.data.msg[i].blocknum > max) max = currentBlock.data.msg[i].blocknum;
-        if (currentBlock.data.msg[i].blocknum < min) min = currentBlock.data.msg[i].blocknum
-    }
-
-    console.log(`min = ${min} , max = ${max}`)
-
-    let newBlockNum;
-
-    if (param == 'left') newBlockNum = max - 1;
-    if (param == 'right') newBlockNum = max + 1;
+    if (newBlockNum < 0) newBlockNum = 0
 
     action = 'Block number';
     search = newBlockNum;
@@ -157,77 +144,83 @@ function GetNewBlock(param) {
 
 async function GetBlockAndMakeTree() {
 
+    if (parseInt(search) < 0) {
+        input.message = 0
+        search = 0
+    }
+
     treeData.children = [];
+
+    var err = false;
 
     try {
         if (action == "Block number") {
-            var block = await axios.get(`http://localhost:5252/byblocknum/${search}`);
+            var ans = await axios.get(`http://localhost:5252/byblocknum/${search}`);
         } else if (action == "Tx ID") {
-            var block = await axios.get(`http://localhost:5252/bytxid/${search}`);
+            var ans = await axios.get(`http://localhost:5252/bytxid/${search}`);
         }
     } catch (e) {
         errorModal.showModal = true;
         errorModal.httpCode = e;
         errorModal.error = e.response.data.error;
+        err = true;
+    }
+
+    if (err) {
         return
     }
 
-    currentBlock = block;
-
-    block = block.data.msg;
+    block = ans.data.msg;
 
     console.log(block)
 
-    for (let i = 0; i < block.length; i++) {
-        treeData.children.push({name: "Block " + block[i].blocknum, children: []});
-        let folder = treeData.children[i].children;
-        folder.push({name: "channelid: " + block[i].channelid});
-        folder.push({name: "blockhash: " + block[i].blockhash});
-        folder.push({name: "previoushash: " + block[i].previoushash});
-        folder.push({name: "blocknum: " + block[i].blocknum});
+    // parsing json into a tree
+    treeData.children.push({name: "Block " + block.blocknum, children: []});
+    let folder = treeData.children[0].children;
+    folder.push({name: "channelid: " + block.channelid});
+    folder.push({name: "blockhash: " + block.blockhash});
+    folder.push({name: "previoushash: " + block.previoushash});
+    folder.push({name: "blocknum: " + block.blocknum});
 
-        folder.push({name: "txs", children: []});
-        folder = folder[4].children;
+    folder.push({name: "txs", children: []});
+    folder = folder[4].children;
 
-        for (let j = 0; j < block[i].txs.length; j++) {
-            folder.push({name: j, children: []});
-            let element = folder[j].children;
-            element.push({name: "txid: " + block[i].txs[j].txid});
-            element.push({name: "validationcode: " + block[i].txs[j].validationcode});
-            element.push({name: "time: " + block[i].txs[j].time});
+    for (let j = 0; j < block.txs.length; j++) {
+        folder.push({name: j, children: []});
+        let element = folder[j].children;
+        element.push({name: "txid: " + block.txs[j].txid});
+        element.push({name: "validationcode: " + block.txs[j].validationcode});
+        element.push({name: "time: " + block.txs[j].time});
 
-            element.push({name: "KV", children: []});
+        element.push({name: "KV", children: []});
 
-            var isConfig = false;
+        var isConfig = false;
 
-            for (let x = 0; x < block[i].txs[j].KV.length; x++) {
-                var value = window.atob(block[i].txs[j].KV[x].value)
-                if (block[i].txs[j].KV[x].key == "Type" && value == "Config") {
-                    isConfig = true;
-                    break;
+        for (let x = 0; x < block.txs[j].KV.length; x++) {
+            var value = window.atob(block.txs[j].KV[x].value)
+            if (block.txs[j].KV[x].key == "Type" && value == "Config") {
+                isConfig = true;
+                break;
+            }
+        }
+
+        for (let x = 0; x < block.txs[j].KV.length; x++) {
+            let kvFolder = element[3].children;
+            kvFolder.push({name: "key: " + block.txs[j].KV[x].key, children: []});
+            kvFolder = kvFolder[x].children;
+
+            var value = window.atob(block.txs[j].KV[x].value)
+
+            if (isConfig) {
+                var key = block.txs[j].KV[x].key
+                if (key == "Groups" || key == "Values" || key == "Policies") {
+                    value = JSON.parse(value);
+                    GoDeep(value)
+                    value = JSON.stringify(value)
                 }
             }
 
-            for (let x = 0; x < block[i].txs[j].KV.length; x++) {
-                let kvFolder = element[3].children;
-                kvFolder.push({name: "key: " + block[i].txs[j].KV[x].key, children: []});
-                kvFolder = kvFolder[x].children;
-
-                // value = []byte
-                // kvFolder.push({ name: "value: " + block[i].txs[j].KV[x].value });
-                var value = window.atob(block[i].txs[j].KV[x].value)
-
-                if (isConfig) {
-                    var key = block[i].txs[j].KV[x].key
-                    if (key == "Groups" || key == "Values" || key == "Policies") {
-                        value = JSON.parse(value);
-                        GoDeep(value)
-                        value = JSON.stringify(value)
-                    }
-                }
-
-                kvFolder.push({name: "value: " + value});
-            }
+            kvFolder.push({name: "value: " + value});
         }
     }
 }
@@ -257,7 +250,7 @@ function GoDeep(jsonData) {
             var dec = window.atob(value)
             jsonData[key] = dec
         } catch (e) {
-            //    nothing
+            // do nothing
         }
 
     });
