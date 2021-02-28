@@ -21,8 +21,6 @@
 
 [Testing](#testing)
 
-[Compatibility](#compatibility)
-
 <br>
 
 ##### _FabEx is inspired by [ledgerfsck](https://github.com/C0rWin/ledgerfsck)_
@@ -121,12 +119,3 @@ You can choose database for data saving and retrieving with `-db flag` (MongoDB 
 unit tests: `make unit-tests`
 
 integration tests: `make integration-tests`
-
-<br>
-
-### <a name="compatibility">**Compatibility**</a>
-
-FabEx is compatible with HLF 2.x.x. It has been decided not to support versions 1.х.х due to the fact that FabEx uses both native Fabric packages and SDK, which, unfortunately, conflict (protos conflicts). 
-In addition, old versions of the Fabric don't have the necessary functionality (or it is in other packages / spread over several packages), which is available in newer versions. It is very difficult to do at first what is planned for version 2.x.x, and then search for the necessary functionality in the packages of the old Fabric and then search the compatible version of the SDK. 
-
-If you are brave enough to support older versions, please send a pull request.
