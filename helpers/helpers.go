@@ -73,11 +73,11 @@ func Explore(fab *models.Fabex) error {
 			event.WithBlockNum(blockNumber), // increment for fetching next (after last added to DB) block from ledger
 		)
 		if err != nil {
-			return errors.Wrap(err, "event service error")
+			return errors.WithStack(errors.Wrap(err, "event service error"))
 		}
 		_, notifier, err := eventClient.RegisterBlockEvent()
 		if err != nil {
-			return errors.Wrap(err, "event service registration error")
+			return errors.WithStack(errors.Wrap(err, "event service registration error"))
 		}
 
 		// insert missing blocks/txs into db
@@ -134,7 +134,7 @@ func QueryChannelConfig(ledgerClient *ledger.Client) (fab.ChannelCfg, error) {
 
 func QueryChannelInfo(ledgerClient *ledger.Client) (*fab.BlockchainInfoResponse, error) {
 	resp, err := ledgerClient.QueryInfo()
-	return resp, err
+	return resp, errors.WithStack(err)
 }
 
 func SetupLogLevel(lvl logging.Level) {
