@@ -2,8 +2,7 @@ FROM golang:1.14 as build-stage
 LABEL maintainer="Vadim Inshakov <vadiminshakov@gmail.com>"
 ADD . /app
 WORKDIR /app
-RUN tar xvf vendor.tar
-RUN go build -mod=vendor
+RUN go build
 
 # production stage
 FROM alpine:3.9 as production-stage
