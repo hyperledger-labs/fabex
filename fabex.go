@@ -54,21 +54,18 @@ type FabexServer struct {
 }
 
 func main() {
-
 	// parse flags
 	enrolluser := flag.Bool("enrolluser", false, "enroll user (true) or not (false)")
 	task := flag.String("task", "grpc", "choose the task to execute")
 	blocknum := flag.Uint64("blocknum", 0, "block number")
-	confpath := flag.String("configpath", "./configs/", "path to YAML config")
-	confname := flag.String("configname", "config", "name of YAML config")
+	confpath := flag.String("config", "./configs/", "path to YAML config")
 	databaseSelected := flag.String("db", "mongo", "select database")
 	ui := flag.Bool("ui", true, "with UI or without")
 
 	flag.Parse()
 
 	// read config
-	viper.SetConfigName(*confname)
-	viper.AddConfigPath(*confpath)
+	viper.SetConfigFile(*confpath)
 	viper.SetConfigType("yaml")
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -136,7 +133,7 @@ func main() {
 	case "channelconfig":
 		cfg, err := helpers.QueryChannelConfig(fabex.LedgerClient.Client)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("failed to get channel config: %s", err)
 		}
 		log.Printf("ChannelID: %v\nChannel Orderers: %v\nChannel Versions: %v\n", cfg.ID(), cfg.Orderers(), cfg.Versions())
 
@@ -296,7 +293,7 @@ func StartGrpcServ(serv *FabexServer, fabex *models.Fabex) {
 
 	// start explorer
 	go func() {
-		log.Fatal(helpers.Explore(fabex))
+		log.Fatalf("explorer error: %+v", helpers.Explore(fabex))
 	}()
 
 	// start server
