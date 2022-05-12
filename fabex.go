@@ -20,8 +20,16 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"flag"
 	"fmt"
+	"net"
+
+	"go.uber.org/zap"
+
+	fabconfig "github.com/hyperledger/fabric-sdk-go/pkg/core/config"
+
+	log "github.com/hyperledger-labs/fabex/config/log"
+
+	"github.com/hyperledger-labs/fabex/config"
 	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/helpers"
 	"github.com/hyperledger-labs/fabex/ledgerclient"
@@ -30,20 +38,9 @@ import (
 	"github.com/hyperledger-labs/fabex/rest"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
-	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
-	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-	"net"
-	"os"
-)
-
-var (
-	lvl          = logging.INFO
-	globalConfig models.Config
 )
 
 type FabexServer struct {
@@ -54,64 +51,50 @@ type FabexServer struct {
 }
 
 func main() {
-	// parse flags
-	enrolluser := flag.Bool("enrolluser", false, "enroll user (true) or not (false)")
-	task := flag.String("task", "grpc", "choose the task to execute")
-	blocknum := flag.Uint64("blocknum", 0, "block number")
-	confpath := flag.String("config", "./configs/", "path to YAML config")
-	databaseSelected := flag.String("db", "mongo", "select database")
-	ui := flag.Bool("ui", true, "with UI or without")
-
-	flag.Parse()
-
-	// read config
-	viper.SetConfigFile(*confpath)
-	viper.SetConfigType("yaml")
-
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("Error reading config file, %s", err)
+	bootConf, err := config.GetBootConfig()
+	if err != nil {
+		panic(err)
+	}
+	l, err := log.GetLogger(bootConf)
+	if err != nil {
+		panic(err)
 	}
 
-	err := viper.Unmarshal(&globalConfig)
+	conf, err := config.GetMainConfig(bootConf)
 	if err != nil {
-		log.Fatalf("unable to decode into struct, %v", err)
+		l.Fatal(err.Error())
 	}
-
-	log.Println("Reading connection profile..")
-	c := config.FromFile(globalConfig.Fabric.ConnectionProfile)
-	sdk, err := fabsdk.New(c)
+	sdk, err := fabsdk.New(fabconfig.FromFile(conf.ConnectionProfile))
 	if err != nil {
-		log.Printf("Failed to create new SDK: %s\n", err)
-		os.Exit(1)
+		l.Fatal("failed to create new SDK", zap.Error(err))
 	}
 	defer sdk.Close()
 
-	helpers.SetupLogLevel(lvl)
-	if *enrolluser {
-		err = helpers.EnrollUser(sdk, globalConfig.Fabric.User, globalConfig.Fabric.Secret)
+	if bootConf.Enrolluser {
+		err = helpers.EnrollUser(sdk, conf.Fabric.User, conf.Fabric.Secret)
 		if err != nil {
-			log.Fatal(err)
+			l.Fatal("failed to enroll user", zap.Error(err))
 		}
 	}
 
-	clientChannelContext := sdk.ChannelContext(globalConfig.Fabric.Channel, fabsdk.WithUser(globalConfig.Fabric.User), fabsdk.WithOrg(globalConfig.Fabric.Org))
+	clientChannelContext := sdk.ChannelContext(conf.Fabric.Channel, fabsdk.WithUser(conf.Fabric.User), fabsdk.WithOrg(conf.Fabric.Org))
 	ledgerClient, err := ledger.New(clientChannelContext)
 	if err != nil {
-		log.Fatalf("Failed to create ledger [%s] client: %#v", globalConfig.Fabric.Channel, err)
+		l.Fatal("Failed to create ledger client", zap.String("channel", conf.Fabric.Channel), zap.Error(err))
 	}
 
 	channelclient, err := channel.New(clientChannelContext)
 	if err != nil {
-		log.Fatalf("Failed to create channel [%s], error: %s", globalConfig.Fabric.Channel, err)
+		l.Fatal("Failed to create channel", zap.String("channel", conf.Fabric.Channel), zap.Error(err))
 	}
 
 	// choose database
 	var dbInstance db.Storage
 	switch *databaseSelected {
 	case "mongo":
-		dbInstance = db.CreateDBConfMongo(globalConfig.Mongo.Host, globalConfig.Mongo.Port, globalConfig.Mongo.Dbuser, globalConfig.Mongo.Dbsecret, globalConfig.Mongo.Dbname, globalConfig.Mongo.Collection)
+		dbInstance = db.CreateDBConfMongo(conf.Mongo.Host, conf.Mongo.Port, conf.Mongo.Dbuser, conf.Mongo.Dbsecret, conf.Mongo.Dbname, conf.Mongo.Collection)
 	case "cassandra":
-		dbInstance = db.NewCassandraClient(globalConfig.Cassandra.Host, globalConfig.Cassandra.Dbuser, globalConfig.Cassandra.Dbsecret, globalConfig.Cassandra.Keyspace, globalConfig.Cassandra.Columnfamily)
+		dbInstance = db.NewCassandraClient(conf.Cassandra.Host, conf.Cassandra.Dbuser, conf.Cassandra.Dbsecret, conf.Cassandra.Keyspace, conf.Cassandra.Columnfamily)
 	}
 
 	err = dbInstance.Connect()
@@ -190,10 +173,10 @@ func main() {
 		}
 
 	case "grpc":
-		serv := NewFabexServer(globalConfig.GRPCServer.Host, globalConfig.GRPCServer.Port, fabex)
+		serv := NewFabexServer(conf.GRPCServer.Host, conf.GRPCServer.Port, fabex)
 
 		// rest
-		go rest.Run(serv.Conf.Db, globalConfig.UI.Port, *ui)
+		go rest.Run(serv.Conf.Db, conf.UI.Port, *ui)
 		// grpc
 		StartGrpcServ(serv, fabex)
 	}
