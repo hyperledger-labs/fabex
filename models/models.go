@@ -72,6 +72,16 @@ type Config struct {
 	UI
 }
 
+type BootConfig struct {
+	Enrolluser       bool
+	Task             string
+	Blocknum         uint64
+	Confpath         string
+	DatabaseSelected string
+	UI               bool
+	LogLevel         string
+}
+
 type WriteKV struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
