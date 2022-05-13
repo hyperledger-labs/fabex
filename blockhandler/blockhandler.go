@@ -21,6 +21,8 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"strconv"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/hyperledger-labs/fabex/db"
@@ -29,15 +31,16 @@ import (
 	"github.com/hyperledger/fabric-protos-go/ledger/rwset"
 	"github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
+	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
 	"github.com/hyperledger/fabric/protoutil"
 	"github.com/pkg/errors"
-	"strconv"
 )
 
 // LedgerClient interface used for dependency injection of Fabric ledger client
 type LedgerClient interface {
 	QueryBlock(blockNumber uint64, options ...ledger.RequestOption) (*fabcommon.Block, error)
+	QueryInfo(options ...ledger.RequestOption) (*fab.BlockchainInfoResponse, error)
 }
 
 // CustomBlock stores slice of transactions (with block data)
