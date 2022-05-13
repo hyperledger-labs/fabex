@@ -1,12 +1,14 @@
 package rest
 
 import (
+	"net"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/hyperledger-labs/fabex/db"
-	"net/http"
 )
 
-func Run(db db.Storage, port string, withUI bool) {
+func Run(db db.Storage, host, port string, withUI bool) error {
 	r := gin.Default()
 
 	if withUI {
@@ -21,5 +23,5 @@ func Run(db db.Storage, port string, withUI bool) {
 		c.Redirect(http.StatusMovedPermanently, "/ui")
 	})
 
-	r.Run(":" + port)
+	return r.Run(net.JoinHostPort(host, port))
 }
