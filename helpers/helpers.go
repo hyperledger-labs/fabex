@@ -20,19 +20,19 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"unicode/utf8"
+
 	"github.com/hyperledger-labs/fabex/blockhandler"
 	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/models"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/event"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
-	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/events/deliverclient/seek"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"unicode/utf8"
 )
 
 const NOT_FOUND_ERR = "not found"
@@ -73,11 +73,11 @@ func Explore(fab *models.Fabex) error {
 			event.WithBlockNum(blockNumber), // increment for fetching next (after last added to DB) block from ledger
 		)
 		if err != nil {
-			return errors.Wrap(err, "event service error")
+			return errors.WithStack(errors.Wrap(err, "event service error"))
 		}
 		_, notifier, err := eventClient.RegisterBlockEvent()
 		if err != nil {
-			return errors.Wrap(err, "event service registration error")
+			return errors.WithStack(errors.Wrap(err, "event service registration error"))
 		}
 
 		// insert missing blocks/txs into db
@@ -134,14 +134,7 @@ func QueryChannelConfig(ledgerClient *ledger.Client) (fab.ChannelCfg, error) {
 
 func QueryChannelInfo(ledgerClient *ledger.Client) (*fab.BlockchainInfoResponse, error) {
 	resp, err := ledgerClient.QueryInfo()
-	return resp, err
-}
-
-func SetupLogLevel(lvl logging.Level) {
-	logging.SetLevel("fabsdk", lvl)
-	logging.SetLevel("fabsdk/common", lvl)
-	logging.SetLevel("fabsdk/fab", lvl)
-	logging.SetLevel("fabsdk/client", lvl)
+	return resp, errors.WithStack(err)
 }
 
 func PackTxsToBlocks(blocks []db.Tx) ([]models.Block, error) {

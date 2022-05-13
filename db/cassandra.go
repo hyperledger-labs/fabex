@@ -70,8 +70,15 @@ func (c *Cassandra) Connect() error {
 	}
 
 	// create payload index
-	index := fmt.Sprintf(`CREATE INDEX IF NOT EXISTS payload ON %s(%s);`, c.Columnfamily, PAYLOADKEYS)
-	err = c.Session.Query(index).Exec()
+	indexPayload := fmt.Sprintf(`CREATE INDEX IF NOT EXISTS payload ON %s(%s);`, c.Columnfamily, PAYLOADKEYS)
+	err = c.Session.Query(indexPayload).Exec()
+	if err != nil {
+		return errors.Wrapf(err, "failed to create index: %s", c.Columnfamily)
+	}
+
+	// create hash index
+	indexHash := fmt.Sprintf(`CREATE INDEX IF NOT EXISTS hash ON %s(%s);`, c.Columnfamily, HASH)
+	err = c.Session.Query(indexHash).Exec()
 	if err != nil {
 		return errors.Wrapf(err, "failed to create index: %s", c.Columnfamily)
 	}

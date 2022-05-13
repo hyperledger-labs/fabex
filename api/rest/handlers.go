@@ -1,17 +1,19 @@
 package rest
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/helpers"
-	"net/http"
-	"strconv"
 )
 
 func bytxid(db db.Storage) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		txid := c.Param("txid")
-		QueryResults, err := db.GetByTxId(txid)
+		ch := c.Param("channel")
+		QueryResults, err := db.GetByTxId(ch, txid)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
@@ -49,6 +51,7 @@ func bytxid(db db.Storage) func(c *gin.Context) {
 func byblocknum(db db.Storage) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		blocknum := c.Param("blocknum")
+		ch := c.Param("channel")
 		blocknumconverted, err := strconv.Atoi(blocknum)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -58,7 +61,7 @@ func byblocknum(db db.Storage) func(c *gin.Context) {
 			return
 		}
 
-		QueryResults, err := db.GetByBlocknum(uint64(blocknumconverted))
+		QueryResults, err := db.GetByBlocknum(ch, uint64(blocknumconverted))
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
