@@ -22,13 +22,14 @@ const NOT_FOUND_ERR = "not found"
 // Storage db interface
 type Storage interface {
 	Connect() error
-	Insert(tx Tx) error
-	QueryBlockByHash(hash string) ([]Tx, error)
-	GetByTxId(txid string) ([]Tx, error)
-	GetByBlocknum(blocknum uint64) ([]Tx, error)
-	GetBlockInfoByPayload(payload string) ([]Tx, error)
-	QueryAll() ([]Tx, error)
-	GetLastEntry() (Tx, error)
+	Init(channel string) error
+	Insert(channel string, tx Tx) error
+	QueryBlockByHash(channel, hash string) ([]Tx, error)
+	GetByTxId(channel, txid string) ([]Tx, error)
+	GetByBlocknum(channel string, blocknum uint64) ([]Tx, error)
+	GetBlockInfoByPayload(channel, payload string) ([]Tx, error)
+	QueryAll(channel string) ([]Tx, error)
+	GetLastEntry(channel string) (Tx, error)
 }
 
 // Tx stores info about block and tx payload
