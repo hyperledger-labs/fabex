@@ -17,10 +17,15 @@
 package helpers
 
 import (
+	"context"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"unicode/utf8"
+
+	"go.uber.org/zap"
+
+	fabctx "github.com/hyperledger/fabric-sdk-go/pkg/common/providers/context"
 
 	"github.com/hyperledger-labs/fabex/blockhandler"
 	"github.com/hyperledger-labs/fabex/db"
@@ -37,17 +42,27 @@ import (
 
 const NOT_FOUND_ERR = "not found"
 
-func Explore(fab *models.Fabex) error {
+func Explore(ctx context.Context, chprovider fabctx.ChannelProvider, database db.Storage, lClient blockhandler.LedgerClient) error {
+	log, ok := ctx.Value("log").(*zap.Logger)
+	if !ok {
+		return errors.WithStack(errors.New("failed to get logger from context"))
+	}
+
 	// check we have up-to-date db or not
 	// get last block hash
-	resp, err := QueryChannelInfo(fab.LedgerClient.Client)
+	resp, err := QueryChannelInfo(lClient)
 	if err != nil {
 		return err
 	}
 	currentHash := hex.EncodeToString(resp.BCI.CurrentBlockHash)
 
 	//find txs from this block in db
-	txs, err := fab.Db.QueryBlockByHash(currentHash)
+	chclient, err := chprovider()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	txs, err := database.QueryBlockByHash(chclient.ChannelID(), currentHash)
 	if err != nil {
 		if err.Error() != "sql: no rows in result set" && err.Error() != "mongo: no documents in result" {
 			return err
@@ -56,7 +71,7 @@ func Explore(fab *models.Fabex) error {
 
 	if txs == nil {
 		// find latest tx in db
-		lastTx, err := fab.Db.GetLastEntry()
+		lastTx, err := database.GetLastEntry(chclient.ChannelID())
 		if err != nil && err.Error() != NOT_FOUND_ERR {
 			return errors.Wrap(err, "Can't to get last block")
 		}
@@ -67,39 +82,52 @@ func Explore(fab *models.Fabex) error {
 			blockNumber = lastTx.Blocknum + 1
 		}
 		eventClient, err := event.New(
-			fab.ChannelContext,
+			chprovider,
 			event.WithBlockEvents(),
 			event.WithSeekType(seek.FromBlock),
 			event.WithBlockNum(blockNumber), // increment for fetching next (after last added to DB) block from ledger
+			event.WithEventConsumerTimeout(0),
 		)
 		if err != nil {
 			return errors.WithStack(errors.Wrap(err, "event service error"))
 		}
-		_, notifier, err := eventClient.RegisterBlockEvent()
+		reg, notifier, err := eventClient.RegisterBlockEvent()
 		if err != nil {
 			return errors.WithStack(errors.Wrap(err, "event service registration error"))
 		}
+		defer func() {
+			go func() {
+				for range notifier {
+				}
+			}()
+			eventClient.Unregister(reg)
+		}()
 
 		// insert missing blocks/txs into db
-		for {
-			blockEvent := <-notifier
+		for ctx.Err() == nil {
+			blockEvent, ok := <-notifier
+			if !ok {
+				break
+			}
 
 			customBlock, err := blockhandler.HandleBlock(blockEvent.Block)
 			if err != nil {
 				return errors.Wrap(err, "GetBlock error")
 			}
 
-			if customBlock != nil {
-				for _, tx := range customBlock.Txs {
-					err = fab.Db.Insert(tx)
-					if err != nil {
-						return err
-					}
-				}
-			} else {
+			if customBlock == nil {
 				break
 			}
+
+			for _, tx := range customBlock.Txs {
+				err = database.Insert(chclient.ChannelID(), tx)
+				if err != nil {
+					return err
+				}
+				log.Debug("add tx", zap.String("channel", chclient.ChannelID()), zap.Uint64("block number", blockEvent.Block.Header.Number), zap.String("tx ID", tx.Txid))
+			}
 		}
+		log.Info("stop expoler", zap.String("channel", chclient.ChannelID()))
 	}
 	return nil
 }
@@ -132,7 +160,7 @@ func QueryChannelConfig(ledgerClient *ledger.Client) (fab.ChannelCfg, error) {
 	return ledgerClient.QueryConfig()
 }
 
-func QueryChannelInfo(ledgerClient *ledger.Client) (*fab.BlockchainInfoResponse, error) {
+func QueryChannelInfo(ledgerClient blockhandler.LedgerClient) (*fab.BlockchainInfoResponse, error) {
 	resp, err := ledgerClient.QueryInfo()
 	return resp, errors.WithStack(err)
 }
