@@ -40,6 +40,10 @@ func NewFabexServer(addr string, port string, database db.Storage) *FabexServer 
 }
 
 func (s *FabexServer) GetRange(req *pb.RequestRange, stream pb.Fabex_GetRangeServer) error {
+	if req.Channelid == "" {
+		return errors.New("no channel ID specified")
+	}
+
 	// set blocks counter to latest saved in db block number value
 	blockCounter := req.Startblock
 
@@ -61,6 +65,10 @@ func (s *FabexServer) GetRange(req *pb.RequestRange, stream pb.Fabex_GetRangeSer
 }
 
 func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
+	if req.Channelid == "" {
+		return errors.New("no channel ID specified")
+	}
+
 	switch {
 	case req.Txid != "":
 		QueryResults, err := s.db.GetByTxId(req.Channelid, req.Txid)

@@ -15,13 +15,13 @@ func Run(db db.Storage, host, port string, withUI bool) error {
 		r.Static("/ui", "./ui")
 	}
 
-	r.GET("/bytxid/:txid", bytxid(db))
-
-	r.GET("/byblocknum/:blocknum", byblocknum(db))
-
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/ui")
 	})
+
+	r.GET("/api/:channel/bytxid/:txid", bytxid(db))
+
+	r.GET("/api/:channel/byblocknum/:blocknum", byblocknum(db))
 
 	return r.Run(net.JoinHostPort(host, port))
 }
