@@ -19,14 +19,15 @@ package db
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"log"
-	"time"
 )
 
 type DBmongo struct {
@@ -60,8 +61,12 @@ func (db *DBmongo) Connect() error {
 	return err
 }
 
-func (db *DBmongo) Insert(tx Tx) error {
-	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
+func (db *DBmongo) Init(_ string) error {
+	return nil
+}
+
+func (db *DBmongo) Insert(ch string, tx Tx) error {
+	collection := db.Instance.Database(db.DBname).Collection(fmt.Sprintf("%s_%s", db.Collection, ch))
 	ctx := context.Background()
 	_, err := collection.InsertOne(ctx, bson.M{"ChannelId": tx.ChannelId, "Txid": tx.Txid, "Hash": tx.Hash, "PreviousHash": tx.PreviousHash, "Blocknum": tx.Blocknum, "Payload": tx.Payload, "ValidationCode": tx.ValidationCode, "Time": tx.Time})
 	if err != nil {
@@ -71,8 +76,8 @@ func (db *DBmongo) Insert(tx Tx) error {
 	return nil
 }
 
-func (db *DBmongo) getByFilter(filterValue interface{}) ([]Tx, error) {
-	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
+func (db *DBmongo) getByFilter(ch string, filterValue interface{}) ([]Tx, error) {
+	collection := db.Instance.Database(db.DBname).Collection(fmt.Sprintf("%s_%s", db.Collection, ch))
 	filter := filterValue
 	ctx := context.Background()
 	cur, err := collection.Find(ctx, filter)
@@ -98,28 +103,28 @@ func (db *DBmongo) getByFilter(filterValue interface{}) ([]Tx, error) {
 	return results, nil
 }
 
-func (db *DBmongo) QueryBlockByHash(hash string) ([]Tx, error) {
-	return db.getByFilter(bson.M{"Hash": hash})
+func (db *DBmongo) QueryBlockByHash(ch string, hash string) ([]Tx, error) {
+	return db.getByFilter(ch, bson.M{"Hash": hash})
 }
 
-func (db *DBmongo) GetByTxId(txID string) ([]Tx, error) {
-	return db.getByFilter(bson.M{"Txid": txID})
+func (db *DBmongo) GetByTxId(ch string, txID string) ([]Tx, error) {
+	return db.getByFilter(ch, bson.M{"Txid": txID})
 }
 
-func (db *DBmongo) GetByBlocknum(blocknum uint64) ([]Tx, error) {
-	return db.getByFilter(bson.M{"Blocknum": blocknum})
+func (db *DBmongo) GetByBlocknum(ch string, blocknum uint64) ([]Tx, error) {
+	return db.getByFilter(ch, bson.M{"Blocknum": blocknum})
 }
 
-func (db *DBmongo) GetBlockInfoByPayload(payload string) ([]Tx, error) {
-	return db.getByFilter(bson.D{{"Payload", primitive.Regex{Pattern: payload, Options: "i"}}})
+func (db *DBmongo) GetBlockInfoByPayload(ch string, payload string) ([]Tx, error) {
+	return db.getByFilter(ch, bson.D{{"Payload", primitive.Regex{Pattern: payload, Options: "i"}}})
 }
 
-func (db *DBmongo) QueryAll() ([]Tx, error) {
-	return db.getByFilter(bson.D{})
+func (db *DBmongo) QueryAll(ch string) ([]Tx, error) {
+	return db.getByFilter(ch, bson.D{})
 }
 
-func (db *DBmongo) GetLastEntry() (Tx, error) {
-	collection := db.Instance.Database(db.DBname).Collection(db.Collection)
+func (db *DBmongo) GetLastEntry(ch string) (Tx, error) {
+	collection := db.Instance.Database(db.DBname).Collection(fmt.Sprintf("%s_%s", db.Collection, ch))
 
 	ctx := context.Background()
 	opts := options.FindOne().SetSort(bson.D{{"_id", -1}})
