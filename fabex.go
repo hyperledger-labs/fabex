@@ -25,6 +25,8 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/hyperledger-labs/fabex/log"
+
 	"github.com/hyperledger-labs/fabex/api/rest"
 
 	"github.com/hyperledger-labs/fabex/api/grpc"
@@ -32,8 +34,6 @@ import (
 	"go.uber.org/zap"
 
 	fabconfig "github.com/hyperledger/fabric-sdk-go/pkg/core/config"
-
-	log "github.com/hyperledger-labs/fabex/config/log"
 
 	"github.com/hyperledger-labs/fabex/config"
 	"github.com/hyperledger-labs/fabex/db"
