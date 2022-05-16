@@ -17,40 +17,32 @@
 package main
 
 import (
-	"encoding/base64"
-	"encoding/hex"
-	"encoding/json"
+	"context"
 	"fmt"
 	"net"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+
+	"github.com/hyperledger-labs/fabex/log"
+
+	"github.com/hyperledger-labs/fabex/api/rest"
+
+	"github.com/hyperledger-labs/fabex/api/grpc"
 
 	"go.uber.org/zap"
 
 	fabconfig "github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 
-	log "github.com/hyperledger-labs/fabex/config/log"
-
 	"github.com/hyperledger-labs/fabex/config"
 	"github.com/hyperledger-labs/fabex/db"
 	"github.com/hyperledger-labs/fabex/helpers"
-	"github.com/hyperledger-labs/fabex/ledgerclient"
-	"github.com/hyperledger-labs/fabex/models"
-	pb "github.com/hyperledger-labs/fabex/proto"
-	"github.com/hyperledger-labs/fabex/rest"
-	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
-	"github.com/hyperledger/fabric-sdk-go/pkg/client/ledger"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
-	"github.com/pkg/errors"
-	"google.golang.org/grpc"
 )
 
-type FabexServer struct {
-	pb.UnimplementedFabexServer
-	Address string
-	Port    string
-	Conf    *models.Fabex
-}
-
 func main() {
+	// init configs
 	bootConf, err := config.GetBootConfig()
 	if err != nil {
 		panic(err)
@@ -59,38 +51,33 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer l.Sync()
+
+	ctx := context.WithValue(context.Background(), "log", l)
+	ctx, cancel := context.WithCancel(ctx)
 
 	conf, err := config.GetMainConfig(bootConf)
 	if err != nil {
-		l.Fatal(err.Error())
+		l.Panic(err.Error())
 	}
-	sdk, err := fabsdk.New(fabconfig.FromFile(conf.ConnectionProfile))
+
+	// create sdk instance
+	sdk, err := fabsdk.New(fabconfig.FromFile(conf.Fabric.ConnectionProfile))
 	if err != nil {
-		l.Fatal("failed to create new SDK", zap.Error(err))
+		l.Error("failed to create new SDK", zap.Error(err))
 	}
 	defer sdk.Close()
 
 	if bootConf.Enrolluser {
 		err = helpers.EnrollUser(sdk, conf.Fabric.User, conf.Fabric.Secret)
 		if err != nil {
-			l.Fatal("failed to enroll user", zap.Error(err))
+			l.Panic("failed to enroll user", zap.Error(err))
 		}
-	}
-
-	clientChannelContext := sdk.ChannelContext(conf.Fabric.Channel, fabsdk.WithUser(conf.Fabric.User), fabsdk.WithOrg(conf.Fabric.Org))
-	ledgerClient, err := ledger.New(clientChannelContext)
-	if err != nil {
-		l.Fatal("Failed to create ledger client", zap.String("channel", conf.Fabric.Channel), zap.Error(err))
-	}
-
-	channelclient, err := channel.New(clientChannelContext)
-	if err != nil {
-		l.Fatal("Failed to create channel", zap.String("channel", conf.Fabric.Channel), zap.Error(err))
 	}
 
 	// choose database
 	var dbInstance db.Storage
-	switch *databaseSelected {
+	switch bootConf.Database {
 	case "mongo":
 		dbInstance = db.CreateDBConfMongo(conf.Mongo.Host, conf.Mongo.Port, conf.Mongo.Dbuser, conf.Mongo.Dbsecret, conf.Mongo.Dbname, conf.Mongo.Collection)
 	case "cassandra":
@@ -99,186 +86,51 @@ func main() {
 
 	err = dbInstance.Connect()
 	if err != nil {
-		log.Fatal("DB connection failed:", err.Error())
+		l.Panic("DB connection failed", zap.Error(err))
 	}
-	log.Println("Connected to database successfully")
+	l.Info("Connected to database successfully")
 
-	fabex := &models.Fabex{dbInstance, channelclient, &ledgerclient.CustomLedgerClient{ledgerClient}, clientChannelContext}
+	// engines for channels
+	ecr := engineCreator(sdk, dbInstance)
+	var wg sync.WaitGroup
+	for _, ch := range conf.Fabric.Channels {
+		if err := dbInstance.Init(ch); err != nil {
+			l.Error("engine error", zap.Error(err), zap.String("channel", ch))
+			continue
+		}
 
-	switch *task {
-	case "channelinfo":
-		resp, err := helpers.QueryChannelInfo(fabex.LedgerClient.Client)
+		engine, err := ecr(ch, conf.Fabric.User, conf.Fabric.Org)
 		if err != nil {
-			log.Fatalf("Can't query blockchain info: %s", err)
-		}
-		log.Printf("Blockchain height: %d\nCurrent block hash: %s\nPrevious block hash: %s\nEndorser: %v\nStatus: %v\n", resp.BCI.Height, hex.EncodeToString(resp.BCI.CurrentBlockHash), hex.EncodeToString(resp.BCI.PreviousBlockHash), resp.Endorser, resp.Status)
-
-	case "channelconfig":
-		cfg, err := helpers.QueryChannelConfig(fabex.LedgerClient.Client)
-		if err != nil {
-			log.Fatal("failed to get channel config: %s", err)
-		}
-		log.Printf("ChannelID: %v\nChannel Orderers: %v\nChannel Versions: %v\n", cfg.ID(), cfg.Orderers(), cfg.Versions())
-
-	case "getblock":
-		txs, err := fabex.Db.GetByBlocknum(*blocknum)
-		if err != nil {
-			log.Fatalf("GetBlock error: %s", err)
+			l.Error(err.Error())
 		}
 
-		if txs == nil {
-			log.Fatal("empty block")
-		}
-		var cc []models.WriteKV
-		for _, tx := range txs {
-			err = json.Unmarshal(tx.Payload, &cc)
-			if err != nil {
-				log.Fatalf("Unmarshalling error: %s", err)
+		wg.Add(1)
+		go func(ch string, wg *sync.WaitGroup) {
+			defer wg.Done()
+			if err := engine.Run(ctx); err != nil {
+				l.Error("engine error", zap.Error(err), zap.String("channel", ch))
 			}
-
-			fmt.Printf("Channel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\nTxid: %s\nTx validation code: %d\nTime: %d\nPayload:\n",
-				tx.ChannelId, tx.Blocknum, tx.Hash, tx.PreviousHash, tx.Txid, tx.ValidationCode, tx.Time)
-			for _, val := range cc {
-				fmt.Printf("Key: %s\nValue: %s\n", val.Key, val.Value)
-			}
-		}
-
-	case "explore":
-		log.Fatal(helpers.Explore(fabex))
-	case "getall":
-		allTxs, err := fabex.Db.QueryAll()
-		if err != nil {
-			log.Fatal("Can't query data: ", err)
-		}
-
-		for _, singleTx := range allTxs {
-			fmt.Printf("Channel ID: %s\nBlock number: %d\nBlock hash: %s\nPrevious hash: %s\n",
-				singleTx.ChannelId, singleTx.Blocknum, singleTx.Hash, singleTx.PreviousHash)
-
-			var writeSet []models.WriteKV
-			err = json.Unmarshal(singleTx.Payload, &writeSet)
-			if err != nil {
-				log.Fatalf("Unmarshalling error: %s", err)
-			}
-
-			fmt.Printf("Txid: %s\nTx validation code: %d\nTime: %d\nPayload:\n",
-				singleTx.Txid, singleTx.ValidationCode, singleTx.Time)
-			for _, val := range writeSet {
-				decoded, err := base64.StdEncoding.DecodeString(val.Value)
-				if err != nil {
-					log.Fatal("base64 decoding error", err)
-				}
-				fmt.Printf("Key: %s\nValue: %s\n", val.Key, string(decoded))
-			}
-		}
-
-	case "grpc":
-		serv := NewFabexServer(conf.GRPCServer.Host, conf.GRPCServer.Port, fabex)
-
-		// rest
-		go rest.Run(serv.Conf.Db, conf.UI.Port, *ui)
-		// grpc
-		StartGrpcServ(serv, fabex)
-	}
-}
-
-func NewFabexServer(addr string, port string, conf *models.Fabex) *FabexServer {
-	return &FabexServer{Address: addr, Port: port, Conf: conf}
-}
-
-func (s *FabexServer) GetRange(req *pb.RequestRange, stream pb.Fabex_GetRangeServer) error {
-	// set blocks counter to latest saved in db block number value
-	blockCounter := req.Startblock
-
-	// insert missing blocks/txs into db
-	for blockCounter <= req.Endblock {
-		QueryResults, err := s.Conf.Db.GetByBlocknum(uint64(blockCounter))
-		if err != nil {
-			return errors.Wrapf(err, "failed to get txs by block number %d", blockCounter)
-		}
-		if QueryResults != nil {
-			for _, queryResult := range QueryResults {
-				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
-			}
-		}
-		blockCounter++
+		}(ch, &wg)
 	}
 
-	return nil
-}
-
-func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
-
-	switch {
-	case req.Txid != "":
-		QueryResults, err := s.Conf.Db.GetByTxId(req.Txid)
-		if err != nil {
-			return err
-		}
-
-		for _, queryResult := range QueryResults {
-			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
-		}
-	case req.Blocknum != 0:
-		QueryResults, err := s.Conf.Db.GetByBlocknum(req.Blocknum)
-		if err != nil {
-			return err
-		}
-
-		for _, queryResult := range QueryResults {
-			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
-		}
-
-		// DEPRECATED: payload is not string anymore, so we can't do search
-	//case len(req.Payload) != 0:
-	//	QueryResults, err := s.Conf.Db.GetBlockInfoByPayload(req.Payload)
-	//	if err != nil {
-	//		return err
-	//	}
-	//
-	//	for _, queryResult := range QueryResults {
-	//		stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
-	//	}
-	default:
-		// set blocks counter to latest saved in db block number value
-		blockCounter := 1
-
-		// insert missing blocks/txs into db
-		for {
-			queryResults, err := s.Conf.Db.GetByBlocknum(uint64(blockCounter))
-			if err != nil {
-				return errors.Wrapf(err, "failed to get txs by block number %d", blockCounter)
-			}
-			if queryResults == nil {
-				break
-			}
-			for _, queryResult := range queryResults {
-				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
-			}
-
-			blockCounter++
-		}
-	}
-
-	return nil
-}
-
-func StartGrpcServ(serv *FabexServer, fabex *models.Fabex) {
-
-	grpcServer := grpc.NewServer()
-	pb.RegisterFabexServer(grpcServer, serv)
-
-	l, err := net.Listen("tcp", fmt.Sprintf("%s:%s", serv.Address, serv.Port))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	log.Printf("Listening on tcp://%s:%s", serv.Address, serv.Port)
-
-	// start explorer
+	l.Info("start REST server")
 	go func() {
-		log.Fatalf("explorer error: %+v", helpers.Explore(fabex))
+		l.Panic("REST server error", zap.Error(rest.Run(dbInstance, conf.UI.Host, conf.UI.Port, bootConf.UI)))
 	}()
+	l.Info(fmt.Sprintf("REST server started on %s", net.JoinHostPort(conf.UI.Host, conf.UI.Port)))
 
-	// start server
-	grpcServer.Serve(l)
+	// grpc server
+	l.Info("start GRPC server")
+	go func() {
+		serv := grpc.NewFabexServer(conf.GRPCServer.Host, conf.GRPCServer.Port, dbInstance)
+		l.Panic("GRPC server error", zap.Error(grpc.StartGrpcServ(ctx, serv)))
+	}()
+	l.Info(fmt.Sprintf("GRPC server started on %s", net.JoinHostPort(conf.GRPCServer.Host, conf.GRPCServer.Port)))
+
+	interruptCh := make(chan os.Signal, 1)
+	signal.Notify(interruptCh, os.Interrupt, syscall.SIGTERM, os.Interrupt)
+	s := <-interruptCh
+	l.Info("os signal received, shutdown", zap.String("signal", s.String()))
+	cancel()
+	wg.Wait()
 }

@@ -17,14 +17,15 @@
 package client
 
 import (
+	"io"
+	"net"
+	"reflect"
+
 	"github.com/hyperledger-labs/fabex/db"
 	pb "github.com/hyperledger-labs/fabex/proto"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"io"
-	"net"
-	"reflect"
 )
 
 type FabexClient struct {
@@ -41,9 +42,9 @@ func New(addr, port string) (*FabexClient, error) {
 	return &FabexClient{pb.NewFabexClient(conn)}, nil
 }
 
-func (fabexCli *FabexClient) GetRange(startblock, endblock int) ([]db.Tx, error) {
+func (fabexCli *FabexClient) GetRange(channel string, startblock, endblock int) ([]db.Tx, error) {
 
-	stream, err := fabexCli.Client.GetRange(context.Background(), &pb.RequestRange{Startblock: int64(startblock), Endblock: int64(endblock)})
+	stream, err := fabexCli.Client.GetRange(context.Background(), &pb.RequestRange{Channelid: channel, Startblock: int64(startblock), Endblock: int64(endblock)})
 	if err != nil {
 		return nil, err
 	}
@@ -55,11 +56,10 @@ func (fabexCli *FabexClient) GetRange(startblock, endblock int) ([]db.Tx, error)
 			return txs, nil
 		}
 		if err != nil {
-			return txs, err
+			return nil, err
 		}
 		txs = append(txs, db.Tx{ChannelId: in.Channelid, Blocknum: in.Blocknum, Hash: in.Hash, PreviousHash: in.Previoushash, Txid: in.Txid, Payload: in.Payload, Time: in.Time, ValidationCode: in.Validationcode})
 	}
-
 }
 
 func (fabexCli *FabexClient) Get(filter *pb.Entry) ([]db.Tx, error) {

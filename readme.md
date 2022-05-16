@@ -13,11 +13,9 @@
 
 [Prerequisites](#prerequisites)
 
-[Microservice mode](#microservice)
+[Start fabex service](#start)
 
 [UI](#ui)
-
-[CLI usage](#cli)
 
 [Testing](#testing)
 
@@ -54,15 +52,15 @@ the tutorial is available at [this link](https://medium.com/@vadiminshakov/fabex
 
 <br><br>
 
-### <a name="microservice">**Microservice mode**</a>
+### <a name="start">**Start fabex service**</a>
 
 You can start Fabex as standalone microservice with Cassandra blocks storage:
 
-    ./fabex -task=grpc -configpath=configs -configname=config -enrolluser=true -db=cassandra
+    CONFIG=config/config.yaml DB=cassandra ./fabex
     
   or with Mongo storage
   
-    ./fabex -task=grpc -configpath=configs -configname=config -enrolluser=true -db=mongo
+    CONFIG=config/config.yaml DB=mongo ./fabex
 
 Use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fabex.proto) as service contract.
 
@@ -75,42 +73,6 @@ Use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fa
 UI is available on port 5252
 
 ![UI](https://github.com/hyperledger-labs/fabex/blob/2.x/ui.png)
-
-<br><br>
- 
-### <a name="cli">**CLI**</a>
-Build Fabex executable binary file:  
-
-    go build
-
-Enroll admin user:  
-
-    ./fabex -enrolluser=true
-
-Save blocks data to db:
-
-    ./fabex -task=explore -configpath=configs -configname=config -db=cassandra
-    
-
-Also you can start service for fetching blocks in daemon mode: 
- 
-    ./fabex -task=explore -configpath=configs -configname=config -db=cassandra
-    
-    
-Get transactions of specific block (chain operation):  
-
-    ./fabex -task=getblock -blocknum=14 -configpath=configs -configname=config -db=cassandra
-
-Get all transactions (db operation):  
-
-    ./fabex -task=getall -configpath=configs -configname=config -db=cassandra
-
-
-You can choose database for data saving and retrieving with `-db flag` (MongoDB or CassandraDB):
-
-    ./fabex -task=explore -configpath=configs -configname=config -db=mongo
-    ./fabex -task=explore -configpath=configs -configname=config -db=cassandra
-
 
 <br><br>
 
