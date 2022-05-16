@@ -55,7 +55,17 @@ func (s *FabexServer) GetRange(req *pb.RequestRange, stream pb.Fabex_GetRangeSer
 		}
 		if QueryResults != nil {
 			for _, queryResult := range QueryResults {
-				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
+				if err = stream.Send(&pb.Entry{
+					Channelid:      queryResult.ChannelId,
+					Txid:           queryResult.Txid,
+					Hash:           queryResult.Hash,
+					Previoushash:   queryResult.PreviousHash,
+					Blocknum:       queryResult.Blocknum,
+					Payload:        queryResult.Payload,
+					Time:           queryResult.Time,
+					Validationcode: queryResult.ValidationCode}); err != nil {
+					return err
+				}
 			}
 		}
 		blockCounter++
@@ -71,23 +81,23 @@ func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
 
 	switch {
 	case req.Txid != "":
-		QueryResults, err := s.db.GetByTxId(req.Channelid, req.Txid)
-		if err != nil {
-			return err
+		queryFunc := func() ([]db.Tx, error) {
+			return s.db.GetByTxId(req.Channelid, req.Txid)
 		}
+		return query(stream, queryFunc)
 
-		for _, queryResult := range QueryResults {
-			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
-		}
 	case req.Blocknum != 0:
-		QueryResults, err := s.db.GetByBlocknum(req.Channelid, req.Blocknum)
-		if err != nil {
-			return err
+		queryFunc := func() ([]db.Tx, error) {
+			return s.db.GetByBlocknum(req.Channelid, req.Blocknum)
 		}
+		return query(stream, queryFunc)
 
-		for _, queryResult := range QueryResults {
-			stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
+	case req.Payload != nil:
+		queryFunc := func() ([]db.Tx, error) {
+			return s.db.GetBlockInfoByPayload(req.Channelid, string(req.Payload))
 		}
+		return query(stream, queryFunc)
+
 	default:
 		// set blocks counter to latest saved in db block number value
 		blockCounter := 1
@@ -101,13 +111,39 @@ func (s *FabexServer) Get(req *pb.Entry, stream pb.Fabex_GetServer) error {
 			if queryResults == nil {
 				break
 			}
-			for _, queryResult := range queryResults {
-				stream.Send(&pb.Entry{Channelid: queryResult.ChannelId, Txid: queryResult.Txid, Hash: queryResult.Hash, Previoushash: queryResult.PreviousHash, Blocknum: queryResult.Blocknum, Payload: queryResult.Payload, Time: queryResult.Time, Validationcode: queryResult.ValidationCode})
+			if err = sendStream(stream, queryResults); err != nil {
+				return err
 			}
 
 			blockCounter++
 		}
 	}
 
+	return nil
+}
+
+func query(stream pb.Fabex_GetServer, queryf func() ([]db.Tx, error)) error {
+	queryResults, err := queryf()
+	if err != nil {
+		return err
+	}
+
+	return sendStream(stream, queryResults)
+}
+
+func sendStream(stream pb.Fabex_GetServer, queryResults []db.Tx) error {
+	for _, qr := range queryResults {
+		if err := stream.Send(&pb.Entry{
+			Channelid:      qr.ChannelId,
+			Txid:           qr.Txid,
+			Hash:           qr.Hash,
+			Previoushash:   qr.PreviousHash,
+			Blocknum:       qr.Blocknum,
+			Payload:        qr.Payload,
+			Time:           qr.Time,
+			Validationcode: qr.ValidationCode}); err != nil {
+			return err
+		}
+	}
 	return nil
 }
