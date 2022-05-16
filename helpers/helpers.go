@@ -43,7 +43,7 @@ import (
 const NOT_FOUND_ERR = "not found"
 
 func Explore(ctx context.Context, chprovider fabctx.ChannelProvider, database db.Storage, lClient blockhandler.LedgerClient) error {
-	log, ok := ctx.Value("log").(*zap.Logger)
+	l, ok := ctx.Value("log").(*zap.Logger)
 	if !ok {
 		return errors.WithStack(errors.New("failed to get logger from context"))
 	}
@@ -64,7 +64,7 @@ func Explore(ctx context.Context, chprovider fabctx.ChannelProvider, database db
 
 	txs, err := database.QueryBlockByHash(chclient.ChannelID(), currentHash)
 	if err != nil {
-		if err.Error() != "sql: no rows in result set" && err.Error() != "mongo: no documents in result" {
+		if err.Error() != "not found" && err.Error() != "sql: no rows in result set" && err.Error() != "mongo: no documents in result" {
 			return err
 		}
 	}
@@ -124,10 +124,10 @@ func Explore(ctx context.Context, chprovider fabctx.ChannelProvider, database db
 				if err != nil {
 					return err
 				}
-				log.Debug("add tx", zap.String("channel", chclient.ChannelID()), zap.Uint64("block number", blockEvent.Block.Header.Number), zap.String("tx ID", tx.Txid))
+				l.Debug("add tx", zap.String("channel", chclient.ChannelID()), zap.Uint64("block number", blockEvent.Block.Header.Number), zap.String("tx ID", tx.Txid))
 			}
 		}
-		log.Info("stop expoler", zap.String("channel", chclient.ChannelID()))
+		l.Info("stop expoler", zap.String("channel", chclient.ChannelID()))
 	}
 	return nil
 }
