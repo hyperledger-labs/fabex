@@ -66,16 +66,10 @@ func (c *Cassandra) Connect() error {
 }
 
 func (c *Cassandra) Init(ch string) error {
-	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (ID UUID, %s text, %s text, %s text, %s text, %s bigint, %s text, %s int, %s int, %s list<text>, PRIMARY KEY(ID,%s))
-		WITH CLUSTERING ORDER BY (%s DESC);`, fmt.Sprintf("%s_%s", ch, c.Columnfamily), CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, PAYLOADKEYS, BLOCKNUM, BLOCKNUM)
+	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (ID UUID, %s text, %s text, %s text, %s text, %s bigint, %s text, %s int, %s int, %s list<text>, PRIMARY KEY(ID,%s));`, fmt.Sprintf("%s_%s", ch, c.Columnfamily),
+		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, PAYLOADKEYS, BLOCKNUM)
 	if err := c.Session.Query(query).Exec(); err != nil {
 		return errors.Wrapf(err, "failed to create column family: %s", c.Columnfamily)
-	}
-
-	// create payload index
-	indexPayload := fmt.Sprintf(`CREATE INDEX IF NOT EXISTS payload ON %s(%s);`, fmt.Sprintf("%s_%s", ch, c.Columnfamily), PAYLOADKEYS)
-	if err := c.Session.Query(indexPayload).Exec(); err != nil {
-		return errors.Wrapf(err, "failed to create index: %s", c.Columnfamily)
 	}
 
 	// create hash index
@@ -85,7 +79,7 @@ func (c *Cassandra) Init(ch string) error {
 	}
 
 	// Normalization. We can't use slow aggregation queries, so create column family with last entry
-	aggregationTable := fmt.Sprintf("CREATE TABLE IF NOT EXISTS MAX_%s (fortable text PRIMARY KEY, id UUID, blocknum bigint);", ch)
+	aggregationTable := fmt.Sprintf("CREATE TABLE IF NOT EXISTS MAX_%s (fortable text PRIMARY KEY, id UUID, hash text, blocknum bigint);", ch)
 	if err := c.Session.Query(aggregationTable).Exec(); err != nil {
 		return errors.Wrap(err, "failed to create column family: MAX")
 	}
@@ -114,37 +108,39 @@ func (c *Cassandra) Insert(ch string, tx Tx) error {
 		return err
 	}
 
-	err = c.UpdateMax(ch, id, tx.Blocknum)
+	err = c.UpdateMax(ch, id, tx.Blocknum, tx.Hash)
 
 	return err
 }
 
-func (c *Cassandra) UpdateMax(ch string, id gocql.UUID, blocknum uint64) error {
+func (c *Cassandra) UpdateMax(ch string, id gocql.UUID, blocknum uint64, hash string) error {
 	err := c.Session.Query(fmt.Sprintf("SELECT id FROM MAX_%s LIMIT 1;", ch)).Exec()
 	if err != nil && err.Error() != NOT_FOUND_ERR {
 		return errors.WithStack(err)
 	}
 	if err != nil && err.Error() == NOT_FOUND_ERR {
-		if err = c.Session.Query(fmt.Sprintf("INSERT INTO MAX_%s (fortable, id, blocknum) VALUES (?, ?, ?)", ch), fmt.Sprintf("%s_%s", ch, c.Columnfamily), id, blocknum).Exec(); err != nil {
+		if err = c.Session.Query(fmt.Sprintf("INSERT INTO MAX_%s (fortable, id, hash, blocknum) VALUES (?, ?, ?, ?)", ch), fmt.Sprintf("%s_%s", ch, c.Columnfamily), id, hash, blocknum).Exec(); err != nil {
 			return errors.WithStack(err)
 		}
 
 	}
-	err = c.Session.Query(fmt.Sprintf(`UPDATE MAX_%s SET id = ?, blocknum = ? where fortable = ?;`, ch), id, blocknum, fmt.Sprintf("%s_%s", ch, c.Columnfamily)).Exec()
+	err = c.Session.Query(fmt.Sprintf(`UPDATE MAX_%s SET id = ?, hash = ?, blocknum = ? where fortable = ?;`, ch), id, hash, blocknum, fmt.Sprintf("%s_%s", ch, c.Columnfamily)).Exec()
 	return errors.WithStack(err)
 }
 
-func (c *Cassandra) GetBlockInfoByPayload(ch string, searchExpression string) ([]Tx, error) {
-	query := fmt.Sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s CONTAINS '%s'",
-		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, fmt.Sprintf("%s_%s", ch, c.Columnfamily), PAYLOADKEYS, searchExpression)
-	txs, err := c.getByFilter(query, "")
-	return txs, err
+func (c *Cassandra) GetBlockInfoByPayload(ch string, payloadkey string) ([]Tx, error) {
+	return nil, errors.WithStack(errors.New("not implemented for cassandra"))
 }
 
 func (c *Cassandra) QueryBlockByHash(ch string, hash string) ([]Tx, error) {
-	query := fmt.Sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = ?",
-		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, fmt.Sprintf("%s_%s", ch, c.Columnfamily), HASH)
-	return c.getByFilter(query, hash)
+	var id string
+	err := c.Session.Query(fmt.Sprintf("SELECT id FROM MAX_%s where hash = ? LIMIT 1 ALLOW FILTERING;", ch), hash).Scan(&id)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return c.getByFilter(fmt.Sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE id = ?",
+		CHANNEL_ID, TXID, HASH, PREVIOUS_HASH, BLOCKNUM, PAYLOAD, VALIDATION_CODE, TIME, fmt.Sprintf("%s_%s", ch, c.Columnfamily)), id)
 }
 
 func (c *Cassandra) GetByTxId(ch string, txID string) ([]Tx, error) {
@@ -192,6 +188,7 @@ func (c *Cassandra) GetLastEntry(ch string) (Tx, error) {
 func (c *Cassandra) getByFilter(sel string, filter string) ([]Tx, error) {
 	var txs []Tx
 	var sc gocql.Scanner
+
 	if filter != "" {
 		sc = c.Session.Query(fmt.Sprintf("%s ALLOW FILTERING", sel), filter).Iter().Scanner()
 	} else {
@@ -206,7 +203,7 @@ func (c *Cassandra) getByFilter(sel string, filter string) ([]Tx, error) {
 		txs = append(txs, tx)
 	}
 	if err := sc.Err(); err != nil {
-		return nil, err
+		return nil, errors.WithStack(errors.Wrap(err, "cassandra query error"))
 	}
 	return txs, nil
 }
