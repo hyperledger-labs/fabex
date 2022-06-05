@@ -51,12 +51,12 @@ func CreateDBConfMongo(host string, port int, user, password, dbname, collection
 }
 
 func (db *DBmongo) Connect() error {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second) //nolint:govet
 	err := db.Instance.Connect(ctx)
 	if err != nil {
 		return err
 	}
-	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second) //nolint:govet
 	err = db.Instance.Ping(ctx, readpref.Primary())
 	return err
 }
@@ -68,7 +68,8 @@ func (db *DBmongo) Init(_ string) error {
 func (db *DBmongo) Insert(ch string, tx Tx) error {
 	collection := db.Instance.Database(db.DBname).Collection(fmt.Sprintf("%s_%s", db.Collection, ch))
 	ctx := context.Background()
-	_, err := collection.InsertOne(ctx, bson.M{"ChannelId": tx.ChannelId, "Txid": tx.Txid, "Hash": tx.Hash, "PreviousHash": tx.PreviousHash, "Blocknum": tx.Blocknum, "Payload": tx.Payload, "ValidationCode": tx.ValidationCode, "Time": tx.Time})
+
+	_, err := collection.InsertOne(ctx, bson.M{"ChannelId": tx.ChannelId, "Txid": tx.Txid, "Hash": tx.Hash, "PreviousHash": tx.PreviousHash, "Blocknum": tx.Blocknum, "Payload": string(tx.Payload), "ValidationCode": tx.ValidationCode, "Time": tx.Time})
 	if err != nil {
 		return err
 	}
@@ -116,7 +117,7 @@ func (db *DBmongo) GetByBlocknum(ch string, blocknum uint64) ([]Tx, error) {
 }
 
 func (db *DBmongo) GetBlockInfoByPayload(ch string, payload string) ([]Tx, error) {
-	return db.getByFilter(ch, bson.D{{"Payload", primitive.Regex{Pattern: payload, Options: "i"}}})
+	return db.getByFilter(ch, bson.M{"Payload": primitive.Regex{Pattern: payload, Options: "i"}})
 }
 
 func (db *DBmongo) QueryAll(ch string) ([]Tx, error) {
@@ -127,7 +128,7 @@ func (db *DBmongo) GetLastEntry(ch string) (Tx, error) {
 	collection := db.Instance.Database(db.DBname).Collection(fmt.Sprintf("%s_%s", db.Collection, ch))
 
 	ctx := context.Background()
-	opts := options.FindOne().SetSort(bson.D{{"_id", -1}})
+	opts := options.FindOne().SetSort(bson.D{{Key: "_id", Value: -1}})
 
 	var tx Tx
 	err := collection.FindOne(ctx, bson.D{}, opts).Decode(&tx)

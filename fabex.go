@@ -80,8 +80,7 @@ func main() {
 	switch bootConf.Database {
 	case "mongo":
 		dbInstance = db.CreateDBConfMongo(conf.Mongo.Host, conf.Mongo.Port, conf.Mongo.Dbuser, conf.Mongo.Dbsecret, conf.Mongo.Dbname, conf.Mongo.Collection)
-	case "cassandra":
-		dbInstance = db.NewCassandraClient(conf.Cassandra.Host, conf.Cassandra.Dbuser, conf.Cassandra.Dbsecret, conf.Cassandra.Keyspace, conf.Cassandra.Columnfamily)
+		// here can be other storage options
 	}
 
 	err = dbInstance.Connect()

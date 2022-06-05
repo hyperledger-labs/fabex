@@ -32,19 +32,14 @@ the tutorial is available at [this link](https://medium.com/@vadiminshakov/fabex
 
 1. Configure `config.yaml` (it's main config of the Fabex) and `connection-profile.yaml` (Hyperledger Fabric connection profile)
 
-2. Install and start database (MongoDB or CassandraDB)
-    
-    If you choose Mongo:
+2. Install and start database (MongoDB)
       1. set initial user name and password in `db/mongo-compose/docker-compose.yaml`
       2. start container:
     
       ```
       make mongo
       ```
-    If you choose Cassandra:
-      ``` 
-      make cassandra
-      ```
+  
 3. (OPTIONAL) Start your Fabric blockchain network or sample test network with 
    ```
    make fabric-test
@@ -54,12 +49,8 @@ the tutorial is available at [this link](https://medium.com/@vadiminshakov/fabex
 
 ### <a name="start">**Start fabex service**</a>
 
-You can start Fabex as standalone microservice with Cassandra blocks storage:
+You can start Fabex as standalone microservice with Mongo blocks storage:
 
-    CONFIG=config/config.yaml DB=cassandra ./fabex
-    
-  or with Mongo storage
-  
     CONFIG=config/config.yaml DB=mongo ./fabex
 
 Use [fabex.proto](https://github.com/hyperledger-labs/fabex/blob/master/proto/fabex.proto) as service contract.
