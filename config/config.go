@@ -15,14 +15,6 @@ type Mongo struct {
 	Collection string
 }
 
-type Cassandra struct {
-	Host         string
-	Dbuser       string
-	Dbsecret     string
-	Keyspace     string
-	Columnfamily string
-}
-
 type GRPCServer struct {
 	Host string
 	Port string
@@ -43,7 +35,6 @@ type UI struct {
 
 type Config struct {
 	Mongo      `mapstructure:"mongo"`
-	Cassandra  `mapstructure:"cassandra"`
 	Fabric     `mapstructure:"fabric"`
 	GRPCServer `mapstructure:"grpc"`
 	UI         `mapstructure:"ui"`
@@ -52,7 +43,7 @@ type Config struct {
 type BootConfig struct {
 	Enrolluser bool   `env:"ENROLL" envDefault:"false"`
 	Config     string `env:"CONFIG"`
-	Database   string `env:"DB" envDefault:"cassandra"`
+	Database   string `env:"DB" envDefault:"mongo"`
 	UI         bool   `env:"UI" envDefault:"true"`
 	LogLevel   string `env:"LOG" envDefault:"info"`
 }
